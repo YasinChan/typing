@@ -1,12 +1,23 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterLink, RouterView } from 'vue-router';
+import HelloWorld from './components/HelloWorld.vue';
+import { setTheme, getTheme } from '@/common/theme';
+
+setTheme();
+
+const changeTheme = () => {
+  debugger;
+  const currentTheme = getTheme();
+  currentTheme === 'light' ? setTheme('dark') : setTheme('light')
+}
+
 </script>
 
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="@/assets/favicon.png" width="125" height="125" />
 
+    <div @click="changeTheme">切换主题</div>
     <div class="wrapper">
       <HelloWorld msg="Typing" />
 
