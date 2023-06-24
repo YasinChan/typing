@@ -1,0 +1,44 @@
+/* v2.5 颜色变量 light 模式 */
+:root {
+  /*灰阶颜色 */
+  --gray-08: #1d2127;
+  --gray-07: #52575d;
+  --gray-06: #868c92;
+  --gray-05: #a0a5aa;
+  --gray-04: #b9bec1;
+  --gray-03: #d2d7d9;
+  --gray-02: #ebeff0;
+  --gray-01: #f5f7f8;
+  /* 基础色 */
+  --primary-white: #ffffff;
+  --primary-white-gradient: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+  --primary-black: #000000;
+  --primary-red: #f64c4c;
+  --primary-red-light: rgba(246, 76, 76, 0.1);
+  --primary-y-blue: #15c5ce;
+  --primary-y-blue-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
+  --primary-y-blue-light: #ecfafb;
+  --primary-y-orange: #ff8156;
+  --primary-y-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
+  --primary-y-orange-light: #fff5f1;
+  /* 延展色 */
+  --extension-background-gray: #f5f7f8;
+
+  /* hover 色 */
+  --gray-01-hover: #e6e8e9;
+  --gray-02-hover: #dde1e2;
+  --gray-03-hover: #c5cacc;
+  --gray-04-hover: #aeb3b5;
+  --gray-06-hover: #7e8489;
+  --gray-08-hover: #1b1f25;
+  --primary-white-hover: #f0f0f0;
+  --primary-y-blue-hover: #14b9c2;
+  --primary-y-blue-light-hover: #deebec;
+  --primary-y-orange-hover: #f07951;
+  --primary-y-orange-light-hover: #f0e6e3;
+  --primary-red-hover: #e74747;
+  --extension-overlay-black-hover: rgba(0, 0, 0, 0.12);
+  --extension-components-black-hover: rgba(0, 0, 0, 0.46);
+  --extension-background-gray-hover: #e6e8e9;
+  --extension-shadow-background-white-hover: #f0f0f0;
+}

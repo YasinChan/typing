@@ -1,4 +1,5 @@
-import './assets/main.css';
+import('@/assets/theme/theme-dark.css');
+import './assets/main.scss';
 
 import { createApp } from 'vue';
 import App from './App.vue';

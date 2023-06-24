@@ -17,5 +17,10 @@ export default defineConfig({
   },
   css: {
     devSourcemap: true,
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import '@/assets/definitions/index.scss';`
+      }
+    }
   }
 })
