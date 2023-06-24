@@ -2,11 +2,11 @@ import YStorage from '@/common/YStorage';
 
 type themeType = 'dark' | 'light';
 
-function getCurrentThemeLink(): HTMLLinkElement {
-  return document.querySelector(`[href*="theme/color"]`);
+function getCurrentThemeLink(): HTMLLinkElement | null {
+  return document.querySelector(`link[href*="assets/theme-"]`);
 }
 
-export function setTheme(type: themeType | undefined) {
+export function setTheme(type?: themeType | undefined) {
   getCurrentThemeLink()?.remove();
   if (type) {
     YStorage.set('Y_STORAGE', {
@@ -21,12 +21,12 @@ export function setTheme(type: themeType | undefined) {
     }
   }
   if (type === 'light') {
-    import(/* webpackChunkName: "theme/color/light" */ '@/assets/theme/color/light.scss');
+    import('@/assets/theme/theme-light.scss');
   } else {
-    import(/* webpackChunkName: "theme/color/dark" */ '@/assets/theme/color/dark.scss');
+    import('@/assets/theme/theme-dark.scss');
   }
 }
 
-export function getTheme(): themeType {
-  return YStorage.get('Y_STORAGE').theme;
+export function getTheme(): themeType | undefined {
+  return YStorage.get('Y_STORAGE')?.theme;
 }

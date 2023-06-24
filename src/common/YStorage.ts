@@ -1,11 +1,16 @@
-const serialize = function (value) {
+type ValueType = Object | string | undefined | null;
+
+function serialize(value: ValueType): string {
   if (!value) {
-    return;
+    return '';
   }
   return JSON.stringify(value);
-};
+}
 
-const safelyDeserialize = function (value) {
+const safelyDeserialize = function (value: string | undefined | null): Object {
+  if (!value) {
+    return {};
+  }
   try {
     return JSON.parse(value);
   } catch (e) {
@@ -14,14 +19,14 @@ const safelyDeserialize = function (value) {
 };
 
 export default {
-  set(key, value) {
+  set(key: string, value: ValueType) {
     if (!value) {
       return;
     }
     window.localStorage.setItem(key, serialize(value));
   },
 
-  get(key) {
+  get(key: string): { [x: string]: any } {
     if (!key) {
       return {};
     }
@@ -29,27 +34,27 @@ export default {
     return safelyDeserialize(value);
   },
 
-  remove(key) {
+  remove(key: string) {
     if (!key) {
       return;
     }
-    this.storage.removeItem(key);
+    window.localStorage.removeItem(key);
   },
 
   clear() {
-    this.storage.clear();
+    window.localStorage.clear();
   },
 
   // 批量
   // obj  e.：{ key: value, key1: value }
-  setList(obj) {
+  setList(obj: { [x: string]: ValueType }) {
     for (const key in obj) {
       this.set(key, obj[key]);
     }
   },
 
   // 通过key数组批量查询
-  getList(keys) {
+  getList(keys: any[]) {
     return keys.map((key) => this.get(key));
   }
 };

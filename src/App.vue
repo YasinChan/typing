@@ -6,11 +6,9 @@ import { setTheme, getTheme } from '@/common/theme';
 setTheme();
 
 const changeTheme = () => {
-  debugger;
   const currentTheme = getTheme();
-  currentTheme === 'light' ? setTheme('dark') : setTheme('light')
-}
-
+  currentTheme === 'light' ? setTheme('dark') : setTheme('light');
+};
 </script>
 
 <template>
