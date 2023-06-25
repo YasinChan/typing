@@ -1,5 +1,5 @@
 import YStorage from '@/common/YStorage';
-import { DARK_THEME, LIGHT_THEME, type ThemeType } from '@/config/theme';
+import { DARK_THEME, DEFAULT_THEME, LIGHT_THEME, type ThemeType } from '@/config/theme';
 
 const theme: any = {
   [DARK_THEME]: () => import('@/assets/theme/theme-dark.css'),
@@ -9,13 +9,13 @@ const theme: any = {
 const cacheTheme: any = {};
 
 export function setTheme(type: ThemeType) {
-  for (let i in theme) {
+  for (const i in theme) {
     // 先把渲染过的 theme style 都存一下
     if (getThemeLink(i)) {
       cacheTheme[i] = getThemeLink(i)?.cloneNode(true);
     }
   }
-  if (type === getTheme()) {
+  if (type === getTheme() && type === DEFAULT_THEME) {
     return;
   }
   return new Promise<void>((resolve, reject) => {
