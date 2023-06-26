@@ -7,13 +7,13 @@
 }
 
 body {
-  transition: background-color 0.3s, color 0.3s;
   font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: $extension-background-gray;
+  background-color: $extension-background-gray;
+  transition: background-color 0.3s, color 0.3s;
   padding: 32px;
 }
 
