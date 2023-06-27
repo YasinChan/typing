@@ -17,6 +17,33 @@ body {
   padding: 32px;
 }
 
+@font-face {
+  font-family: 'zpix';
+  src: url('@/assets/font/zpix.ttf');
+}
+
+@font-face {
+  font-family: 'zhankugaoduanhei';
+  src: url('@/assets/font/zhankugaoduanhei.ttf');
+}
+
+@font-face {
+  font-family: 'AlibabaPuHuiTi';
+  src: url('@/assets/font/AlibabaPuHuiTi.ttf');
+}
+
+.y-font--zpix {
+  font-family: zpix;
+}
+
+.y-font--zhankugaoduanhei {
+  font-family: zhankugaoduanhei;
+}
+
+.y-font--AlibabaPuHuiTi {
+  font-family: AlibabaPuHuiTi;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;

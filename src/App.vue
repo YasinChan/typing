@@ -1,21 +1,26 @@
 <script setup lang="ts">
 import { setTheme, getTheme } from '@/common/theme';
+import Modal from '@/components/Modal.vue';
+import { reactive } from 'vue';
+
 setTheme(getTheme());
+
+const obj = reactive({ 
+  showModal: false,
+  currentFont: '',
+});
 
 const changeTheme = () => {
   const currentTheme = getTheme();
   currentTheme === 'light' ? setTheme('dark') : setTheme('light');
 };
+
 </script>
 
 <template>
   <header>
     <div class="y-info">
-      <img
-        alt="Typing logo"
-        class="y-info__logo"
-        src="@/assets/favicon.png"
-      />
+      <img alt="Typing logo" class="y-info__logo" src="@/assets/favicon.png" />
       <h1 class="y-info__title">Typing</h1>
     </div>
 
@@ -23,13 +28,32 @@ const changeTheme = () => {
       <div class="y-menu__item y-menu__item--active">计时模式</div>
       <div class="y-menu__item">限时模式</div>
       <div class="y-menu__item y-menu__keybord-test">键盘测试</div>
+      <div class="y-menu__item y-menu__change" @click="() => {obj.showModal = true;}">切换字体</div>
       <div class="y-menu__item y-menu__change" @click="changeTheme">切换主题</div>
     </div>
   </header>
-  <main>
-    <div>Test Test Test</div>
-    <div>测试 测试 测试</div>
+  <main :class="'y-font--'+obj.currentFont">
+    <div>Test test Test test Test test Test test</div>
+    <div>测试 测试 测试 测试 测试 测试 测试 测试 测试</div>
   </main>
+
+  <Teleport to="body">
+    <modal :show="obj.showModal" @close="obj.showModal = false">
+      <template #header>
+        <h3>选择字体</h3>
+      </template>
+      <template #body>
+        <div class="y-change-font__container">
+          <ul>
+            <li @click="obj.currentFont = 'default'" class="y-font--default">默认 字体 测试 TEST test </li>
+            <li @click="obj.currentFont = 'zpix'" class="y-font--zpix">zpix 字体 测试 TEST test </li>
+            <li @click="obj.currentFont = 'zhankugaoduanhei'" class="y-font--zhankugaoduanhei">zhankugaoduanhei 字体 测试 TEST test </li>
+            <li @click="obj.currentFont = 'AlibabaPuHuiTi'" class="y-font--AlibabaPuHuiTi">AlibabaPuHuiTi 字体 测试 TEST test </li>
+          </ul>
+        </div>
+      </template>
+    </modal>
+  </Teleport>
 </template>
 
 <style lang="scss">
@@ -47,7 +71,7 @@ header {
   height: 30px;
 }
 .y-info__title {
-  font-family: $font-en;
+  font-family: zhankugaoduanhei;
   margin-left: 6px;
   display: inline-block;
   color: $gray-06;
@@ -93,5 +117,11 @@ main {
   color: $gray-08;
   font-size: 18px;
   letter-spacing: 1px;
+}
+
+.y-change-font__container {
+  li {
+    cursor: pointer;
+  }
 }
 </style>
