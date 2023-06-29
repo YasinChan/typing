@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import YButton from '@/components/Button.vue';
 defineProps({
   show: {
     default: false,
@@ -9,8 +10,8 @@ defineProps({
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="y-modal__mask">
-      <div class="y-modal__container">
+    <div v-if="show" class="y-modal__mask" @click="$emit('close')">
+      <div class="y-modal__container" @click.stop>
         <div class="y-modal__header">
           <slot name="header">default header</slot>
         </div>
@@ -21,7 +22,7 @@ defineProps({
 
         <div class="y-modal__footer">
           <slot name="footer">
-            <button @click="$emit('close')">OK</button>
+            <y-button @click="$emit('close')">确定</y-button>
           </slot>
         </div>
       </div>

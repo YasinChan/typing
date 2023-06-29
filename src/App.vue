@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { setTheme, getTheme } from '@/common/theme';
-import Modal from '@/components/Modal.vue';
+import YModal from '@/components/Modal.vue';
 import { reactive } from 'vue';
 
 setTheme(getTheme());
 
-const obj = reactive({ 
+const obj = reactive({
   showModal: false,
-  currentFont: '',
+  currentFont: ''
 });
 
 const changeTheme = () => {
   const currentTheme = getTheme();
   currentTheme === 'light' ? setTheme('dark') : setTheme('light');
 };
-
 </script>
 
 <template>
@@ -28,31 +27,46 @@ const changeTheme = () => {
       <div class="y-menu__item y-menu__item--active">计时模式</div>
       <div class="y-menu__item">限时模式</div>
       <div class="y-menu__item y-menu__keybord-test">键盘测试</div>
-      <div class="y-menu__item y-menu__change" @click="() => {obj.showModal = true;}">切换字体</div>
+      <div
+        class="y-menu__item y-menu__change"
+        @click="
+          () => {
+            obj.showModal = true;
+          }
+        "
+      >
+        切换字体
+      </div>
       <div class="y-menu__item y-menu__change" @click="changeTheme">切换主题</div>
     </div>
   </header>
-  <main :class="'y-font--'+obj.currentFont">
+  <main :class="'y-font--' + obj.currentFont">
     <div>Test test Test test Test test Test test</div>
     <div>测试 测试 测试 测试 测试 测试 测试 测试 测试</div>
   </main>
 
   <Teleport to="body">
-    <modal :show="obj.showModal" @close="obj.showModal = false">
+    <y-modal :show="obj.showModal" @close="obj.showModal = false">
       <template #header>
         <h3>选择字体</h3>
       </template>
       <template #body>
         <div class="y-change-font__container">
           <ul>
-            <li @click="obj.currentFont = 'default'" class="y-font--default">默认 字体 测试 TEST test </li>
-            <li @click="obj.currentFont = 'zpix'" class="y-font--zpix">zpix 字体 测试 TEST test </li>
-            <li @click="obj.currentFont = 'zhankugaoduanhei'" class="y-font--zhankugaoduanhei">zhankugaoduanhei 字体 测试 TEST test </li>
-            <li @click="obj.currentFont = 'AlibabaPuHuiTi'" class="y-font--AlibabaPuHuiTi">AlibabaPuHuiTi 字体 测试 TEST test </li>
+            <li @click="obj.currentFont = 'default'" class="y-font--default">
+              默认 字体 测试 TEST test
+            </li>
+            <li @click="obj.currentFont = 'zpix'" class="y-font--zpix">zpix 字体 测试 TEST test</li>
+            <li @click="obj.currentFont = 'zhankugaoduanhei'" class="y-font--zhankugaoduanhei">
+              zhankugaoduanhei 字体 测试 TEST test
+            </li>
+            <li @click="obj.currentFont = 'AlibabaPuHuiTi'" class="y-font--AlibabaPuHuiTi">
+              AlibabaPuHuiTi 字体 测试 TEST test
+            </li>
           </ul>
         </div>
       </template>
-    </modal>
+    </y-modal>
   </Teleport>
 </template>
 
