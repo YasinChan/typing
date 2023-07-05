@@ -2,6 +2,19 @@
 import { setTheme, getTheme } from '@/common/theme';
 import YModal from '@/components/Modal.vue';
 import { reactive } from 'vue';
+import axios from 'axios';
+
+axios
+  .post('/api/users/login', {
+    userName: 'yaoyao',
+    password: '123456'
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 
 setTheme(getTheme());
 
