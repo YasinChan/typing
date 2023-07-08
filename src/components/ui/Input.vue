@@ -60,16 +60,16 @@ const inputHandler = (event: any): any => {
 }
 .y-input--err {
   input {
-    border: 1px solid $primary-red;
+    border: 1px solid $main-red;
     &:hover,
     &:focus {
-      border-color: $primary-red-hover;
+      border-color: $main-red-hover;
       border-right-width: 1px;
     }
   }
 }
 .y-input__error-text {
   font-size: 12px;
-  color: $primary-red;
+  color: $main-red;
 }
 </style>
