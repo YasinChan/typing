@@ -17,16 +17,15 @@ defineProps({
     type: String
   }
 });
-defineEmits(['update:value']);
+const emitter = defineEmits(['update:value']);
+
+const inputHandler = (event: any): any => {
+  emitter('update:value', (event.target as HTMLInputElement).value);
+};
 </script>
 <template>
   <div class="y-input" :class="[errorText ? 'y-input--err' : '']">
-    <input
-      :type="type"
-      :value="value"
-      @input="$emit('update:value', $event.target.value)"
-      :placeholder="placeholder"
-    />
+    <input :type="type" :value="value" @input="inputHandler" :placeholder="placeholder" />
     <span class="y-input__error-text">{{ errorText }}</span>
   </div>
 </template>
@@ -61,16 +60,16 @@ defineEmits(['update:value']);
 }
 .y-input--err {
   input {
-    border: 1px solid $main-red;
+    border: 1px solid $primary-red;
     &:hover,
     &:focus {
-      border-color: $main-red-hover;
+      border-color: $primary-red-hover;
       border-right-width: 1px;
     }
   }
 }
 .y-input__error-text {
   font-size: 12px;
-  color: $main-red;
+  color: $primary-red;
 }
 </style>

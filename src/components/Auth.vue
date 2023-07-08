@@ -162,7 +162,7 @@ const logout = () => {
 
 <template>
   <div class="flex-center">
-    <y-drop-down v-if="profile.userName">
+    <y-drop-down v-if="'userName' in profile && profile.userName">
       <template #title>
         <div class="y-auth__login-img-wrap--login flex-center">
           <img
@@ -174,7 +174,7 @@ const logout = () => {
       </template>
       <template #menu>
         <div class="y-auth__menu">
-          <div class="y-auth__menu-item">{{ profile.userName }}</div>
+          <div class="y-auth__menu-item">{{ 'userName' in profile ? profile.userName : '' }}</div>
           <div @click="logout" class="y-auth__menu-item y-auth__menu-item-logout">登出</div>
         </div>
       </template>
