@@ -6,7 +6,7 @@ import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
 
-import pinyin from 'pinyin';
+// import pinyin from 'pinyin';
 
 setTheme(getTheme());
 
@@ -24,7 +24,7 @@ const obj = reactive({
   testPinyin: [] as any
 });
 
-obj.testPinyin = pinyin(obj.test);
+// obj.testPinyin = pinyin(obj.test);
 console.log('obj.testPinyin', obj.testPinyin);
 
 provide('message', (obj: any) => {
