@@ -10,19 +10,22 @@
   --gray-02: #ebeff0;
   --gray-01: #f5f7f8;
   /* 基础色 */
-  --primary-white: #ffffff;
-  --primary-white-gradient: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
-  --primary-black: #000000;
-  --primary-red: #f64c4c;
-  --primary-red-light: rgba(246, 76, 76, 0.1);
-  --primary-y-blue: #15c5ce;
-  --primary-y-blue-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
-  --primary-y-blue-light: #ecfafb;
-  --primary-y-orange: #ff8156;
-  --primary-y-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
-  --primary-y-orange-light: #fff5f1;
-  /* 延展色 */
-  --extension-background-gray: #f5f7f8;
+  --main-white: #ffffff;
+  --main-white-gradient: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+  --main-black: #000000;
+  --main-red: #f64c4c;
+  --main-red-light: rgba(246, 76, 76, 0.1);
+  --main-color: #15c5ce;
+  --main-color-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
+  --main-color-light: #ecfafb;
+  --main-orange: #ff8156;
+  --main-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
+  --main-orange-light: #fff5f1;
+
+  --background-gray: #f5f7f8;
+  --layout-background-gray: #ffffff;
+  --background-gray-hover: #e6e8e9;
+  --layout-background-gray-hover: #f0f0f0;
 
   /* hover 色 */
   --gray-01-hover: #e6e8e9;
@@ -31,14 +34,12 @@
   --gray-04-hover: #aeb3b5;
   --gray-06-hover: #7e8489;
   --gray-08-hover: #1b1f25;
-  --primary-white-hover: #f0f0f0;
-  --primary-y-blue-hover: #14b9c2;
-  --primary-y-blue-light-hover: #deebec;
-  --primary-y-orange-hover: #f07951;
-  --primary-y-orange-light-hover: #f0e6e3;
-  --primary-red-hover: #e74747;
+  --main-white-hover: #f0f0f0;
+  --main-color-hover: #14b9c2;
+  --main-color-light-hover: #deebec;
+  --main-orange-hover: #f07951;
+  --main-orange-light-hover: #f0e6e3;
+  --main-red-hover: #e74747;
   --extension-overlay-black-hover: rgba(0, 0, 0, 0.12);
   --extension-components-black-hover: rgba(0, 0, 0, 0.46);
-  --extension-background-gray-hover: #e6e8e9;
-  --extension-shadow-background-white-hover: #f0f0f0;
 }

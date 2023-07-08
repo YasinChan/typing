@@ -10,23 +10,22 @@
   --gray-02: rgba(255, 255, 255, 0.1);
   --gray-01: #343947;
   /* 基础色 */
-  --primary-white: #252733;
-  --primary-white-gradient: linear-gradient(
-    180deg,
-    rgba(37, 39, 51, 1) 0%,
-    rgba(37, 39, 51, 0) 100%
-  );
-  --primary-black: rgba(255, 255, 255, 0.9);
-  --primary-red: #f64c4c;
-  --primary-red-light: rgba(246, 76, 76, 0.1);
-  --primary-y-blue: #15c5ce;
-  --primary-y-blue-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
-  --primary-y-blue-light: #233f4a;
-  --primary-y-orange: #ff8156;
-  --primary-y-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
-  --primary-y-orange-light: #463538;
-  /* 延展色 */
-  --extension-background-gray: #252733;
+  --main-white: #252733;
+  --main-white-gradient: linear-gradient(180deg, rgba(37, 39, 51, 1) 0%, rgba(37, 39, 51, 0) 100%);
+  --main-black: rgba(255, 255, 255, 0.9);
+  --main-red: #f64c4c;
+  --main-red-light: rgba(246, 76, 76, 0.1);
+  --main-color: #15c5ce;
+  --main-color-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
+  --main-color-light: #233f4a;
+  --main-orange: #ff8156;
+  --main-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
+  --main-orange-light: #463538;
+
+  --background-gray: #252733;
+  --layout-background-gray: #30323d;
+  --background-gray-hover: #3a3c47;
+  --layout-background-gray-hover: #4b505c;
 
   /* hover 色 */
   --gray-01-hover: #404552;
@@ -35,14 +34,12 @@
   --gray-04-hover: rgba(255, 255, 255, 0.46);
   --gray-06-hover: rgba(255, 255, 255, 0.66);
   --gray-08-hover: rgba(255, 255, 255, 0.91);
-  --primary-white-hover: #32343f;
-  --primary-y-blue-hover: #31ccd4;
-  --primary-y-blue-light-hover: #304b55;
-  --primary-y-orange-hover: #ff8960;
-  --primary-y-orange-light-hover: #514144;
-  --primary-red-hover: #f75757;
+  --main-white-hover: #32343f;
+  --main-color-hover: #31ccd4;
+  --main-color-light-hover: #304b55;
+  --main-orange-hover: #ff8960;
+  --main-orange-light-hover: #514144;
+  --main-red-hover: #f75757;
   --extension-overlay-black-hover: rgba(0, 0, 0, 0.06);
   --extension-components-black-hover: rgba(29, 33, 39, 0.4);
-  --extension-background-gray-hover: #3a3c47;
-  --extension-shadow-background-white-hover: #4b505c;
 }

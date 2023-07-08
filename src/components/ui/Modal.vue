@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import YButton from '@/components/Button.vue';
+import YButton from '@/components/ui/Button.vue';
 defineProps({
   show: {
     default: false,
@@ -47,14 +47,17 @@ defineProps({
   width: 300px;
   margin: auto;
   padding: 20px 30px;
-  background-color: #fff;
+  background-color: $layout-background-gray;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
 }
 
-.y-modal__header h3 {
-  margin-top: 0;
+.y-modal__header {
+  color: $gray-08;
+  h3 {
+    margin-top: 0;
+  }
 }
 
 .y-modal__body {

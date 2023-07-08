@@ -1,27 +1,45 @@
 <script setup lang="ts">
 import { setTheme, getTheme } from '@/common/theme';
-import YModal from '@/components/Modal.vue';
-import { reactive } from 'vue';
-import axios from 'axios';
-
-axios
-  .post('/api/users/login', {
-    userName: 'yaoyao',
-    password: '123456'
-  })
-  .then(function (response) {
-    console.log(response);
-  })
-  .catch(function (error) {
-    console.log(error);
-  });
+import YModal from '@/components/ui/Modal.vue';
+import { reactive, provide } from 'vue';
+import Auth from '@/components/Auth.vue';
+import Message from '@/components/ui/Message.vue';
+// import { getMe } from '@/request/index';
+import { useUserStore } from '@/store/user';
 
 setTheme(getTheme());
 
 const obj = reactive({
-  showModal: false,
-  currentFont: ''
+  showChangeFontModal: false,
+  currentFont: '',
+  userName: '',
+  password: '',
+  userNameError: '',
+  passwordError: '',
+  type: '',
+  message: '',
+  visible: false
 });
+
+provide('message', (obj: any) => {
+  showMessage(obj);
+});
+
+const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
+  // 在这个函数中，设置Message组件的message和show属性，
+  // 以显示消息
+  obj.message = message;
+  obj.type = type;
+  obj.visible = true;
+
+  setTimeout(() => {
+    // 过一段时间后，隐藏消息
+    obj.visible = false;
+  }, settimeout);
+};
+
+const userStore = useUserStore();
+userStore.setProfile();
 
 const changeTheme = () => {
   const currentTheme = getTheme();
@@ -32,7 +50,11 @@ const changeTheme = () => {
 <template>
   <header>
     <div class="y-info">
-      <img alt="Typing logo" class="y-info__logo" src="@/assets/favicon.png" />
+      <img
+        alt="Typing logo"
+        class="y-info__logo"
+        src="https://tf.yasinchan.com/2kAlQqg80xLzbmTmGmAaCXFzHSRVvojb/favicon.png"
+      />
       <h1 class="y-info__title">Typing</h1>
     </div>
 
@@ -44,13 +66,16 @@ const changeTheme = () => {
         class="y-menu__item y-menu__change"
         @click="
           () => {
-            obj.showModal = true;
+            obj.showChangeFontModal = true;
           }
         "
       >
         切换字体
       </div>
       <div class="y-menu__item y-menu__change" @click="changeTheme">切换主题</div>
+      <div class="y-menu__item y-menu__change">
+        <auth></auth>
+      </div>
     </div>
   </header>
   <main :class="'y-font--' + obj.currentFont">
@@ -59,7 +84,7 @@ const changeTheme = () => {
   </main>
 
   <Teleport to="body">
-    <y-modal :show="obj.showModal" @close="obj.showModal = false">
+    <y-modal :show="obj.showChangeFontModal" @close="obj.showChangeFontModal = false">
       <template #header>
         <h3>选择字体</h3>
       </template>
@@ -80,6 +105,9 @@ const changeTheme = () => {
         </div>
       </template>
     </y-modal>
+  </Teleport>
+  <Teleport to="body">
+    <message :type="obj.type" :message="obj.message" :visible="obj.visible"></message>
   </Teleport>
 </template>
 
@@ -116,7 +144,7 @@ header {
   cursor: pointer;
   letter-spacing: 1px;
   &.y-menu__item--active {
-    color: $primary-y-blue;
+    color: $main-color;
     font-weight: bold;
     position: relative;
     &::after {
@@ -125,7 +153,7 @@ header {
       width: 40px;
       height: 2px;
       border-radius: 2px;
-      background: $primary-y-blue;
+      background: $main-color;
       bottom: -5px;
       left: 50%;
       transform: translateX(-50%);
