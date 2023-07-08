@@ -4,8 +4,9 @@ import YModal from '@/components/ui/Modal.vue';
 import { reactive, provide } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
-// import { getMe } from '@/request/index';
 import { useUserStore } from '@/store/user';
+
+import pinyin from 'pinyin';
 
 setTheme(getTheme());
 
@@ -18,8 +19,13 @@ const obj = reactive({
   passwordError: '',
   type: '',
   message: '',
-  visible: false
+  visible: false,
+  test: '敬请期待！',
+  testPinyin: [] as any
 });
+
+obj.testPinyin = pinyin(obj.test);
+console.log('obj.testPinyin', obj.testPinyin);
 
 provide('message', (obj: any) => {
   showMessage(obj);
@@ -79,7 +85,14 @@ const changeTheme = () => {
     </div>
   </header>
   <main :class="'y-font--' + obj.currentFont">
-    <h1>敬请期待！</h1>
+    <p>
+      <template v-for="item in obj.testPinyin">
+        {{ item[0] + ' ' }}
+      </template>
+    </p>
+    <h1>{{ obj.test }}</h1>
+    <br />
+    <br />
     <div>Test test Test test Test test Test test</div>
     <div>测试 测试 测试 测试 测试 测试 测试 测试 测试</div>
   </main>
