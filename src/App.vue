@@ -79,7 +79,7 @@ const changeTheme = () => {
     </div>
   </header>
   <main :class="'y-font--' + obj.currentFont">
-    <div>敬请期待！</div>
+    <h1>敬请期待！</h1>
     <div>Test test Test test Test test Test test</div>
     <div>测试 测试 测试 测试 测试 测试 测试 测试 测试</div>
   </main>
