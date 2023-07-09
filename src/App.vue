@@ -5,8 +5,9 @@ import { reactive, provide } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
+import YPinyin from '@/components/Pinyin.vue';
 
-// import pinyin from 'pinyin';
+import { pinyin } from 'pinyin-pro';
 
 setTheme(getTheme());
 
@@ -21,11 +22,10 @@ const obj = reactive({
   message: '',
   visible: false,
   test: '敬请期待！',
-  testPinyin: [] as any
+  testPinyin: [] as any,
 });
 
-// obj.testPinyin = pinyin(obj.test);
-console.log('obj.testPinyin', obj.testPinyin);
+obj.testPinyin = pinyin(obj.test, { type: 'array', toneType: 'none' });
 
 provide('message', (obj: any) => {
   showMessage(obj);
@@ -87,14 +87,13 @@ const changeTheme = () => {
   <main :class="'y-font--' + obj.currentFont">
     <p>
       <template v-for="item in obj.testPinyin">
-        {{ item[0] + ' ' }}
+        {{ item }}
       </template>
     </p>
     <h1>{{ obj.test }}</h1>
     <br />
     <br />
-    <div>Test test Test test Test test Test test</div>
-    <div>测试 测试 测试 测试 测试 测试 测试 测试 测试</div>
+    <y-pinyin words="测试 测试 测试 测试"></y-pinyin>
   </main>
 
   <Teleport to="body">
@@ -103,7 +102,7 @@ const changeTheme = () => {
         <h3>选择字体</h3>
       </template>
       <template #body>
-        <div class="y-change-font__container">
+        <div class="y-change-font__container gray-08">
           <ul>
             <li @click="obj.currentFont = 'default'" class="y-font--default">
               默认 字体 测试 TEST test
