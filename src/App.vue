@@ -22,7 +22,7 @@ const obj = reactive({
   message: '',
   visible: false,
   test: '敬请期待！',
-  testPinyin: [] as any,
+  testPinyin: [] as any
 });
 
 obj.testPinyin = pinyin(obj.test, { type: 'array', toneType: 'none' });

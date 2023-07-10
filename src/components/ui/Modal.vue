@@ -1,16 +1,39 @@
 <script setup lang="ts">
+import { watch } from 'vue';
 import YButton from '@/components/ui/Button.vue';
-defineProps({
+const props = defineProps({
   show: {
     default: false,
     type: Boolean
   }
 });
+
+const emit = defineEmits(['close']);
+
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.code === 'Escape') {
+    emit('close');
+  }
+};
+
+watch(
+  () => props.show,
+  (val) => {
+    if (val) {
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+  },
+  {
+    immediate: true
+  }
+);
 </script>
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="y-modal__mask" @click="$emit('close')">
+    <div v-if="show" class="y-modal__mask" @click="emit('close')">
       <div class="y-modal__container" @click.stop>
         <div class="y-modal__header">
           <slot name="header">default header</slot>
@@ -22,7 +45,7 @@ defineProps({
 
         <div class="y-modal__footer">
           <slot name="footer">
-            <y-button @click="$emit('close')">确定</y-button>
+            <y-button @click="emit('close')">确定</y-button>
           </slot>
         </div>
       </div>

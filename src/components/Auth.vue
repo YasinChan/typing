@@ -215,6 +215,7 @@ const logout = () => {
           <y-input
             v-if="obj.currentType === 'register'"
             v-model:value="obj.confirmPassword"
+            @keydown.enter="register"
             :error-text="obj.confirmPasswordError"
             placeholder="确认密码"
           ></y-input>
