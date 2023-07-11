@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getMe } from '@/request/index';
+import { getMe, getRegion } from '@/request/index';
 
 export type profileType = {
   isAdmin: boolean;
@@ -11,7 +11,8 @@ export type profileType = {
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    profile: {} as profileType | {}
+    profile: {} as profileType | {},
+    region: '' as string
   }),
   actions: {
     setProfile() {
@@ -25,6 +26,19 @@ export const useUserStore = defineStore('user', {
         .catch((e) => {
           console.log(e);
           this.profile = {};
+        });
+    },
+    setRegion() {
+      getRegion()
+        .then((res) => {
+          const region = res.data?.result?.region;
+          if (region) {
+            this.region = region;
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          this.region = '';
         });
     }
   }

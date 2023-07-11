@@ -5,7 +5,6 @@ import { reactive, provide } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
-import YPinyin from '@/components/Pinyin.vue';
 
 import { pinyin } from 'pinyin-pro';
 
@@ -46,6 +45,7 @@ const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
 
 const userStore = useUserStore();
 userStore.setProfile();
+userStore.setRegion();
 
 const changeTheme = () => {
   const currentTheme = getTheme();
@@ -65,9 +65,9 @@ const changeTheme = () => {
     </div>
 
     <div class="y-menu">
-      <div class="y-menu__item y-menu__item--active">计时模式</div>
-      <div class="y-menu__item">限时模式</div>
-      <div class="y-menu__item y-menu__keybord-test">键盘测试</div>
+      <router-link to="/" class="y-menu__item y-menu__item--active">计时模式</router-link>
+      <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
+      <router-link to="/keyboard" class="y-menu__item y-menu__keybord-test">键盘测试</router-link>
       <div
         class="y-menu__item y-menu__change"
         @click="
@@ -93,7 +93,8 @@ const changeTheme = () => {
     <h1>{{ obj.test }}</h1>
     <br />
     <br />
-    <y-pinyin words="测试 测试 测试 测试"></y-pinyin>
+
+    <router-view></router-view>
   </main>
 
   <Teleport to="body">
@@ -156,20 +157,25 @@ header {
   margin-left: 12px;
   cursor: pointer;
   letter-spacing: 1px;
-  &.y-menu__item--active {
+  transition: color 0.5s;
+  &::after {
+    transition: all 0.1s;
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: $main-color;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  &.router-link-active {
     color: $main-color;
     font-weight: bold;
     position: relative;
     &::after {
-      position: absolute;
-      content: '';
-      width: 40px;
-      height: 2px;
-      border-radius: 2px;
-      background: $main-color;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
+      width: 30px;
     }
   }
 }

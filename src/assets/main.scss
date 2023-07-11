@@ -17,6 +17,16 @@ body {
   padding: 32px;
 }
 
+a {
+  color: $gray-08;
+  text-decoration: none;
+}
+
+.router-link-active {
+  color: $main-color;
+  font-weight: bold;
+}
+
 @font-face {
   font-family: 'zpix';
   src: url('@/assets/font/zpix.ttf');

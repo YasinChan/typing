@@ -71,14 +71,14 @@ const userStore = useUserStore();
 
 const { profile } = storeToRefs(userStore);
 
-function testUserName() {
+function verifyUserName() {
   if (!USERNAME_REG.test(obj.userName)) {
     obj.userNameError = '用户名需要至少一位数字、字母或下划线';
     return false;
   }
   return true;
 }
-function testPassword() {
+function verifyPassword() {
   if (!PASSWORD_REG.test(obj.password)) {
     obj.passwordError = '密码需要至少六位数字或字母';
     return false;
@@ -88,10 +88,10 @@ function testPassword() {
 
 const login = () => {
   obj.disable = true;
-  if (!testUserName()) {
+  if (!verifyUserName()) {
     return;
   }
-  if (!testPassword()) {
+  if (!verifyPassword()) {
     return;
   }
 
@@ -118,10 +118,10 @@ const login = () => {
 
 const register = () => {
   obj.disable = true;
-  if (!testUserName()) {
+  if (!verifyUserName()) {
     return;
   }
-  if (!testPassword()) {
+  if (!verifyPassword()) {
     return;
   }
 
@@ -157,6 +157,12 @@ const logout = () => {
       const msg = err.response?.data?.message;
       message({ message: msg, type: 'error' });
     });
+};
+
+const passwordEnter = () => {
+  if (obj.currentType === 'login') {
+    login();
+  }
 };
 </script>
 
@@ -210,6 +216,7 @@ const logout = () => {
           <y-input
             v-model:value="obj.password"
             :error-text="obj.passwordError"
+            @keydown.enter="passwordEnter"
             placeholder="密码"
           ></y-input>
           <y-input
