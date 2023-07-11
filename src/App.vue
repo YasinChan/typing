@@ -56,12 +56,7 @@ const changeTheme = () => {
 <template>
   <header>
     <div class="y-info">
-      <img
-        alt="Typing logo"
-        class="y-info__logo"
-        src="https://tf.yasinchan.com/2kAlQqg80xLzbmTmGmAaCXFzHSRVvojb/favicon.png"
-      />
-      <h1 class="y-info__title">Typing</h1>
+      <h1 class="y-info__title main-color">Typing</h1>
     </div>
 
     <div class="y-menu">
@@ -143,8 +138,7 @@ header {
   font-family: zhankugaoduanhei;
   margin-left: 6px;
   display: inline-block;
-  color: $gray-06;
-  font-size: 16px;
+  font-size: 20px;
   line-height: 30px;
 }
 

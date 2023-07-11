@@ -12,6 +12,10 @@ defineProps({
     default: '',
     type: [String, Number]
   },
+  name: {
+    default: '',
+    type: String
+  },
   errorText: {
     default: '',
     type: String
@@ -25,7 +29,13 @@ const inputHandler = (event: any): any => {
 </script>
 <template>
   <div class="y-input" :class="[errorText ? 'y-input--err' : '']">
-    <input :type="type" :value="value" @input="inputHandler" :placeholder="placeholder" />
+    <input
+      :type="type"
+      :value="value"
+      :name="name"
+      @input="inputHandler"
+      :placeholder="placeholder"
+    />
     <span class="y-input__error-text">{{ errorText }}</span>
   </div>
 </template>

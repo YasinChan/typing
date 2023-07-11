@@ -9,7 +9,7 @@ import { postLogin, postLogout, postRegister } from '@/request/index';
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
 
-const USERNAME_REG = /^\w+$/;
+const USERNAME_REG = /^[\u4e00-\u9fff]|\w+$/;
 const PASSWORD_REG = /^[a-zA-Z0-9]{6,}$/;
 
 const obj = reactive({
@@ -202,51 +202,70 @@ const passwordEnter = () => {
     </div>
   </div>
   <Teleport to="body">
-    <y-modal :show="obj.showLogin" @close="obj.showLogin = false">
-      <template #header>
-        <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
-      </template>
-      <template #body>
-        <div class="y-change-login__container">
-          <y-input
-            v-model:value="obj.userName"
-            :error-text="obj.userNameError"
-            placeholder="用户名"
-          ></y-input>
-          <y-input
-            v-model:value="obj.password"
-            :error-text="obj.passwordError"
-            @keydown.enter="passwordEnter"
-            placeholder="密码"
-          ></y-input>
-          <y-input
-            v-if="obj.currentType === 'register'"
-            v-model:value="obj.confirmPassword"
-            @keydown.enter="register"
-            :error-text="obj.confirmPasswordError"
-            placeholder="确认密码"
-          ></y-input>
-        </div>
-      </template>
-      <template #footer>
-        <div class="y-auth__footer flex-center--y">
-          <y-button v-if="obj.currentType === 'login'" :disable="obj.disable" @click="login"
-            >登录</y-button
-          >
-          <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
-          <span
-            style="font-size: 14px"
-            class="y-auth__footer-change main-color"
-            @click="
-              obj.currentType === 'register'
-                ? (obj.currentType = 'login')
-                : (obj.currentType = 'register')
-            "
-            >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
-          >
-        </div>
-      </template>
-    </y-modal>
+    <form action="POST">
+      <y-modal :show="obj.showLogin" @close="obj.showLogin = false">
+        <template #header>
+          <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
+        </template>
+        <template #body>
+          <div class="y-change-login__container">
+            <template v-if="obj.currentType === 'register'">
+              <y-input
+                v-model:value="obj.userName"
+                :error-text="obj.userNameError"
+                placeholder="用户名"
+              ></y-input>
+              <y-input
+                v-model:value="obj.password"
+                :error-text="obj.passwordError"
+                @keydown.enter="passwordEnter"
+                placeholder="密码"
+              ></y-input>
+              <y-input
+                v-model:value="obj.confirmPassword"
+                @keydown.enter="register"
+                :error-text="obj.confirmPasswordError"
+                placeholder="确认密码"
+              ></y-input>
+            </template>
+            <template v-else>
+              <y-input
+                v-model:value="obj.userName"
+                :error-text="obj.userNameError"
+                name="UserName"
+                placeholder="用户名"
+              ></y-input>
+              <y-input
+                v-model:value="obj.password"
+                :error-text="obj.passwordError"
+                name="Password"
+                type="password"
+                @keydown.enter="passwordEnter"
+                placeholder="密码"
+              ></y-input>
+            </template>
+          </div>
+        </template>
+        <template #footer>
+          <div class="y-auth__footer flex-center--y">
+            <y-button v-if="obj.currentType === 'login'" :disable="obj.disable" @click="login"
+              >登录</y-button
+            >
+            <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
+            <span
+              style="font-size: 14px"
+              class="y-auth__footer-change main-color"
+              @click="
+                obj.currentType === 'register'
+                  ? (obj.currentType = 'login')
+                  : (obj.currentType = 'register')
+              "
+              >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
+            >
+          </div>
+        </template>
+      </y-modal>
+    </form>
   </Teleport>
 </template>
 
