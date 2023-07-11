@@ -1,18 +1,28 @@
 import { defineStore } from 'pinia';
-import { getMe, getRegion } from '@/request/index';
+import { getMe, getConfig } from '@/request/index';
 
 export type profileType = {
   isAdmin: boolean;
   userName: string;
   id: string;
+  userId: string;
+  avatar: string;
   iat: number;
   exp: number;
+};
+
+export type configType = {
+  showRemind: boolean;
+  latestUserId: string;
+  region: string;
+  remind: string;
+  updatedAt: string;
 };
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     profile: {} as profileType | {},
-    region: '' as string
+    config: {} as configType | {}
   }),
   actions: {
     setProfile() {
@@ -28,17 +38,17 @@ export const useUserStore = defineStore('user', {
           this.profile = {};
         });
     },
-    setRegion() {
-      getRegion()
+    setConfig() {
+      getConfig()
         .then((res) => {
-          const region = res.data?.result?.region;
-          if (region) {
-            this.region = region;
+          const config = res.data?.result?.config;
+          if (config) {
+            this.config = config;
           }
         })
         .catch((e) => {
           console.log(e);
-          this.region = '';
+          this.config = {};
         });
     }
   }

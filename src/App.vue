@@ -5,8 +5,7 @@ import { reactive, provide } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
-
-import { pinyin } from 'pinyin-pro';
+import { storeToRefs } from 'pinia';
 
 setTheme(getTheme());
 
@@ -20,24 +19,22 @@ const obj = reactive({
   type: '',
   message: '',
   visible: false,
-  test: '敬请期待！',
-  testPinyin: [] as any
+  timeout: undefined as undefined | number
 });
-
-obj.testPinyin = pinyin(obj.test, { type: 'array', toneType: 'none' });
 
 provide('message', (obj: any) => {
   showMessage(obj);
 });
 
 const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
+  clearTimeout(obj.timeout);
   // 在这个函数中，设置Message组件的message和show属性，
   // 以显示消息
   obj.message = message;
   obj.type = type;
   obj.visible = true;
 
-  setTimeout(() => {
+  obj.timeout = setTimeout(() => {
     // 过一段时间后，隐藏消息
     obj.visible = false;
   }, settimeout);
@@ -45,7 +42,9 @@ const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
 
 const userStore = useUserStore();
 userStore.setProfile();
-userStore.setRegion();
+userStore.setConfig();
+
+const { config } = storeToRefs(userStore);
 
 const changeTheme = () => {
   const currentTheme = getTheme();
@@ -54,9 +53,10 @@ const changeTheme = () => {
 </script>
 
 <template>
+  <div v-if="'showRemind' in config && config.showRemind" class="y-remind">{{ config.remind }}</div>
   <header>
     <div class="y-info">
-      <h1 class="y-info__title main-color">Typing</h1>
+      <a href="/" class="y-info__title main-color">Typing</a>
     </div>
 
     <div class="y-menu">
@@ -80,15 +80,6 @@ const changeTheme = () => {
     </div>
   </header>
   <main :class="'y-font--' + obj.currentFont">
-    <p>
-      <template v-for="item in obj.testPinyin">
-        {{ item }}
-      </template>
-    </p>
-    <h1>{{ obj.test }}</h1>
-    <br />
-    <br />
-
     <router-view></router-view>
   </main>
 
@@ -121,6 +112,18 @@ const changeTheme = () => {
 </template>
 
 <style lang="scss">
+.y-remind {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  color: $main-orange;
+  font-weight: bold;
+  background: $main-color-gradient;
+}
 header {
   display: flex;
   align-items: center;
@@ -138,7 +141,8 @@ header {
   font-family: zhankugaoduanhei;
   margin-left: 6px;
   display: inline-block;
-  font-size: 20px;
+  font-weight: bold;
+  font-size: 18px;
   line-height: 30px;
 }
 

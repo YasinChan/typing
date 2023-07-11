@@ -20,9 +20,11 @@ nextTick().then(() => {
     <div class="y-dorp-down__title" @click.stop="obj.showMenu = !obj.showMenu">
       <slot name="title"></slot>
     </div>
-    <div v-if="obj.showMenu" ref="menuRef" class="y-dorp-down__menu">
-      <slot name="menu"></slot>
-    </div>
+    <Transition name="drop-down">
+      <div v-if="obj.showMenu" ref="menuRef" class="y-dorp-down__menu">
+        <slot name="menu"></slot>
+      </div>
+    </Transition>
   </div>
 </template>
 <style lang="scss">
@@ -36,5 +38,15 @@ nextTick().then(() => {
   border-radius: 2px;
   box-shadow: 0px 0px 5px $layout-background-gray;
   color: $gray-06;
+}
+
+.drop-down-enter-active,
+.drop-down-leave-active {
+  transition: all 0.1s ease;
+}
+
+.drop-down-enter-from,
+.drop-down-leave-to {
+  opacity: 0;
 }
 </style>

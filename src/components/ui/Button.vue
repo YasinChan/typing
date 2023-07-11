@@ -3,6 +3,10 @@ const props = defineProps({
   disable: {
     type: Boolean,
     default: false
+  },
+  form: {
+    type: String,
+    default: ''
   }
 });
 const emitter = defineEmits(['click']);
@@ -19,6 +23,7 @@ const handlerClick = () => {
   <button
     @click="handlerClick"
     :disabled="disable"
+    :form="form"
     class="y-button"
     :class="[disable ? 'y-button--disabled' : '']"
   >

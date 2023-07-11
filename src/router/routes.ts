@@ -4,8 +4,8 @@ import Keyboard from '@/view/Keyboard.vue';
 import User from '@/view/User.vue';
 
 export default [
-  { path: '/', component: TimeKeep },
-  { path: '/time-limit', component: TimeLimit },
-  { path: '/keyboard', component: Keyboard },
-  { path: '/user/:id', component: User }
+  { path: '/', name: 'TimeKeep', component: TimeKeep },
+  { path: '/time-limit', name: 'TimeLimit', component: TimeLimit },
+  { path: '/keyboard', name: 'Keyboard', component: Keyboard },
+  { path: '/user/:id', name: 'User', component: User }
 ];

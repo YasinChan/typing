@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import YModal from '@/components/ui/Modal.vue';
-import { reactive, watch, inject } from 'vue';
+import { reactive, watch, inject, ref } from 'vue';
 import YInput from '@/components/ui/Input.vue';
 import YButton from '@/components/ui/Button.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
@@ -12,6 +12,7 @@ import { useUserStore } from '@/store/user';
 const USERNAME_REG = /^[\u4e00-\u9fff]|\w+$/;
 const PASSWORD_REG = /^[a-zA-Z0-9]{6,}$/;
 
+const submitInputRef = ref();
 const obj = reactive({
   showLogin: false,
   userName: '',
@@ -21,7 +22,7 @@ const obj = reactive({
   confirmPassword: '',
   confirmPasswordError: '',
   disable: false,
-  currentType: 'register' // login
+  currentType: 'login' // register
 });
 
 const message: any = inject('message');
@@ -104,10 +105,9 @@ const login = () => {
   })
     .then(function (response) {
       message({ message: response.data?.message });
-      const userStore = useUserStore();
-      userStore.setProfile();
-      obj.disable = false;
-      obj.showLogin = false;
+      setTimeout(() => {
+        location.replace('/user/' + response.data?.result?.info?.userId);
+      }, 500);
     })
     .catch(function (error) {
       const msg = error.response?.data?.message;
@@ -151,7 +151,9 @@ const logout = () => {
   postLogout()
     .then(function (response) {
       message({ message: response.data?.message });
-      userStore.setProfile();
+      setTimeout(() => {
+        location.reload();
+      }, 500);
     })
     .catch(function (err) {
       const msg = err.response?.data?.message;
@@ -167,21 +169,21 @@ const passwordEnter = () => {
 </script>
 
 <template>
-  <div class="flex-center">
+  <div class="y-auth flex-center">
     <y-drop-down v-if="'userName' in profile && profile.userName">
       <template #title>
         <div class="y-auth__login-img-wrap--login flex-center">
-          <img
-            class="y-auth__login-img"
-            src="https://tf.yasinchan.com/cSmuMHMW0t4vnb8UTNO5RcSAYChr1DBL/22f1196f825298281376608459bfa7fe.webp"
-            alt="user"
-          />
+          <img class="y-auth__login-img" :src="profile.avatar" alt="user" />
         </div>
       </template>
       <template #menu>
         <div class="y-auth__menu">
-          <div class="y-auth__menu-item">{{ 'userName' in profile ? profile.userName : '' }}</div>
-          <div @click="logout" class="y-auth__menu-item y-auth__menu-item-logout">登出</div>
+          <router-link
+            :to="{ name: 'User', params: { id: profile.userId } }"
+            class="y-auth__menu-item"
+            >{{ 'userName' in profile ? profile.userName : '' }}</router-link
+          >
+          <div @click="logout" class="y-auth__menu-item">登出</div>
         </div>
       </template>
     </y-drop-down>
@@ -202,33 +204,33 @@ const passwordEnter = () => {
     </div>
   </div>
   <Teleport to="body">
-    <form action="POST">
-      <y-modal :show="obj.showLogin" @close="obj.showLogin = false">
-        <template #header>
-          <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
-        </template>
-        <template #body>
-          <div class="y-change-login__container">
-            <template v-if="obj.currentType === 'register'">
-              <y-input
-                v-model:value="obj.userName"
-                :error-text="obj.userNameError"
-                placeholder="用户名"
-              ></y-input>
-              <y-input
-                v-model:value="obj.password"
-                :error-text="obj.passwordError"
-                @keydown.enter="passwordEnter"
-                placeholder="密码"
-              ></y-input>
-              <y-input
-                v-model:value="obj.confirmPassword"
-                @keydown.enter="register"
-                :error-text="obj.confirmPasswordError"
-                placeholder="确认密码"
-              ></y-input>
-            </template>
-            <template v-else>
+    <y-modal :show="obj.showLogin" @close="obj.showLogin = false">
+      <template #header>
+        <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
+      </template>
+      <template #body>
+        <div class="y-change-login__container">
+          <template v-if="obj.currentType === 'register'">
+            <y-input
+              v-model:value="obj.userName"
+              :error-text="obj.userNameError"
+              placeholder="用户名"
+            ></y-input>
+            <y-input
+              v-model:value="obj.password"
+              :error-text="obj.passwordError"
+              @keydown.enter="passwordEnter"
+              placeholder="密码"
+            ></y-input>
+            <y-input
+              v-model:value="obj.confirmPassword"
+              @keydown.enter="register"
+              :error-text="obj.confirmPasswordError"
+              placeholder="确认密码"
+            ></y-input>
+          </template>
+          <template v-else>
+            <form id="login-form" action="POST" @submit.prevent="login">
               <y-input
                 v-model:value="obj.userName"
                 :error-text="obj.userNameError"
@@ -243,33 +245,38 @@ const passwordEnter = () => {
                 @keydown.enter="passwordEnter"
                 placeholder="密码"
               ></y-input>
-            </template>
-          </div>
-        </template>
-        <template #footer>
-          <div class="y-auth__footer flex-center--y">
-            <y-button v-if="obj.currentType === 'login'" :disable="obj.disable" @click="login"
-              >登录</y-button
-            >
-            <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
-            <span
-              style="font-size: 14px"
-              class="y-auth__footer-change main-color"
-              @click="
-                obj.currentType === 'register'
-                  ? (obj.currentType = 'login')
-                  : (obj.currentType = 'register')
-              "
-              >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
-            >
-          </div>
-        </template>
-      </y-modal>
-    </form>
+            </form>
+          </template>
+        </div>
+      </template>
+      <template #footer>
+        <div class="y-auth__footer flex-center--y">
+          <y-button form="login-form" v-if="obj.currentType === 'login'" :disable="obj.disable"
+            >登录</y-button
+          >
+          <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
+          <span
+            style="font-size: 14px"
+            class="y-auth__footer-change main-color"
+            @click="
+              obj.currentType === 'register'
+                ? (obj.currentType = 'login')
+                : (obj.currentType = 'register')
+            "
+            >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
+          >
+        </div>
+      </template>
+    </y-modal>
   </Teleport>
 </template>
 
 <style lang="scss">
+.y-auth {
+  .y-dorp-down__menu {
+    margin: 10px 0;
+  }
+}
 .y-auth__login-img-wrap {
   width: 18px;
   height: 18px;
@@ -279,8 +286,13 @@ const passwordEnter = () => {
   width: 18px;
   height: 18px;
   border-radius: 10px;
-  background: $main-color;
   box-shadow: 0px 0px 5px $main-color;
+  overflow: hidden;
+  .y-auth__login-img {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+  }
 }
 .y-auth__login-img {
   width: 16px;
@@ -295,10 +307,13 @@ const passwordEnter = () => {
   font-size: 14px;
 }
 .y-auth__menu-item {
+  border-radius: 2px;
   padding: 10px 15px;
-}
-.y-auth__menu-item-logout:hover {
-  background: $layout-background-gray-hover;
+  display: block;
+  transition: background 0.2s;
+  &:hover {
+    background: $layout-background-gray-hover;
+  }
 }
 .y-auth__footer-change {
   cursor: pointer;
