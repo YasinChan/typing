@@ -38,10 +38,12 @@ jobs:
         run: |
           git config --global user.name "Yasinchan"
           git config --global user.email "yasinchan2016@gmail.com"
+
+          git branch -D build
           git checkout -b build
 
           shopt -s extglob
-          rm -rf !(dist)
+          rm -rf .prettierrc.json .gitignore .eslintrc.cjs .github !(dist)
 
           mv dist/* .
 
