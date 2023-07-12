@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: 打包部署
 
 on:
   push:
@@ -13,10 +13,6 @@ jobs:
       contents: write
 
     steps:
-      # - uses: actions/labeler@v4
-      #   with:
-      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -42,7 +38,7 @@ jobs:
           git checkout -b build
 
           shopt -s extglob
-          rm -rf .prettierrc.json .gitignore .eslintrc.cjs .vscode .github !(dist)
+          rm -rf .prettierrc.json .gitignore .eslintrc.cjs .vscode .github !(dist) !(static.json)
 
           mv dist/* .
 
