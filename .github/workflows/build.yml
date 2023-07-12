@@ -29,8 +29,8 @@ jobs:
 
       - name: Deploy to build branch
         run: |
-          git config --global user.name "Your Name"
-          git config --global user.email "your-email@example.com"
+          git config --global user.name "Yasinchan"
+          git config --global user.email "yasinchan2016@gmail.com"
           git checkout -b build
           rm -rf ./*     # 清空build分支
           mv ./dist/* ./   # 将打包生成的文件移动到build分支根目录
