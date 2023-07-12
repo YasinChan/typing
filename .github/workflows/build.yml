@@ -9,7 +9,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
+      # - uses: actions/labeler@v4
+      #   with:
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout code
         uses: actions/checkout@v2
 
