@@ -33,15 +33,12 @@ jobs:
           git config --global user.email "yasinchan2016@gmail.com"
           git checkout -b build
 
-          rm -rf /node_modules
-
-          mkdir -p build_temp
           shopt -s extglob
-          mv !(build_temp) build_temp/
+          rm -rf !(dist)
 
-          git rm -rf .
-          mv build_temp/* .
-          rmdir build_temp
+          mv dist/* .
+
+          rmdir dist
 
           git add .
           git commit -m "Build and deploy"
