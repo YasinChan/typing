@@ -38,7 +38,7 @@ jobs:
           git checkout -b build
 
           shopt -s extglob
-          rm -rf .prettierrc.json .gitignore .eslintrc.cjs .vscode .github !(dist) !(static.json)
+          rm -rf .prettierrc.json .gitignore .eslintrc.cjs .vscode .github !(dist static.json)
 
           mv dist/* .
 
