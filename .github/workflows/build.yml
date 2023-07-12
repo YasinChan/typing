@@ -27,13 +27,19 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Create build artifacts directory
+        run: mkdir build_artifacts
+
+      - name: Move artifacts to build directory
+        run: mv ./dist/* build_artifacts/
+
       - name: Deploy to build branch
         run: |
           git config --global user.name "Yasinchan"
           git config --global user.email "yasinchan2016@gmail.com"
           git checkout -b build
           rm -rf ./*     # 清空build分支
-          mv ./dist/* ./   # 将打包生成的文件移动到build分支根目录
+          mv build_artifacts/* ./   # 将打包生成的文件移动到build分支根目录
           git add .
           git commit -m "Build and deploy"
           git push origin build
