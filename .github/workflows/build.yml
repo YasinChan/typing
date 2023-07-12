@@ -34,6 +34,7 @@ jobs:
           git checkout -b build
 
           mkdir -p build_temp
+          shopt -s extglob
           mv !(build_temp) build_temp/
 
           git rm -rf .
