@@ -50,4 +50,4 @@ jobs:
 
           git add .
           git commit -m "Build and deploy"
-          git push origin build
+          git push origin build -f
