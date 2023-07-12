@@ -19,6 +19,10 @@ defineProps({
   errorText: {
     default: '',
     type: String
+  },
+  maxLength: {
+    default: 1000,
+    type: Number
   }
 });
 const emitter = defineEmits(['update:value']);
@@ -26,15 +30,21 @@ const emitter = defineEmits(['update:value']);
 const inputHandler = (event: any): any => {
   emitter('update:value', (event.target as HTMLInputElement).value);
 };
+
+const blurHandler = (event: any): any => {
+  emitter('update:value', (event.target as HTMLInputElement).value.trim());
+};
 </script>
 <template>
   <div class="y-input" :class="[errorText ? 'y-input--err' : '']">
     <input
       :type="type"
       :value="value"
+      @blur="blurHandler"
       :name="name"
       @input="inputHandler"
       :placeholder="placeholder"
+      :maxlength="maxLength"
     />
     <span class="y-input__error-text">{{ errorText }}</span>
   </div>

@@ -2,5 +2,7 @@
 import YPinyin from '@/components/Pinyin.vue';
 </script>
 <template>
-  <y-pinyin words="键盘测试"></y-pinyin>
+  <div class="y-main">
+    <y-pinyin words="键盘测试"></y-pinyin>
+  </div>
 </template>

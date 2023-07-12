@@ -5,13 +5,13 @@ import { reactive, provide } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
+import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
 
 setTheme(getTheme());
 
 const obj = reactive({
   showChangeFontModal: false,
-  currentFont: '',
   userName: '',
   password: '',
   userNameError: '',
@@ -43,6 +43,7 @@ const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
 const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
+const useConfig = useConfigStore();
 
 const { config } = storeToRefs(userStore);
 
@@ -79,9 +80,8 @@ const changeTheme = () => {
       </div>
     </div>
   </header>
-  <main :class="'y-font--' + obj.currentFont">
-    <router-view></router-view>
-  </main>
+
+  <router-view></router-view>
 
   <Teleport to="body">
     <y-modal :show="obj.showChangeFontModal" @close="obj.showChangeFontModal = false">
@@ -91,14 +91,19 @@ const changeTheme = () => {
       <template #body>
         <div class="y-change-font__container gray-08">
           <ul>
-            <li @click="obj.currentFont = 'default'" class="y-font--default">
+            <li @click="useConfig.setCurrentFont('default')" class="y-font--default">
               默认 字体 测试 TEST test
             </li>
-            <li @click="obj.currentFont = 'zpix'" class="y-font--zpix">zpix 字体 测试 TEST test</li>
-            <li @click="obj.currentFont = 'zhankugaoduanhei'" class="y-font--zhankugaoduanhei">
+            <li @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix">
+              zpix 字体 测试 TEST test
+            </li>
+            <li
+              @click="useConfig.setCurrentFont('zhankugaoduanhei')"
+              class="y-font--zhankugaoduanhei"
+            >
               zhankugaoduanhei 字体 测试 TEST test
             </li>
-            <li @click="obj.currentFont = 'AlibabaPuHuiTi'" class="y-font--AlibabaPuHuiTi">
+            <li @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi">
               AlibabaPuHuiTi 字体 测试 TEST test
             </li>
           </ul>
@@ -189,6 +194,10 @@ main {
   color: $gray-08;
   font-size: 18px;
   letter-spacing: 1px;
+}
+.y-main {
+  margin: 100px;
+  color: $gray-08;
 }
 
 .y-change-font__container {

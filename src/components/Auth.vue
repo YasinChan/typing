@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import YModal from '@/components/ui/Modal.vue';
-import { reactive, watch, inject, ref } from 'vue';
+import { reactive, watch, inject } from 'vue';
 import YInput from '@/components/ui/Input.vue';
 import YButton from '@/components/ui/Button.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 import { postLogin, postLogout, postRegister } from '@/request/index';
+import YImage from '@/components/ui/Image.vue';
 
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
 
-const USERNAME_REG = /^[\u4e00-\u9fff]|\w+$/;
+const USERNAME_REG = /^[\u4e00-\u9fffa-zA-Z0-9_-]{1,25}$/;
 const PASSWORD_REG = /^[a-zA-Z0-9]{6,}$/;
 
-const submitInputRef = ref();
 const obj = reactive({
   showLogin: false,
   userName: '',
@@ -69,19 +69,18 @@ watch(
 );
 
 const userStore = useUserStore();
-
 const { profile } = storeToRefs(userStore);
 
 function verifyUserName() {
   if (!USERNAME_REG.test(obj.userName)) {
-    obj.userNameError = '用户名需要至少一位数字、字母或下划线';
+    obj.userNameError = '用户名只能包含至少一位数字、字母、中文、- 或 _ ';
     return false;
   }
   return true;
 }
 function verifyPassword() {
   if (!PASSWORD_REG.test(obj.password)) {
-    obj.passwordError = '密码需要至少六位数字或字母';
+    obj.passwordError = '密码只能包含至少六位数字或者字母';
     return false;
   }
   return true;
@@ -173,7 +172,7 @@ const passwordEnter = () => {
     <y-drop-down v-if="'userName' in profile && profile.userName">
       <template #title>
         <div class="y-auth__login-img-wrap--login flex-center">
-          <img class="y-auth__login-img" :src="profile.avatar" alt="user" />
+          <y-image class="y-auth__login-img" :src="profile.avatar" alt="user"></y-image>
         </div>
       </template>
       <template #menu>
@@ -198,7 +197,7 @@ const passwordEnter = () => {
     >
       <img
         class="y-auth__login-img"
-        src="https://tf.yasinchan.com/cSmuMHMW0t4vnb8UTNO5RcSAYChr1DBL/22f1196f825298281376608459bfa7fe.webp"
+        src="https://tf.yasinchan.com/aAo3RCau7RL9WsKC8I5TScUVmQaLLmA7/f83f561a35c2ef1b2ad3b4b1342ad249.png"
         alt="user"
       />
     </div>
@@ -212,6 +211,7 @@ const passwordEnter = () => {
         <div class="y-change-login__container">
           <template v-if="obj.currentType === 'register'">
             <y-input
+              :max-length="25"
               v-model:value="obj.userName"
               :error-text="obj.userNameError"
               placeholder="用户名"
@@ -298,6 +298,7 @@ const passwordEnter = () => {
   width: 16px;
   height: 16px;
   opacity: 0.6;
+  border-radius: 10px;
 }
 .y-auth__footer {
   justify-content: space-between;
