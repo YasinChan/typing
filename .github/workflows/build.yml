@@ -38,8 +38,8 @@ jobs:
           mv !(build_temp) build_temp/
 
           git rm -rf .
-          mv build_temp/dist/* .
-          rm -rf build_temp
+          mv build_temp/* .
+          rmdir build_temp
 
           git add .
           git commit -m "Build and deploy"
