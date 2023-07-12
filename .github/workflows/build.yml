@@ -39,7 +39,7 @@ jobs:
 
           git rm -rf .
           mv build_temp/dist/* .
-          rmdir build_temp
+          rm -rf build_temp
 
           git add .
           git commit -m "Build and deploy"
