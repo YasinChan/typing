@@ -7,6 +7,8 @@ export type profileType = {
   id: string;
   userId: string;
   avatar: string;
+  question: string;
+  answer: string;
   iat: number;
   exp: number;
 };
@@ -24,6 +26,14 @@ export const useUserStore = defineStore('user', {
     profile: {} as profileType | {},
     config: {} as configType | {}
   }),
+  getters: {
+    myUserId(): any {
+      if ('userId' in this.profile) {
+        return this.profile.userId;
+      }
+      return '';
+    }
+  },
   actions: {
     setProfile() {
       getMe()

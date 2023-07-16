@@ -51,7 +51,6 @@ const blurHandler = (event: any): any => {
 </template>
 <style lang="scss">
 .y-input {
-  padding-bottom: 10px;
   input {
     touch-action: manipulation;
     -webkit-appearance: none;

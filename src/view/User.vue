@@ -1,21 +1,38 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getUserInfo } from '@/request/index';
-import { reactive, watch } from 'vue';
+import { getUserInfo, setPersonalInfo, updatePassword } from '@/request';
+import { reactive, watch, inject } from 'vue';
+import YModal from '@/components/ui/Modal.vue';
+import YInput from '@/components/ui/Input.vue';
 import YImage from '@/components/ui/Image.vue';
+import { EMAIL_REG, PASSWORD_REG } from '@/common/reg';
 
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
 
 const userStore = useUserStore();
-const { profile } = storeToRefs(userStore);
+const { profile, myUserId } = storeToRefs(userStore);
+
+const message: any = inject('message');
 
 const state = reactive({
   info: {
     avatar: '',
     userName: ''
   },
-  paramsId: '' as any
+  showPasswordQuestion: false,
+  showResetAvatar: false,
+  showSetEmail: false,
+  paramsId: '' as any,
+  question: '' as any,
+  answer: '' as any,
+  email: '' as any,
+  emailError: '' as any,
+  oldPassword: '' as any,
+  newPassword: '' as any,
+  confirmNewPassword: '' as any,
+  newPasswordError: '' as any,
+  confirmNewPasswordError: '' as any
 });
 
 const router = useRouter();
@@ -32,20 +49,216 @@ watch(
     immediate: true
   }
 );
+watch(
+  profile,
+  (val: any) => {
+    state.question = val.question;
+    state.answer = val.answer;
+    state.email = val.email;
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+);
+
+function verifyPassword() {
+  if (!PASSWORD_REG.test(state.newPassword)) {
+    state.newPasswordError = '密码只能包含至少六位数字或者字母';
+    return false;
+  }
+  return true;
+}
+const setPasswordQuestion = () => {
+  state.showPasswordQuestion = true;
+};
+const setEmail = () => {
+  state.showSetEmail = true;
+};
+const resetAvatar = () => {
+  state.showResetAvatar = true;
+};
+
+const setPQ = () => {
+  if (!state.question || !state.answer) {
+    message({ message: '问题或答案不能为空', type: 'warn' });
+    return;
+  }
+  setPersonalInfo({
+    userId: state.paramsId,
+    question: state.question,
+    answer: state.answer
+  }).then((res) => {
+    message({ message: res.data?.message });
+    userStore.setProfile();
+  });
+  state.showPasswordQuestion = false;
+};
+
+watch(
+  () => state.email,
+  () => {
+    state.emailError = '';
+  }
+);
+
+watch(
+  () => state.showResetAvatar,
+  () => {
+    state.oldPassword = '';
+    state.newPassword = '';
+    state.confirmNewPassword = '';
+    state.newPasswordError = '';
+    state.confirmNewPasswordError = '';
+  }
+);
+const setNewEmail = () => {
+  if (!EMAIL_REG.test(state.email)) {
+    state.emailError = '邮箱格式不正确';
+    return;
+  }
+  state.emailError = '';
+
+  if (!state.email) {
+    message({ message: '邮箱不能为空', type: 'warn' });
+    return;
+  }
+  setPersonalInfo({
+    userId: state.paramsId,
+    email: state.email
+  }).then((res) => {
+    message({ message: res.data?.message });
+    userStore.setProfile();
+  });
+  state.showSetEmail = false;
+};
+const setResetAvatar = () => {
+  if (!state.oldPassword || !state.newPassword || !state.confirmNewPassword) {
+    message({ message: '密码不能为空', type: 'warn' });
+    return;
+  }
+  if (!verifyPassword()) {
+    return;
+  }
+  if (state.newPassword !== state.confirmNewPassword) {
+    message({ message: '两次密码不一致', type: 'warn' });
+    return;
+  }
+  updatePassword({
+    oldPassword: state.oldPassword,
+    newPassword: state.newPassword
+  })
+    .then((res) => {
+      message({ message: res.data?.message });
+      state.showResetAvatar = false;
+      userStore.setProfile();
+    })
+    .catch((error) => {
+      const msg = error.response?.data?.message;
+      message({ message: msg, type: 'error' });
+    });
+};
 </script>
 
 <template>
   <div class="y-user y-main">
     <div class="y-user__info">
       <y-image class="y-user__image" :src="state.info.avatar"></y-image>
-      <div class="y-user__user-name">{{ state.info.userName }}</div>
+      <div class="y-user__name-info">
+        <div class="y-user__user-name">
+          {{ state.info.userName }}
+          <span class="y-user__user-status" v-if="myUserId == state.paramsId">已登录</span>
+        </div>
+        <div v-if="myUserId == state.paramsId && 'email' in profile" class="y-user__user-email">
+          {{ profile.email }}
+        </div>
+      </div>
     </div>
-    <div v-if="'userId' in profile && profile.userId == state.paramsId" class="y-user__setting">
-      <div class="y-user__setting-avatar">设置头像</div>
-      <div class="y-user__setting-avatar">设置问题</div>
-      <div class="y-user__setting-avatar">设置密码</div>
+    <div class="y-user__setting" v-if="myUserId == state.paramsId">
+      <div class="y-user__setting-title">设置</div>
+      <div class="y-user__setting-set">
+        <div class="y-user__setting-set-item" @click="setPasswordQuestion">设置密保问题</div>
+        <div class="y-user__setting-set-item" @click="setEmail">设置邮箱地址</div>
+        <div class="y-user__setting-set-item" @click="resetAvatar">重置密码</div>
+      </div>
     </div>
   </div>
+  <Teleport to="body">
+    <y-modal
+      :show="state.showPasswordQuestion"
+      @close="state.showPasswordQuestion = false"
+      @confirm="setPQ"
+    >
+      <template #header>
+        <h3>设置密保问题</h3>
+      </template>
+      <template #body>
+        <div class="y-user-pq__container">
+          <div class="y-user-pq__remind">
+            请设置一个问题与答案，方便在你忘记密码时找回密码，如：
+          </div>
+          <div class="y-user-pq__eg">问：世界上最好的语言</div>
+          <div class="y-user-pq__eg">答：PHP</div>
+          <y-input
+            class="y-user-pq__q"
+            v-model:value="state.question"
+            placeholder="你的问题"
+          ></y-input>
+          <y-input
+            class="y-user-pq__a"
+            v-model:value="state.answer"
+            placeholder="你的回答"
+          ></y-input>
+        </div>
+      </template>
+    </y-modal>
+    <y-modal :show="state.showResetAvatar" @close="state.showResetAvatar = false">
+      <template #header>
+        <h3>重置密码</h3>
+      </template>
+      <template #body> </template>
+    </y-modal>
+  </Teleport>
+  <Teleport to="body">
+    <y-modal :show="state.showSetEmail" @close="state.showSetEmail = false" @confirm="setNewEmail">
+      <template #header>
+        <h3>设置邮箱地址</h3>
+      </template>
+      <template #body>
+        <div class="y-user-set-email__container">
+          <y-input
+            :error-text="state.emailError"
+            placeholder="设置邮箱地址"
+            v-model:value="state.email"
+          ></y-input>
+        </div>
+      </template>
+    </y-modal>
+    <y-modal
+      :show="state.showResetAvatar"
+      @close="state.showResetAvatar = false"
+      @confirm="setResetAvatar"
+    >
+      <template #header>
+        <h3>重置密码</h3>
+      </template>
+      <template #body>
+        <div class="y-user-reset-password__container">
+          <y-input placeholder="旧密码" v-model:value="state.oldPassword"></y-input>
+          <y-input
+            :error-text="state.newPasswordError"
+            placeholder="新密码"
+            v-model:value="state.newPassword"
+          ></y-input>
+          <y-input
+            :error-text="state.confirmNewPasswordError"
+            placeholder="确认新密码"
+            v-model:value="state.confirmNewPassword"
+          ></y-input>
+        </div>
+      </template>
+    </y-modal>
+  </Teleport>
 </template>
 
 <style lang="scss">
@@ -53,7 +266,60 @@ watch(
   display: flex;
 }
 .y-user__image {
-  width: 40px;
-  height: 40px;
+  width: 100px;
+  height: 100px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.y-user__name-info {
+  margin-left: 20px;
+}
+.y-user__user-name {
+  font-size: 28px;
+  font-weight: bold;
+}
+.y-user__user-status {
+  font-size: 12px;
+  border-radius: 2px;
+  padding: 2px 5px;
+  margin-left: 4px;
+  border: 1px solid $gray-04;
+  vertical-align: middle;
+}
+
+.y-user__setting {
+  margin-top: 30px;
+}
+.y-user__setting-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.y-user__setting-set {
+  display: flex;
+  font-size: 16px;
+}
+.y-user__setting-set-item {
+  margin-right: 20px;
+  cursor: pointer;
+}
+.y-user-pq__container {
+  color: $gray-04;
+  font-size: 14px;
+  .y-input {
+    padding-bottom: 10px;
+  }
+}
+.y-user-pq__remind {
+  color: $gray-06;
+  margin-bottom: 5px;
+}
+.y-user-pq__q {
+  margin-top: 10px;
+}
+.y-user-reset-password__container {
+  .y-input {
+    padding-bottom: 10px;
+  }
 }
 </style>

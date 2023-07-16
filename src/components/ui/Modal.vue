@@ -8,7 +8,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'confirm']);
 
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.code === 'Escape') {
@@ -45,7 +45,7 @@ watch(
 
         <div class="y-modal__footer">
           <slot name="footer">
-            <y-button @click="emit('close')">确定</y-button>
+            <y-button @click="emit('confirm')">确定</y-button>
           </slot>
         </div>
       </div>

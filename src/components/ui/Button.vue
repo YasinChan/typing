@@ -7,6 +7,10 @@ const props = defineProps({
   form: {
     type: String,
     default: ''
+  },
+  size: {
+    type: String,
+    default: 'medium'
   }
 });
 const emitter = defineEmits(['click']);
@@ -25,7 +29,11 @@ const handlerClick = () => {
     :disabled="disable"
     :form="form"
     class="y-button"
-    :class="[disable ? 'y-button--disabled' : '']"
+    :class="[
+      disable ? 'y-button--disabled' : '',
+      size === 'small' ? 'y-button--small' : '',
+      size === 'large' ? 'y-button--large' : ''
+    ]"
   >
     <slot>按钮</slot>
   </button>
@@ -49,6 +57,10 @@ const handlerClick = () => {
   &:hover {
     background: $main-color-hover;
   }
+}
+.y-button--small {
+  padding: 4px 10px;
+  font-size: 12px;
 }
 .y-button--disabled {
   cursor: not-allowed;

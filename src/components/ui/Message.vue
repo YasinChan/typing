@@ -26,7 +26,6 @@ defineProps({
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateX(-50%);
   transform: translateY(0);
   padding: 10px 20px;
   border-radius: 4px;
@@ -42,6 +41,9 @@ defineProps({
 
 .y-message--error {
   background: $main-red;
+}
+.y-message--warn {
+  background: $main-orange;
 }
 
 .message-enter-active,
