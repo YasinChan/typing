@@ -1,0 +1,130 @@
+<script setup lang="ts">
+import { SUB_VALUE } from '@/config/key.ts';
+import { reactive, watch } from 'vue';
+
+const props = defineProps({
+  /**
+   * 键帽的宽度
+   * 1、125、15、225、25
+   */
+  unit: {
+    type: Number,
+    default: 1
+  },
+  /**
+   * 键帽的背景颜色
+   */
+  backgroundColor: {
+    type: String,
+    default: '#4F5767' // //#4F5767 #F4F4F5
+  },
+  /**
+   * 键帽上的字体颜色
+   */
+  color: {
+    type: String,
+    default: '#fff'
+  },
+  /**
+   * 键帽上的主要字符
+   */
+  value: {
+    type: String,
+    default: 'A'
+  },
+  isKeyPressed: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const state = reactive({
+  isActive: false // 是否已经被点击过了
+});
+
+watch(
+  () => props.isKeyPressed,
+  (newValue) => {
+    if (newValue) {
+      state.isActive = true;
+    }
+  },
+  {
+    immediate: true
+  }
+);
+</script>
+<template>
+  <div
+    class="y-single-key"
+    :class="[
+      'y-single-key--' + unit,
+      SUB_VALUE[value] ? 'y-single-key__small-size' : '',
+      value.length > 1 ? 'y-single-key__word' : '',
+      state.isActive ? 'y-single-key--active' : ''
+    ]"
+    :style="{
+      backgroundColor,
+      color
+    }"
+  >
+    <span v-if="SUB_VALUE[value]" class="y-single-key__sub-value">{{ SUB_VALUE[value] }}</span>
+    <span class="y-single-key__value">{{ value }}</span>
+  </div>
+</template>
+<style lang="scss">
+$unit: 40px;
+.y-single-key {
+  display: flex;
+  align-items: center;
+  width: $unit; /* 键帽宽度 */
+  height: $unit; /* 键帽高度 */
+  font-size: 20px; /* 字体大小 */
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* 键帽阴影效果 */
+  padding: 6px;
+  margin: 2px;
+  position: relative;
+}
+.y-single-key--active {
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
+.y-single-key__small-size {
+  font-size: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+/* 这是单词类型的，比如 Enter Esc F1，字号需要小一点                                                                                                                           */
+.y-single-key__word {
+  font-size: 12px;
+}
+.y-single-key--1 {
+  width: $unit;
+}
+.y-single-key--125 {
+  width: $unit * 1.25;
+}
+.y-single-key--15 {
+  width: $unit * 1.5;
+}
+.y-single-key--175 {
+  width: $unit * 1.75;
+}
+.y-single-key--2 {
+  width: $unit * 2;
+}
+.y-single-key--225 {
+  width: $unit * 2.25;
+}
+</style>
