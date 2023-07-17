@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SUB_VALUE } from '@/config/key.ts';
+import { SUB_VALUE } from '@/config/key';
 import { reactive, watch } from 'vue';
 
 const props = defineProps({
