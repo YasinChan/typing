@@ -1,4 +1,4 @@
-export const SUB_VALUE = {
+export const SUB_VALUE: any = {
   '`': '~',
   '1': '!',
   '2': '@',

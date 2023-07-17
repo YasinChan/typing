@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SUB_VALUE } from '@/config/key';
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed } from 'vue';
 
 const props = defineProps({
   /**
@@ -53,13 +53,17 @@ watch(
     immediate: true
   }
 );
+
+const subValue = computed(() => {
+  return SUB_VALUE[props.value];
+});
 </script>
 <template>
   <div
     class="y-single-key"
     :class="[
       'y-single-key--' + unit,
-      SUB_VALUE[value] ? 'y-single-key__small-size' : '',
+      subValue ? 'y-single-key__small-size' : '',
       value.length > 1 ? 'y-single-key__word' : '',
       state.isActive ? 'y-single-key--active' : ''
     ]"
@@ -68,7 +72,7 @@ watch(
       color
     }"
   >
-    <span v-if="SUB_VALUE[value]" class="y-single-key__sub-value">{{ SUB_VALUE[value] }}</span>
+    <span v-if="subValue" class="y-single-key__sub-value">{{ subValue }}</span>
     <span class="y-single-key__value">{{ value }}</span>
   </div>
 </template>
