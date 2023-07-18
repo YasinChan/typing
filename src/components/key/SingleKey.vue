@@ -86,9 +86,9 @@ $unit: 40px;
   font-size: 20px; /* 字体大小 */
   font-weight: bold;
   border-radius: 5px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* 键帽阴影效果 */
+  box-shadow: $key-box-shadow; /* 键帽阴影效果 */
   padding: 6px;
-  margin: 2px;
+  margin: 4px 0;
   position: relative;
 }
 .y-single-key--active {
@@ -130,5 +130,11 @@ $unit: 40px;
 }
 .y-single-key--225 {
   width: $unit * 2.25;
+}
+.y-single-key--6 {
+  width: $unit * 6;
+}
+.y-single-key--7 {
+  width: $unit * 7;
 }
 </style>

@@ -27,6 +27,8 @@
   --background-gray-hover: #e6e8e9;
   --layout-background-gray-hover: #f0f0f0;
 
+  --key-box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+
   /* hover 色 */
   --gray-01-hover: #e6e8e9;
   --gray-02-hover: #dde1e2;
