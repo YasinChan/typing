@@ -1,20 +1,42 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, reactive } from 'vue';
 
+import { CAN_PRINT_KEY } from '@/config/key';
+import { useConfigStore } from '@/store/config';
+
+const configStore = useConfigStore();
+
 const state = reactive({
-  isKeyPressed: false
+  currentCode: '',
+  keysPressed: {} as any
 });
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (!state.isKeyPressed) {
-    state.isKeyPressed = true;
-    // 在这里处理按键按下时的事件
-    console.log('handleKeyDown', e);
+  e.preventDefault();
+  const code = e.code;
+
+  const capsLockOn = e.getModifierState('CapsLock');
+  if (capsLockOn && CAN_PRINT_KEY[code]) {
+    configStore.setPrintContent(CAN_PRINT_KEY[code].toUpperCase() || '');
+  } else {
+    configStore.setPrintContent(CAN_PRINT_KEY[code] || '');
+  }
+
+  if (code === 'Enter') {
+    configStore.setPrintContent('<br/>');
+  }
+  if (code === 'Backspace') {
+    configStore.minusPrintContent();
+  }
+
+  if (!state.keysPressed[code]) {
+    state.keysPressed[code] = true;
+    state.currentCode = code;
   }
 };
 
 const handleKeyUp = (e: KeyboardEvent) => {
-  state.isKeyPressed = false;
-  console.log('handleKeyUp', e);
+  state.keysPressed[e.code] = false;
+  state.currentCode = '';
 };
 
 onMounted(() => {
@@ -29,6 +51,6 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div class="y-key-wrap">
-    <slot :is-key-pressed="state.isKeyPressed"></slot>
+    <slot :keys-pressed="state.keysPressed"></slot>
   </div>
 </template>

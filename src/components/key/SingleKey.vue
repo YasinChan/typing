@@ -32,9 +32,16 @@ const props = defineProps({
     type: String,
     default: 'A'
   },
-  isKeyPressed: {
-    type: Boolean,
-    default: false
+  code: {
+    type: String,
+    default: ''
+  },
+  /**
+   * 当前按下的键盘的 code
+   */
+  keysPressed: {
+    type: [Object, null],
+    default: () => ({})
   }
 });
 
@@ -43,16 +50,23 @@ const state = reactive({
 });
 
 watch(
-  () => props.isKeyPressed,
-  (newValue) => {
-    if (newValue) {
-      state.isActive = true;
+  () => props.keysPressed,
+  (val) => {
+    if (val) {
+      const triggeredKeys = Object.keys(val);
+      if (triggeredKeys.includes(props.code)) {
+        state.isActive = true;
+      }
     }
   },
   {
-    immediate: true
+    deep: true
   }
 );
+
+const isKeyPressed = computed(() => {
+  return props.keysPressed[props.code];
+});
 
 const subValue = computed(() => {
   return SUB_VALUE[props.value];
@@ -64,8 +78,9 @@ const subValue = computed(() => {
     :class="[
       'y-single-key--' + unit,
       subValue ? 'y-single-key__small-size' : '',
-      value.length > 1 ? 'y-single-key__word' : '',
-      state.isActive ? 'y-single-key--active' : ''
+      value.length > 1 ? 'y-single-key__word' : 'y-single-key__letter',
+      state.isActive ? 'y-single-key--active' : '',
+      isKeyPressed ? 'y-single-key--pressed' : ''
     ]"
     :style="{
       backgroundColor,
@@ -90,6 +105,17 @@ $unit: 40px;
   padding: 6px;
   margin: 4px 0;
   position: relative;
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0);
+    transition: background-color 0.1s;
+  }
 }
 .y-single-key--active {
   &:after {
@@ -103,6 +129,18 @@ $unit: 40px;
     background-color: rgba(255, 255, 255, 0.2);
   }
 }
+.y-single-key--pressed {
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.6);
+  }
+}
 .y-single-key__small-size {
   font-size: 12px;
   flex-direction: column;
@@ -112,6 +150,10 @@ $unit: 40px;
 /* 这是单词类型的，比如 Enter Esc F1，字号需要小一点                                                                                                                           */
 .y-single-key__word {
   font-size: 12px;
+}
+.y-single-key__letter {
+  align-items: start;
+  line-height: 10px;
 }
 .y-single-key--1 {
   width: $unit;
