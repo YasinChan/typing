@@ -40,7 +40,7 @@ const props = defineProps({
    * 当前按下的键盘的 code
    */
   keysPressed: {
-    type: [Object, null],
+    type: Object,
     default: () => ({})
   }
 });
