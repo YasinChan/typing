@@ -30,7 +30,7 @@ const props = defineProps({
    */
   value: {
     type: String,
-    default: 'A'
+    default: ''
   },
   code: {
     type: String,
@@ -76,6 +76,7 @@ const subValue = computed(() => {
   <div
     class="y-single-key"
     :class="[
+      code ? '' : 'y-single-key--empty',
       'y-single-key--' + unit,
       subValue ? 'y-single-key__small-size' : '',
       value.length > 1 ? 'y-single-key__word' : 'y-single-key__letter',
@@ -101,7 +102,7 @@ $unit: 40px;
   font-size: 20px; /* 字体大小 */
   font-weight: bold;
   border-radius: 5px;
-  box-shadow: $key-box-shadow; /* 键帽阴影效果 */
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4); /* 键帽阴影效果 */
   padding: 6px;
   margin: 4px 0;
   position: relative;
@@ -141,6 +142,13 @@ $unit: 40px;
     background-color: rgba(255, 255, 255, 0.6);
   }
 }
+.y-single-key--empty {
+  background: rgba(0, 0, 0, 0) !important;
+  box-shadow: none !important;
+  &:after {
+    content: none;
+  }
+}
 .y-single-key__small-size {
   font-size: 12px;
   flex-direction: column;
@@ -172,6 +180,15 @@ $unit: 40px;
 }
 .y-single-key--225 {
   width: $unit * 2.25;
+}
+.y-single-key--25 {
+  width: $unit * 2.5;
+}
+.y-single-key--275 {
+  width: $unit * 2.75;
+}
+.y-single-key--3 {
+  width: $unit * 3;
 }
 .y-single-key--6 {
   width: $unit * 6;

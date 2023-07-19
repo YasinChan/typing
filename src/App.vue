@@ -7,6 +7,9 @@ import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
 import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 setTheme(getTheme());
 
@@ -65,7 +68,11 @@ const changeTheme = () => {
       <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
       <router-link to="/keyboard" class="y-menu__item y-menu__keybord-test">键盘测试</router-link>
       <div
-        class="y-menu__item y-menu__change"
+        v-if="
+          router.currentRoute.value.name === 'TimeKeep' ||
+          router.currentRoute.value.name === 'TimeLimit'
+        "
+        class="y-menu__item y-menu__change y-menu__change-font"
         @click="
           () => {
             obj.showChangeFontModal = true;
@@ -73,6 +80,17 @@ const changeTheme = () => {
         "
       >
         切换字体
+      </div>
+      <div
+        v-else-if="router.currentRoute.value.name === 'Keyboard'"
+        class="y-menu__item y-menu__change y-menu__change-keyboard"
+        @click="
+          () => {
+            useConfig.setKeyboardModalStatus(true);
+          }
+        "
+      >
+        切换键盘
       </div>
       <div class="y-menu__item y-menu__change" @click="changeTheme">切换主题</div>
       <div class="y-menu__item y-menu__change">
@@ -185,6 +203,14 @@ header {
 .y-menu__change {
   margin-left: 26px;
   color: $gray-04;
+}
+.y-menu__change-font {
+  text-shadow: -2px -2px 2px $gray-04;
+  color: $gray-06;
+}
+.y-menu__change-keyboard {
+  text-shadow: 2px 2px 2px $gray-04;
+  color: $gray-06;
 }
 
 main {
