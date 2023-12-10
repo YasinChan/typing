@@ -1,7 +1,7 @@
 /**
  * @description 键盘键帽上有两个字符的映射表。
  */
-export const SUB_VALUE: any = {
+export const SUB_VALUE: Record<string, string> = {
   '`': '~',
   '1': '!',
   '2': '@',
@@ -25,6 +25,25 @@ export const SUB_VALUE: any = {
   '/': '?'
 };
 
+export enum KEY_PERMUTATION_KEY {
+  MAIN_AREA = 'main-area',
+  SUB_AREA = 'sub-area',
+  NUMBER_AREA = 'number-area'
+}
+
+export type KEY_PERMUTATION_VALUE = {
+  code?: string;
+  unit?: number;
+  value?: string;
+  type?: string;
+  macValue?: string;
+  macCode?: string;
+};
+
+export type KEY_PERMUTATION_TYPE = Partial<
+  Record<KEY_PERMUTATION_KEY, Array<Array<KEY_PERMUTATION_VALUE>>>
+>;
+
 /**
  * @description 键盘每个键帽的映射表。
  * code: 键盘键帽的键码。
@@ -32,8 +51,8 @@ export const SUB_VALUE: any = {
  * value: 键盘键帽的值。
  * type: 键盘键帽的类型，toggle 表示切换键。
  */
-export const KEY_PERMUTATION_68: any = {
-  'main-area': [
+export const KEY_PERMUTATION_68: KEY_PERMUTATION_TYPE = {
+  [KEY_PERMUTATION_KEY.MAIN_AREA]: [
     [
       { code: 'Escape', unit: 1, value: 'Esc' },
       { code: 'Digit1', unit: 1, value: '1' },
@@ -115,8 +134,8 @@ export const KEY_PERMUTATION_68: any = {
   ]
 };
 
-export const KEY_PERMUTATION_STANDARD: any = {
-  'main-area': [
+export const KEY_PERMUTATION_STANDARD: KEY_PERMUTATION_TYPE = {
+  [KEY_PERMUTATION_KEY.MAIN_AREA]: [
     [
       { code: 'Escape', unit: 1, value: 'Esc' },
       { code: 'F1', unit: 1, value: 'F1' },
@@ -204,7 +223,7 @@ export const KEY_PERMUTATION_STANDARD: any = {
       { code: 'ControlRight', unit: 125, value: 'Ctrl', macValue: '⌃' }
     ]
   ],
-  'sub-area': [
+  [KEY_PERMUTATION_KEY.SUB_AREA]: [
     [
       { code: 'PrintScreen', unit: 1, value: 'Pri \n Scn' },
       { code: 'ScrollLock', unit: 1, value: 'Scrl \n Lock' },
@@ -228,7 +247,7 @@ export const KEY_PERMUTATION_STANDARD: any = {
       { code: 'ArrowRight', unit: 1, value: '→' }
     ]
   ],
-  'number-area': [
+  [KEY_PERMUTATION_KEY.NUMBER_AREA]: [
     [{}, {}, {}, {}],
     [
       { code: 'NumLock', unit: 1, value: 'Num \n Lock' },
