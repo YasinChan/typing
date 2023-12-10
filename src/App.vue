@@ -8,6 +8,7 @@ import { useUserStore } from '@/store/user';
 import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
+import YDropDown from '@/components/ui/DropDown.vue';
 
 const router = useRouter();
 
@@ -15,6 +16,7 @@ setTheme(getTheme());
 
 const obj = reactive({
   showChangeFontModal: false,
+  showChangeSystemModal: false,
   userName: '',
   password: '',
   userNameError: '',
@@ -49,11 +51,16 @@ userStore.setConfig();
 const useConfig = useConfigStore();
 
 const { config } = storeToRefs(userStore);
+const { currentSystem } = storeToRefs(useConfig);
 
 const changeTheme = () => {
   const currentTheme = getTheme();
   currentTheme === 'light' ? setTheme('dark') : setTheme('light');
 };
+
+function changeSystem(system: string) {
+  useConfig.setCurrentSystem(system);
+}
 </script>
 
 <template>
@@ -66,33 +73,43 @@ const changeTheme = () => {
     <div class="y-menu">
       <router-link to="/" class="y-menu__item y-menu__item--active">计时模式</router-link>
       <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
-      <router-link to="/keyboard" class="y-menu__item y-menu__keybord-test">键盘测试</router-link>
-      <div
-        v-if="
-          router.currentRoute.value.name === 'TimeKeep' ||
-          router.currentRoute.value.name === 'TimeLimit'
-        "
-        class="y-menu__item y-menu__change y-menu__change-font"
-        @click="
-          () => {
-            obj.showChangeFontModal = true;
-          }
-        "
-      >
-        切换字体
-      </div>
-      <div
-        v-else-if="router.currentRoute.value.name === 'Keyboard'"
-        class="y-menu__item y-menu__change y-menu__change-keyboard"
-        @click="
-          () => {
-            useConfig.setKeyboardModalStatus(true);
-          }
-        "
-      >
-        切换键盘
-      </div>
-      <div class="y-menu__item y-menu__change" @click="changeTheme">切换主题</div>
+      <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test">键盘测试</router-link>
+      <y-drop-down>
+        <template #title>
+          <div class="y-menu__item">设置</div>
+        </template>
+        <template #menu>
+          <div class="y-auth__menu">
+            <div
+              v-if="
+                router.currentRoute.value.name === 'TimeKeep' ||
+                router.currentRoute.value.name === 'TimeLimit'
+              "
+              class="y-menu__change y-menu__change-font"
+              @click="
+                () => {
+                  obj.showChangeFontModal = true;
+                }
+              "
+            >
+              切换字体
+            </div>
+            <div
+              v-else-if="router.currentRoute.value.name === 'Keyboard'"
+              class="y-menu__change y-menu__change-keyboard"
+              @click="
+                () => {
+                  useConfig.setKeyboardModalStatus(true);
+                }
+              "
+            >
+              切换键盘
+            </div>
+            <div class="y-menu__change" @click="changeTheme">切换主题</div>
+            <div class="y-menu__change" @click="obj.showChangeSystemModal = true">切换系统</div>
+          </div>
+        </template>
+      </y-drop-down>
       <div class="y-menu__item y-menu__change">
         <auth></auth>
       </div>
@@ -107,7 +124,7 @@ const changeTheme = () => {
         <h3>选择字体</h3>
       </template>
       <template #body>
-        <div class="y-change-font__container gray-08">
+        <div class="y-change__container gray-08">
           <ul>
             <li @click="useConfig.setCurrentFont('default')" class="y-font--default">
               默认 字体 测试 TEST test
@@ -123,6 +140,29 @@ const changeTheme = () => {
             </li>
             <li @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi">
               AlibabaPuHuiTi 字体 测试 TEST test
+            </li>
+          </ul>
+        </div>
+      </template>
+    </y-modal>
+  </Teleport>
+  <Teleport to="body">
+    <y-modal
+      :show="obj.showChangeSystemModal"
+      @close="obj.showChangeSystemModal = false"
+      @confirm="obj.showChangeSystemModal = false"
+    >
+      <template #header>
+        <h3>选择系统</h3>
+      </template>
+      <template #body>
+        <div class="y-change__container gray-08">
+          <ul>
+            <li @click="changeSystem('win')" :class="currentSystem === 'win' ? 'active' : ''">
+              Windows
+            </li>
+            <li @click="changeSystem('mac')" :class="currentSystem === 'mac' ? 'active' : ''">
+              Mac
             </li>
           </ul>
         </div>
@@ -201,16 +241,14 @@ header {
   }
 }
 .y-menu__change {
-  margin-left: 26px;
-  color: $gray-04;
-}
-.y-menu__change-font {
-  text-shadow: -2px -2px 2px $gray-04;
-  color: $gray-06;
-}
-.y-menu__change-keyboard {
-  text-shadow: 2px 2px 2px $gray-04;
-  color: $gray-06;
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 10px 15px;
+  display: block;
+  transition: background 0.2s;
+  &:hover {
+    background: $layout-background-gray-hover;
+  }
 }
 
 main {
@@ -226,7 +264,7 @@ main {
   color: $gray-08;
 }
 
-.y-change-font__container {
+.y-change__container {
   li {
     cursor: pointer;
   }

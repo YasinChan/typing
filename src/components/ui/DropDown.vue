@@ -9,31 +9,32 @@ const obj = reactive({
 nextTick().then(() => {
   document.addEventListener('click', (event) => {
     const targetElement: any = event.target;
-    if (!targetElement.closest('.y-dorp-down--js')) {
+    if (!targetElement.closest('.y-drop-down--js')) {
       obj.showMenu = false;
     }
   });
 });
 </script>
 <template>
-  <div class="y-dorp-down y-dorp-down--js">
-    <div class="y-dorp-down__title" @click.stop="obj.showMenu = !obj.showMenu">
+  <div class="y-drop-down y-drop-down--js">
+    <div class="y-drop-down__title" @click.stop="obj.showMenu = !obj.showMenu">
       <slot name="title"></slot>
     </div>
     <Transition name="drop-down">
-      <div v-if="obj.showMenu" ref="menuRef" class="y-dorp-down__menu">
+      <div v-if="obj.showMenu" ref="menuRef" class="y-drop-down__menu">
         <slot name="menu"></slot>
       </div>
     </Transition>
   </div>
 </template>
 <style lang="scss">
-.y-dorp-down {
+.y-drop-down {
   position: relative;
 }
-.y-dorp-down__menu {
+.y-drop-down__menu {
   position: absolute;
   right: 0;
+  top: 28px;
   background: $layout-background-gray;
   border-radius: 2px;
   box-shadow: 0px 0px 5px $layout-background-gray;

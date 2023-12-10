@@ -9,11 +9,12 @@ import YModal from '@/components/ui/Modal.vue';
 
 const screenBottomRef = ref();
 const state = reactive({
-  currentKeyBoard: 'standard' // '68' | 'standard'
+  currentKeyBoard: 'standard', // '68' | 'standard'
+  currentSystem: 'win' // 'mac' | 'win'
 });
 
 const configStore = useConfigStore();
-const { printContent, keyboardModalStatus, currentCode } = storeToRefs(configStore);
+const { printContent, keyboardModalStatus, currentCode, currentSystem } = storeToRefs(configStore);
 
 let timeout: any = null;
 
@@ -62,8 +63,8 @@ const changeKeyboard = (keyboard: string) => {
             <single-key
               v-for="item in v"
               :key="item.code"
-              :code="item.code"
-              :value="item.value"
+              :code="currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+              :value="currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
               :unit="item.unit"
               :keys-pressed="keysPressed"
             ></single-key>
@@ -83,8 +84,8 @@ const changeKeyboard = (keyboard: string) => {
             <single-key
               v-for="item in v"
               :key="item.code"
-              :code="item.code"
-              :value="item.value"
+              :code="currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+              :value="currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
               :unit="item.unit"
               :keys-pressed="keysPressed"
             ></single-key>

@@ -101,13 +101,13 @@ export const KEY_PERMUTATION_68: any = {
       { code: 'PageDown', unit: 1, value: 'PgDn' }
     ],
     [
-      { code: 'ControlLeft', unit: 125, value: 'Ctrl' },
-      { code: 'Win', unit: 125, value: 'Win' },
-      { code: 'AltLeft', unit: 125, value: 'Alt' },
+      { code: 'ControlLeft', unit: 125, value: 'Ctrl', macValue: '⌃' },
+      { code: 'Win', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltLeft' },
+      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaLeft' },
       { code: 'Space', unit: 7, value: 'Space' },
-      { code: 'AltRight', unit: 1, value: 'Alt' },
-      { code: 'Win', unit: 1, value: 'Win' },
-      { code: 'ControlRight', unit: 1, value: 'Ctrl' },
+      { code: 'AltRight', unit: 1, value: 'Alt', macValue: '⌥', macCode: 'MetaRight' },
+      { code: 'Win', unit: 1, value: 'Win', macValue: '⌘', macCode: 'AltRight' },
+      { code: 'ControlRight', unit: 1, value: 'Ctrl', macValue: '⌃' },
       { code: 'ArrowLeft', unit: 1, value: '←' },
       { code: 'ArrowDown', unit: 1, value: '↓' },
       { code: 'ArrowRight', unit: 1, value: '→' }
@@ -194,14 +194,14 @@ export const KEY_PERMUTATION_STANDARD: any = {
       { code: 'ShiftRight', unit: 3, value: 'Shift' }
     ],
     [
-      { code: 'ControlLeft', unit: 125, value: 'Ctrl' },
-      { code: 'MetaLeft', unit: 125, value: 'Win' },
-      { code: 'AltLeft', unit: 125, value: 'Alt' },
+      { code: 'ControlLeft', unit: 125, value: 'Ctrl', macValue: '⌃' },
+      { code: 'MetaLeft', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltLeft' },
+      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaLeft' },
       { code: 'Space', unit: 7, value: 'Space' },
-      { code: 'AltRight', unit: 125, value: 'Alt' },
-      { code: 'MetaRight', unit: 125, value: 'Win' },
+      { code: 'AltRight', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaRight' },
+      { code: 'MetaRight', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltRight' },
       { code: 'ContextMenu', unit: 125, value: 'Menu' },
-      { code: 'ControlRight', unit: 125, value: 'Ctrl' }
+      { code: 'ControlRight', unit: 125, value: 'Ctrl', macValue: '⌃' }
     ]
   ],
   'sub-area': [

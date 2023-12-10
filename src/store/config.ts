@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 export const useConfigStore = defineStore('config', {
   state: () => ({
     currentFont: 'default' as string,
+    currentSystem: 'win' as string, // win, mac
     keyboardModalStatus: false as boolean,
     printContent: '' as string,
     currentCode: [] as any[]
@@ -10,6 +11,9 @@ export const useConfigStore = defineStore('config', {
   actions: {
     setCurrentFont(val: string) {
       this.currentFont = val;
+    },
+    setCurrentSystem(val: string) {
+      this.currentSystem = val;
     },
     setKeyboardModalStatus(val: boolean) {
       this.keyboardModalStatus = val;

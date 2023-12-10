@@ -463,7 +463,7 @@ const updatePassword = () => {
 
 <style lang="scss">
 .y-auth {
-  .y-dorp-down__menu {
+  .y-drop-down__menu {
     margin: 10px 0;
   }
 }
