@@ -10,11 +10,12 @@ import YModal from '@/components/ui/Modal.vue';
 const screenBottomRef = ref();
 const state = reactive({
   currentKeyBoard: 'standard', // '68' | 'standard'
-  currentSystem: 'win' // 'mac' | 'win'
+  currentSystem: 'win', // 'mac' | 'win'
+  keyboardModal: false
 });
 
 const configStore = useConfigStore();
-const { printContent, keyboardModalStatus, currentCode, currentSystem } = storeToRefs(configStore);
+const { printContent, currentCode, onlyShowMain } = storeToRefs(configStore);
 
 let timeout: any = null;
 
@@ -50,6 +51,25 @@ const changeKeyboard = (keyboard: string) => {
       >
         <div class="y-main__sub-screen-text" v-html="currentCode.join('')"></div>
       </div>
+      <Transition name="menu">
+        <div class="y-main__selection" v-show="!onlyShowMain">
+          <div
+            class="y-main__selection-item"
+            v-if="state.currentSystem === 'win'"
+            @click="state.currentSystem = 'mac'"
+          >
+            Windows
+          </div>
+          <div
+            class="y-main__selection-item"
+            v-if="state.currentSystem === 'mac'"
+            @click="state.currentSystem = 'win'"
+          >
+            Mac
+          </div>
+          <div class="y-main__selection-item" @click="state.keyboardModal = true">切换键盘</div>
+        </div>
+      </Transition>
     </div>
     <key-wrap
       v-if="state.currentKeyBoard === '68'"
@@ -63,8 +83,8 @@ const changeKeyboard = (keyboard: string) => {
             <single-key
               v-for="item in v"
               :key="item.code"
-              :code="currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
-              :value="currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
+              :code="state.currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+              :value="state.currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
               :unit="item.unit"
               :keys-pressed="keysPressed"
             ></single-key>
@@ -84,8 +104,8 @@ const changeKeyboard = (keyboard: string) => {
             <single-key
               v-for="item in v"
               :key="item.code"
-              :code="currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
-              :value="currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
+              :code="state.currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+              :value="state.currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
               :unit="item.unit"
               :keys-pressed="keysPressed"
             ></single-key>
@@ -96,9 +116,9 @@ const changeKeyboard = (keyboard: string) => {
   </div>
   <Teleport to="body">
     <y-modal
-      :show="keyboardModalStatus"
-      @close="configStore.setKeyboardModalStatus(false)"
-      @confirm="configStore.setKeyboardModalStatus(false)"
+      :show="state.keyboardModal"
+      @close="state.keyboardModal = false"
+      @confirm="state.keyboardModal = false"
     >
       <template #header>
         <h3>选择键盘</h3>
@@ -120,6 +140,26 @@ const changeKeyboard = (keyboard: string) => {
   margin: 20px auto;
   justify-content: center;
   align-items: flex-end;
+  position: relative;
+}
+.y-main__selection {
+  position: absolute;
+  right: 0;
+  width: 100px;
+}
+.y-main__selection-item {
+  padding: 4px 8px;
+  color: $gray-06;
+  margin-bottom: 4px;
+  cursor: pointer;
+  text-align: center;
+  transform: scale(0.9);
+  opacity: 0.6;
+  transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
+  &:hover {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .y-main__screen {
   width: 600px;

@@ -10,20 +10,18 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import YDropDown from '@/components/ui/DropDown.vue';
 
-const router = useRouter();
 const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
 const useConfig = useConfigStore();
 
 const { config } = storeToRefs(userStore);
-const { currentSystem, onlyShowMain } = storeToRefs(useConfig);
+const { onlyShowMain } = storeToRefs(useConfig);
 
 setTheme(getTheme());
 
 const obj = reactive({
   showChangeFontModal: false,
-  showChangeSystemModal: false,
   userName: '',
   password: '',
   userNameError: '',
@@ -75,10 +73,6 @@ const changeTheme = () => {
   const currentTheme = getTheme();
   currentTheme === 'light' ? setTheme('dark') : setTheme('light');
 };
-
-function changeSystem(system: string) {
-  useConfig.setCurrentSystem(system);
-}
 </script>
 
 <template>
@@ -103,11 +97,6 @@ function changeSystem(system: string) {
           <template #menu>
             <div class="y-auth__menu">
               <div
-                v-if="
-                  router.currentRoute.value.name === 'TimeLimit' ||
-                  router.currentRoute.value.name === 'WordsLimit' ||
-                  router.currentRoute.value.name === 'QuoteLimit'
-                "
                 class="y-menu__change y-menu__change-font"
                 @click="
                   () => {
@@ -117,19 +106,7 @@ function changeSystem(system: string) {
               >
                 切换字体
               </div>
-              <div
-                v-else-if="router.currentRoute.value.name === 'TypingKeyboard'"
-                class="y-menu__change y-menu__change-keyboard"
-                @click="
-                  () => {
-                    useConfig.setKeyboardModalStatus(true);
-                  }
-                "
-              >
-                切换键盘
-              </div>
               <div class="y-menu__change" @click="changeTheme">切换主题</div>
-              <div class="y-menu__change" @click="obj.showChangeSystemModal = true">切换系统</div>
             </div>
           </template>
         </y-drop-down>
@@ -143,7 +120,11 @@ function changeSystem(system: string) {
   <router-view></router-view>
 
   <Teleport to="body">
-    <y-modal :show="obj.showChangeFontModal" @close="obj.showChangeFontModal = false">
+    <y-modal
+      :show="obj.showChangeFontModal"
+      @close="obj.showChangeFontModal = false"
+      @confirm="obj.showChangeFontModal = false"
+    >
       <template #header>
         <h3>选择字体</h3>
       </template>
@@ -164,29 +145,6 @@ function changeSystem(system: string) {
             </li>
             <li @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi">
               AlibabaPuHuiTi 字体 测试 TEST test
-            </li>
-          </ul>
-        </div>
-      </template>
-    </y-modal>
-  </Teleport>
-  <Teleport to="body">
-    <y-modal
-      :show="obj.showChangeSystemModal"
-      @close="obj.showChangeSystemModal = false"
-      @confirm="obj.showChangeSystemModal = false"
-    >
-      <template #header>
-        <h3>选择系统</h3>
-      </template>
-      <template #body>
-        <div class="y-change__container gray-08">
-          <ul>
-            <li @click="changeSystem('win')" :class="currentSystem === 'win' ? 'active' : ''">
-              Windows
-            </li>
-            <li @click="changeSystem('mac')" :class="currentSystem === 'mac' ? 'active' : ''">
-              Mac
             </li>
           </ul>
         </div>
