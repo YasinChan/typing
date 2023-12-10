@@ -90,8 +90,9 @@ function changeSystem(system: string) {
 
     <Transition name="menu">
       <div class="y-menu" v-show="!onlyShowMain">
-        <router-link to="/" class="y-menu__item y-menu__item--active">计时模式</router-link>
-        <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
+        <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
+        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>
+        <router-link to="/quote" class="y-menu__item">句子模式</router-link>
         <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
           >键盘测试</router-link
         >
@@ -103,8 +104,9 @@ function changeSystem(system: string) {
             <div class="y-auth__menu">
               <div
                 v-if="
-                  router.currentRoute.value.name === 'TimeKeep' ||
-                  router.currentRoute.value.name === 'TimeLimit'
+                  router.currentRoute.value.name === 'TimeLimit' ||
+                  router.currentRoute.value.name === 'WordsLimit' ||
+                  router.currentRoute.value.name === 'QuoteLimit'
                 "
                 class="y-menu__change y-menu__change-font"
                 @click="
@@ -116,7 +118,7 @@ function changeSystem(system: string) {
                 切换字体
               </div>
               <div
-                v-else-if="router.currentRoute.value.name === 'Keyboard'"
+                v-else-if="router.currentRoute.value.name === 'TypingKeyboard'"
                 class="y-menu__change y-menu__change-keyboard"
                 @click="
                   () => {
@@ -260,7 +262,6 @@ header {
   }
   &.router-link-active {
     color: $main-color;
-    font-weight: bold;
     position: relative;
     &::after {
       width: 30px;

@@ -8,6 +8,6 @@ const { currentFont } = storeToRefs(useConfig);
 </script>
 <template>
   <main :class="'y-font--' + currentFont">
-    <y-pinyin words="计时模式"></y-pinyin>
+    <y-pinyin words="句子模式"></y-pinyin>
   </main>
 </template>
