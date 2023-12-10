@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { setTheme, getTheme } from '@/common/theme';
 import YModal from '@/components/ui/Modal.vue';
-import { reactive, provide } from 'vue';
+import { reactive, provide, onMounted } from 'vue';
 import Auth from '@/components/Auth.vue';
 import Message from '@/components/ui/Message.vue';
 import { useUserStore } from '@/store/user';
@@ -11,6 +11,13 @@ import { useRouter } from 'vue-router';
 import YDropDown from '@/components/ui/DropDown.vue';
 
 const router = useRouter();
+const userStore = useUserStore();
+userStore.setProfile();
+userStore.setConfig();
+const useConfig = useConfigStore();
+
+const { config } = storeToRefs(userStore);
+const { currentSystem, onlyShowMain } = storeToRefs(useConfig);
 
 setTheme(getTheme());
 
@@ -31,6 +38,25 @@ provide('message', (obj: any) => {
   showMessage(obj);
 });
 
+onMounted(() => {
+  document.addEventListener('keydown', handleKeyDown);
+  document.addEventListener('scroll', handleScroll);
+  document.addEventListener('mouseover', handleMouseMove);
+});
+
+function handleKeyDown() {
+  console.log('----------', 'handleKeyDown', 1, '----------cyy log');
+  useConfig.setOnlyShowMain(true);
+}
+function handleScroll() {
+  console.log('----------', 'handleScroll', 3, '----------cyy log');
+  useConfig.setOnlyShowMain(false);
+}
+function handleMouseMove() {
+  console.log('----------', 'handleMouseMove', 4, '----------cyy log');
+  useConfig.setOnlyShowMain(false);
+}
+
 const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
   clearTimeout(obj.timeout);
   // 在这个函数中，设置Message组件的message和show属性，
@@ -45,14 +71,6 @@ const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
   }, settimeout);
 };
 
-const userStore = useUserStore();
-userStore.setProfile();
-userStore.setConfig();
-const useConfig = useConfigStore();
-
-const { config } = storeToRefs(userStore);
-const { currentSystem } = storeToRefs(useConfig);
-
 const changeTheme = () => {
   const currentTheme = getTheme();
   currentTheme === 'light' ? setTheme('dark') : setTheme('light');
@@ -66,54 +84,58 @@ function changeSystem(system: string) {
 <template>
   <div v-if="'showRemind' in config && config.showRemind" class="y-remind">{{ config.remind }}</div>
   <header>
-    <div class="y-info">
+    <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
       <a href="/" class="y-info__title main-color">Typing</a>
     </div>
 
-    <div class="y-menu">
-      <router-link to="/" class="y-menu__item y-menu__item--active">计时模式</router-link>
-      <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
-      <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test">键盘测试</router-link>
-      <y-drop-down>
-        <template #title>
-          <div class="y-menu__item">设置</div>
-        </template>
-        <template #menu>
-          <div class="y-auth__menu">
-            <div
-              v-if="
-                router.currentRoute.value.name === 'TimeKeep' ||
-                router.currentRoute.value.name === 'TimeLimit'
-              "
-              class="y-menu__change y-menu__change-font"
-              @click="
-                () => {
-                  obj.showChangeFontModal = true;
-                }
-              "
-            >
-              切换字体
+    <Transition name="menu">
+      <div class="y-menu" v-show="!onlyShowMain">
+        <router-link to="/" class="y-menu__item y-menu__item--active">计时模式</router-link>
+        <router-link to="time-limit" class="y-menu__item">限时模式</router-link>
+        <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
+          >键盘测试</router-link
+        >
+        <y-drop-down>
+          <template #title>
+            <div class="y-menu__item">设置</div>
+          </template>
+          <template #menu>
+            <div class="y-auth__menu">
+              <div
+                v-if="
+                  router.currentRoute.value.name === 'TimeKeep' ||
+                  router.currentRoute.value.name === 'TimeLimit'
+                "
+                class="y-menu__change y-menu__change-font"
+                @click="
+                  () => {
+                    obj.showChangeFontModal = true;
+                  }
+                "
+              >
+                切换字体
+              </div>
+              <div
+                v-else-if="router.currentRoute.value.name === 'Keyboard'"
+                class="y-menu__change y-menu__change-keyboard"
+                @click="
+                  () => {
+                    useConfig.setKeyboardModalStatus(true);
+                  }
+                "
+              >
+                切换键盘
+              </div>
+              <div class="y-menu__change" @click="changeTheme">切换主题</div>
+              <div class="y-menu__change" @click="obj.showChangeSystemModal = true">切换系统</div>
             </div>
-            <div
-              v-else-if="router.currentRoute.value.name === 'Keyboard'"
-              class="y-menu__change y-menu__change-keyboard"
-              @click="
-                () => {
-                  useConfig.setKeyboardModalStatus(true);
-                }
-              "
-            >
-              切换键盘
-            </div>
-            <div class="y-menu__change" @click="changeTheme">切换主题</div>
-            <div class="y-menu__change" @click="obj.showChangeSystemModal = true">切换系统</div>
-          </div>
-        </template>
-      </y-drop-down>
-      <div class="y-menu__item y-menu__change">
-        <auth></auth>
+          </template>
+        </y-drop-down>
+        <div class="y-menu__item y-menu__change">
+          <auth></auth>
+        </div>
       </div>
-    </div>
+    </Transition>
   </header>
 
   <router-view></router-view>
@@ -191,10 +213,15 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 38px;
 }
 .y-info {
   display: flex;
   align-items: center;
+  transition: opacity 0.3s ease;
+}
+.y-info__disabled {
+  opacity: 0.3;
 }
 .y-info__logo {
   width: 30px;
@@ -268,5 +295,15 @@ main {
   li {
     cursor: pointer;
   }
+}
+
+.menu-enter-active,
+.menu-leave-active {
+  transition: all 0.3s ease;
+}
+
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
 }
 </style>
