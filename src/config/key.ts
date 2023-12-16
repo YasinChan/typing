@@ -31,6 +31,16 @@ export enum KEY_PERMUTATION_KEY {
   NUMBER_AREA = 'number-area'
 }
 
+/**
+ * @description 键盘每个键帽的映射表。
+ * code: 键盘键帽的键码。
+ * unit: 键盘键帽的宽度。
+ * value: 键盘键帽的值。
+ * type: 键盘键帽的类型，toggle 表示切换键。
+ * macValue: 键盘键帽的对应 Mac 上的值。
+ * macCode: 键盘键帽的对应 Mac 上的键码。
+ * area: 键盘键帽的子区域，比如 MBP 上的上下左右是两行并一行的。
+ */
 export type KEY_PERMUTATION_VALUE = {
   code?: string;
   unit?: number;
@@ -45,13 +55,57 @@ export type KEY_PERMUTATION_TYPE = Partial<
   Record<KEY_PERMUTATION_KEY, Array<Array<KEY_PERMUTATION_VALUE>>>
 >;
 
-/**
- * @description 键盘每个键帽的映射表。
- * code: 键盘键帽的键码。
- * unit: 键盘键帽的宽度。
- * value: 键盘键帽的值。
- * type: 键盘键帽的类型，toggle 表示切换键。
- */
+export enum CAN_PRINT_KEY {
+  KeyQ = 'Q',
+  KeyW = 'W',
+  KeyE = 'E',
+  KeyR = 'R',
+  KeyT = 'T',
+  KeyY = 'Y',
+  KeyU = 'U',
+  KeyI = 'I',
+  KeyO = 'O',
+  KeyP = 'P',
+  KeyA = 'A',
+  KeyS = 'S',
+  KeyD = 'D',
+  KeyF = 'F',
+  KeyG = 'G',
+  KeyH = 'H',
+  KeyJ = 'J',
+  KeyK = 'K',
+  KeyL = 'L',
+  KeyZ = 'Z',
+  KeyX = 'X',
+  KeyC = 'C',
+  KeyV = 'V',
+  KeyB = 'B',
+  KeyN = 'N',
+  KeyM = 'M',
+  Digit1 = '1',
+  Digit2 = '2',
+  Digit3 = '3',
+  Digit4 = '4',
+  Digit5 = '5',
+  Digit6 = '6',
+  Digit7 = '7',
+  Digit8 = '8',
+  Digit9 = '9',
+  Digit0 = '0',
+  Minus = '-',
+  Equal = '=',
+  Backquote = '`',
+  BracketLeft = '[',
+  BracketRight = ']',
+  Backslash = '\\',
+  Semicolon = ';',
+  Quote = "'",
+  Comma = ',',
+  Period = '.',
+  Slash = '/',
+  Space = ' '
+}
+
 export const KEY_PERMUTATION_68: KEY_PERMUTATION_TYPE = {
   [KEY_PERMUTATION_KEY.MAIN_AREA]: [
     [
@@ -382,55 +436,4 @@ export const KEY_PERMUTATION_MBP: KEY_PERMUTATION_TYPE = {
       }
     ]
   ]
-};
-
-export const CAN_PRINT_KEY: any = {
-  KeyQ: 'q',
-  KeyW: 'w',
-  KeyE: 'e',
-  KeyR: 'r',
-  KeyT: 't',
-  KeyY: 'y',
-  KeyU: 'u',
-  KeyI: 'i',
-  KeyO: 'o',
-  KeyP: 'p',
-  KeyA: 'a',
-  KeyS: 's',
-  KeyD: 'd',
-  KeyF: 'f',
-  KeyG: 'g',
-  KeyH: 'h',
-  KeyJ: 'j',
-  KeyK: 'k',
-  KeyL: 'l',
-  KeyZ: 'z',
-  KeyX: 'x',
-  KeyC: 'c',
-  KeyV: 'v',
-  KeyB: 'b',
-  KeyN: 'n',
-  KeyM: 'm',
-  Digit1: '1',
-  Digit2: '2',
-  Digit3: '3',
-  Digit4: '4',
-  Digit5: '5',
-  Digit6: '6',
-  Digit7: '7',
-  Digit8: '8',
-  Digit9: '9',
-  Digit0: '0',
-  Minus: '-',
-  Equal: '=',
-  Backquote: '`',
-  BracketLeft: '[',
-  BracketRight: ']',
-  Backslash: '\\',
-  Semicolon: ';',
-  Quote: "'",
-  Comma: ',',
-  Period: '.',
-  Slash: '/',
-  Space: ' '
 };
