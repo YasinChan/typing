@@ -38,6 +38,7 @@ export type KEY_PERMUTATION_VALUE = {
   type?: string;
   macValue?: string;
   macCode?: string;
+  area?: Array<Array<KEY_PERMUTATION_VALUE>>;
 };
 
 export type KEY_PERMUTATION_TYPE = Partial<
@@ -121,11 +122,11 @@ export const KEY_PERMUTATION_68: KEY_PERMUTATION_TYPE = {
     ],
     [
       { code: 'ControlLeft', unit: 125, value: 'Ctrl', macValue: '⌃' },
-      { code: 'Win', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltLeft' },
-      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaLeft' },
+      { code: 'Win', unit: 125, value: 'Win', macValue: '⌥', macCode: 'AltLeft' },
+      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌘', macCode: 'MetaLeft' },
       { code: 'Space', unit: 7, value: 'Space' },
-      { code: 'AltRight', unit: 1, value: 'Alt', macValue: '⌥', macCode: 'MetaRight' },
-      { code: 'Win', unit: 1, value: 'Win', macValue: '⌘', macCode: 'AltRight' },
+      { code: 'AltRight', unit: 1, value: 'Alt', macValue: '⌘', macCode: 'MetaRight' },
+      { code: 'Win', unit: 1, value: 'Win', macValue: '⌥', macCode: 'AltRight' },
       { code: 'ControlRight', unit: 1, value: 'Ctrl', macValue: '⌃' },
       { code: 'ArrowLeft', unit: 1, value: '←' },
       { code: 'ArrowDown', unit: 1, value: '↓' },
@@ -214,11 +215,11 @@ export const KEY_PERMUTATION_STANDARD: KEY_PERMUTATION_TYPE = {
     ],
     [
       { code: 'ControlLeft', unit: 125, value: 'Ctrl', macValue: '⌃' },
-      { code: 'MetaLeft', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltLeft' },
-      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaLeft' },
+      { code: 'MetaLeft', unit: 125, value: 'Win', macValue: '⌥', macCode: 'AltLeft' },
+      { code: 'AltLeft', unit: 125, value: 'Alt', macValue: '⌘', macCode: 'MetaLeft' },
       { code: 'Space', unit: 7, value: 'Space' },
-      { code: 'AltRight', unit: 125, value: 'Alt', macValue: '⌥', macCode: 'MetaRight' },
-      { code: 'MetaRight', unit: 125, value: 'Win', macValue: '⌘', macCode: 'AltRight' },
+      { code: 'AltRight', unit: 125, value: 'Alt', macValue: '⌘', macCode: 'MetaRight' },
+      { code: 'MetaRight', unit: 125, value: 'Win', macValue: '⌥', macCode: 'AltRight' },
       { code: 'ContextMenu', unit: 125, value: 'Menu' },
       { code: 'ControlRight', unit: 125, value: 'Ctrl', macValue: '⌃' }
     ]
@@ -278,6 +279,107 @@ export const KEY_PERMUTATION_STANDARD: KEY_PERMUTATION_TYPE = {
       { code: 'NumpadDecimal', unit: 1, value: '. ' },
       { code: 'NumpadEqual', unit: 1, value: '= ' },
       {}
+    ]
+  ]
+};
+
+export const KEY_PERMUTATION_MBP: KEY_PERMUTATION_TYPE = {
+  [KEY_PERMUTATION_KEY.MAIN_AREA]: [
+    [
+      { code: 'Escape', unit: 1, value: 'Esc' },
+      { code: 'F1', unit: 1, value: 'F1' },
+      { code: 'F2', unit: 1, value: 'F2' },
+      { code: 'F3', unit: 1, value: 'F3' },
+      { code: 'F4', unit: 1, value: 'F4' },
+      { code: 'F5', unit: 1, value: 'F5' },
+      { code: 'F6', unit: 1, value: 'F6' },
+      { code: 'F7', unit: 1, value: 'F7' },
+      { code: 'F8', unit: 1, value: 'F8' },
+      { code: 'F9', unit: 1, value: 'F9' },
+      { code: 'F10', unit: 1, value: 'F10' },
+      { code: 'F11', unit: 1, value: 'F11' },
+      { code: 'F12', unit: 1, value: 'F12' }
+    ],
+    [
+      { code: 'Backquote', unit: 1, value: '`' },
+      { code: 'Digit1', unit: 1, value: '1' },
+      { code: 'Digit2', unit: 1, value: '2' },
+      { code: 'Digit3', unit: 1, value: '3' },
+      { code: 'Digit4', unit: 1, value: '4' },
+      { code: 'Digit5', unit: 1, value: '5' },
+      { code: 'Digit6', unit: 1, value: '6' },
+      { code: 'Digit7', unit: 1, value: '7' },
+      { code: 'Digit8', unit: 1, value: '8' },
+      { code: 'Digit9', unit: 1, value: '9' },
+      { code: 'Digit0', unit: 1, value: '0' },
+      { code: 'Minus', unit: 1, value: '-' },
+      { code: 'Equal', unit: 1, value: '=' },
+      { code: 'Backspace', unit: 2, value: 'Backspace' }
+    ],
+    [
+      { code: 'Tab', unit: 15, value: 'Tab' },
+      { code: 'KeyQ', unit: 1, value: 'q' },
+      { code: 'KeyW', unit: 1, value: 'w' },
+      { code: 'KeyE', unit: 1, value: 'e' },
+      { code: 'KeyR', unit: 1, value: 'r' },
+      { code: 'KeyT', unit: 1, value: 't' },
+      { code: 'KeyY', unit: 1, value: 'y' },
+      { code: 'KeyU', unit: 1, value: 'u' },
+      { code: 'KeyI', unit: 1, value: 'i' },
+      { code: 'KeyO', unit: 1, value: 'o' },
+      { code: 'KeyP', unit: 1, value: 'p' },
+      { code: 'BracketLeft', unit: 1, value: '[' },
+      { code: 'BracketRight', unit: 1, value: ']' },
+      { code: 'Backslash', unit: 15, value: '\\' }
+    ],
+    [
+      { code: 'CapsLock', unit: 175, value: 'CapsLock', type: 'toggle' },
+      { code: 'KeyA', unit: 1, value: 'a' },
+      { code: 'KeyS', unit: 1, value: 's' },
+      { code: 'KeyD', unit: 1, value: 'd' },
+      { code: 'KeyF', unit: 1, value: 'f' },
+      { code: 'KeyG', unit: 1, value: 'g' },
+      { code: 'KeyH', unit: 1, value: 'h' },
+      { code: 'KeyJ', unit: 1, value: 'j' },
+      { code: 'KeyK', unit: 1, value: 'k' },
+      { code: 'KeyL', unit: 1, value: 'l' },
+      { code: 'Semicolon', unit: 1, value: ';' },
+      { code: 'Quote', unit: 1, value: "'" },
+      { code: 'Enter', unit: 25, value: 'Enter' }
+    ],
+    [
+      { code: 'ShiftLeft', unit: 225, value: 'Shift' },
+      { code: 'KeyZ', unit: 1, value: 'z' },
+      { code: 'KeyX', unit: 1, value: 'x' },
+      { code: 'KeyC', unit: 1, value: 'c' },
+      { code: 'KeyV', unit: 1, value: 'v' },
+      { code: 'KeyB', unit: 1, value: 'b' },
+      { code: 'KeyN', unit: 1, value: 'n' },
+      { code: 'KeyM', unit: 1, value: 'm' },
+      { code: 'Comma', unit: 1, value: ',' },
+      { code: 'Period', unit: 1, value: '.' },
+      { code: 'Slash', unit: 1, value: '/' },
+      { code: 'ShiftRight', unit: 3, value: 'Shift' }
+    ],
+    [
+      { code: 'Fn', unit: 1, value: 'Fn' },
+      { code: 'ControlLeft', unit: 1, value: 'Ctrl', macValue: '⌃' },
+      { code: 'MetaLeft', unit: 1, value: 'Win', macValue: '⌘', macCode: 'AltLeft' },
+      { code: 'AltLeft', unit: 1, value: 'Alt', macValue: '⌥', macCode: 'MetaLeft' },
+      { code: 'Space', unit: 7, value: 'Space' },
+      { code: 'MetaRight', unit: 125, value: 'Win', macValue: '⌘', macCode: 'MetaRight' },
+      { code: 'AltRight', unit: 1, value: 'Alt', macValue: '⌥', macCode: 'AltRight' },
+      {
+        type: 'inner',
+        area: [
+          [{}, { code: 'ArrowUp', unit: 1, value: '↑' }, {}],
+          [
+            { code: 'ArrowLeft', unit: 1, value: '←' },
+            { code: 'ArrowDown', unit: 1, value: '↓' },
+            { code: 'ArrowRight', unit: 1, value: '→' }
+          ]
+        ]
+      }
     ]
   ]
 };

@@ -1,48 +1,34 @@
 <script setup lang="ts">
 import { SUB_VALUE } from '@/config/key';
 import { reactive, watch, computed } from 'vue';
+import SingleKey from '@/components/key/SingleKey.vue';
 
-const props = defineProps({
-  /**
-   * 键帽的宽度
-   * 1、125、15、225、25
-   */
-  unit: {
-    type: Number,
-    default: 1
-  },
-  /**
-   * 键帽的背景颜色
-   */
-  backgroundColor: {
-    type: String,
-    default: '#4F5767' // //#4F5767 #F4F4F5
-  },
-  /**
-   * 键帽上的字体颜色
-   */
-  color: {
-    type: String,
-    default: '#fff'
-  },
-  /**
-   * 键帽上的主要字符
-   */
-  value: {
-    type: String,
-    default: ''
-  },
-  code: {
-    type: String,
-    default: ''
-  },
-  /**
-   * 当前按下的键盘的 code
-   */
-  keysPressed: {
-    type: Object,
-    default: () => ({})
-  }
+import type { KEY_PERMUTATION_VALUE } from '@/config/key';
+
+type Props = {
+  unit: number;
+  backgroundColor: string;
+  color: string;
+  value: string;
+  code: string;
+  keysPressed: any;
+  heightType: string;
+  type: string;
+  area: Array<Array<KEY_PERMUTATION_VALUE>> | null;
+  currentSystem: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  unit: 1,
+  backgroundColor: '#4F5767',
+  color: '#fff',
+  value: '',
+  code: '',
+  keysPressed: {},
+  heightType: 'normal',
+  type: 'normal',
+  area: null,
+  currentSystem: 'win'
 });
 
 const state = reactive({
@@ -73,7 +59,21 @@ const subValue = computed(() => {
 });
 </script>
 <template>
+  <div class="y-single-key__inner" v-if="type === 'inner' && area">
+    <div class="y-single-key__inner-item" v-for="(v, i) in area" :key="i">
+      <single-key
+        v-for="item in v"
+        :key="item.code"
+        height-type="half"
+        :code="currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+        :value="currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
+        :unit="item.unit"
+        :keys-pressed="keysPressed"
+      ></single-key>
+    </div>
+  </div>
   <div
+    v-else
     class="y-single-key"
     :class="[
       code ? '' : 'y-single-key--empty',
@@ -81,7 +81,8 @@ const subValue = computed(() => {
       subValue ? 'y-single-key__small-size' : '',
       value.length > 1 ? 'y-single-key__word' : 'y-single-key__letter',
       state.isActive ? 'y-single-key--active' : '',
-      isKeyPressed ? 'y-single-key--pressed' : ''
+      isKeyPressed ? 'y-single-key--pressed' : '',
+      heightType === 'half' ? 'y-single-key--half' : ''
     ]"
     :style="{
       backgroundColor,
@@ -117,6 +118,10 @@ $unit: 40px;
     background-color: rgba(255, 255, 255, 0);
     transition: background-color 0.1s;
   }
+}
+.y-single-key--half {
+  height: $unit / 2;
+  margin: 1px 0;
 }
 .y-single-key--active {
   &:after {
@@ -195,5 +200,15 @@ $unit: 40px;
 }
 .y-single-key--7 {
   width: $unit * 7;
+}
+
+.y-single-key__inner {
+  display: flex;
+  flex-direction: column;
+}
+.y-single-key__inner-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>

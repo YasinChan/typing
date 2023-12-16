@@ -39,23 +39,20 @@ provide('message', (obj: any) => {
 onMounted(() => {
   document.addEventListener('keydown', handleKeyDown);
   document.addEventListener('scroll', handleScroll);
-  document.addEventListener('mouseover', handleMouseMove);
+  document.addEventListener('mousemove', handleMouseMove);
 });
 
 function handleKeyDown() {
-  console.log('----------', 'handleKeyDown', 1, '----------cyy log');
   useConfig.setOnlyShowMain(true);
 }
 function handleScroll() {
-  console.log('----------', 'handleScroll', 3, '----------cyy log');
   useConfig.setOnlyShowMain(false);
 }
 function handleMouseMove() {
-  console.log('----------', 'handleMouseMove', 4, '----------cyy log');
   useConfig.setOnlyShowMain(false);
 }
 
-const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
+const showMessage = ({ message = '', type = 'success', timeout = 3000 }) => {
   clearTimeout(obj.timeout);
   // 在这个函数中，设置Message组件的message和show属性，
   // 以显示消息
@@ -66,7 +63,7 @@ const showMessage = ({ message = '', type = 'success', settimeout = 3000 }) => {
   obj.timeout = setTimeout(() => {
     // 过一段时间后，隐藏消息
     obj.visible = false;
-  }, settimeout);
+  }, timeout);
 };
 
 const changeTheme = () => {
@@ -246,7 +243,7 @@ main {
   letter-spacing: 1px;
 }
 .y-main {
-  margin: 100px;
+  margin: 100px auto;
   color: $gray-08;
 }
 

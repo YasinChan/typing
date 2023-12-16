@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import SingleKey from '@/components/key/SingleKey.vue';
 import KeyWrap from '@/components/key/KeyWrap.vue';
-import { KEY_PERMUTATION_68, KEY_PERMUTATION_STANDARD } from '@/config/key';
+import { KEY_PERMUTATION_68, KEY_PERMUTATION_STANDARD, KEY_PERMUTATION_MBP } from '@/config/key';
 import { storeToRefs } from 'pinia';
 import { useConfigStore } from '@/store/config';
 import { ref, watch, reactive } from 'vue';
 import YModal from '@/components/ui/Modal.vue';
 
+import type { KeyBoardType, SystemType } from '@/types';
+
 const screenBottomRef = ref();
-const state = reactive({
-  currentKeyBoard: 'standard', // '68' | 'standard'
+const state = reactive<{
+  currentKeyBoard: KeyBoardType;
+  currentSystem: SystemType;
+  keyboardModal: boolean;
+}>({
+  currentKeyBoard: 'standard', // '68' | 'standard' | 'mbp'
   currentSystem: 'win', // 'mac' | 'win'
   keyboardModal: false
 });
@@ -34,7 +40,10 @@ watch(
     }
   }
 );
-const changeKeyboard = (keyboard: string) => {
+const changeKeyboard = (keyboard: KeyBoardType) => {
+  if (keyboard === 'mbp') {
+    state.currentSystem = 'mac';
+  }
   state.currentKeyBoard = keyboard;
 };
 </script>
@@ -113,6 +122,30 @@ const changeKeyboard = (keyboard: string) => {
         </div>
       </template>
     </key-wrap>
+    <key-wrap
+      v-if="state.currentKeyBoard === 'mbp'"
+      title="MBP 配列键盘"
+      className="y-key-wrap__mbp"
+      v-slot="{ keysPressed }"
+    >
+      <template v-for="(value, key) in KEY_PERMUTATION_MBP" :key="key">
+        <div class="y-keyboard__wrap" :class="['y-keyboard__' + key]">
+          <div class="y-keyboard__line" v-for="(v, index) in value" :key="index + 'line'">
+            <single-key
+              v-for="item in v"
+              :key="item.code"
+              :type="item.type"
+              :area="item.area"
+              :current-system="state.currentSystem"
+              :code="state.currentSystem === 'mac' && item.macCode ? item.macCode : item.code"
+              :value="state.currentSystem === 'mac' && item.macValue ? item.macValue : item.value"
+              :unit="item.unit"
+              :keys-pressed="keysPressed"
+            ></single-key>
+          </div>
+        </div>
+      </template>
+    </key-wrap>
   </div>
   <Teleport to="body">
     <y-modal
@@ -128,6 +161,7 @@ const changeKeyboard = (keyboard: string) => {
           <ul>
             <li @click="changeKeyboard('standard')">标准配列键盘</li>
             <li @click="changeKeyboard('68')">68 配列键盘</li>
+            <li @click="changeKeyboard('mbp')">MBP 配列键盘</li>
           </ul>
         </div>
       </template>
@@ -162,6 +196,7 @@ const changeKeyboard = (keyboard: string) => {
   }
 }
 .y-main__screen {
+  max-width: 45vw;
   width: 600px;
   height: 50px;
   overflow: auto;
@@ -242,6 +277,12 @@ const changeKeyboard = (keyboard: string) => {
   }
   .y-keyboard__number-area {
     width: 180px;
+  }
+}
+.y-key-wrap__mbp {
+  width: 700px;
+  .y-keyboard__main-area {
+    width: 100%;
   }
 }
 .y-keyboard__wrap {
