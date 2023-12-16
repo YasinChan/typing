@@ -18,7 +18,7 @@ type Props = {
   currentSystem: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Partial<Props>>(), {
   unit: 1,
   backgroundColor: '#4F5767',
   color: '#fff',

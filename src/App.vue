@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { setTheme, getTheme } from '@/common/theme';
-import YModal from '@/components/ui/Modal.vue';
 import { reactive, provide, onMounted } from 'vue';
-import Auth from '@/components/Auth.vue';
+
+// components
 import Message from '@/components/ui/Message.vue';
+import Auth from '@/components/Auth.vue';
+import YModal from '@/components/ui/Modal.vue';
+import ListItem from '@/components/ui/ListItem.vue';
+import YDropDown from '@/components/ui/DropDown.vue';
+
+// utils
+import { setTheme, getTheme } from '@/common/theme';
+
+// stores
 import { useUserStore } from '@/store/user';
 import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
-import YDropDown from '@/components/ui/DropDown.vue';
 
 const userStore = useUserStore();
 userStore.setProfile();
@@ -127,23 +133,22 @@ const changeTheme = () => {
       </template>
       <template #body>
         <div class="y-change__container gray-08">
-          <ul>
-            <li @click="useConfig.setCurrentFont('default')" class="y-font--default">
-              默认 字体 测试 TEST test
-            </li>
-            <li @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix">
-              zpix 字体 测试 TEST test
-            </li>
-            <li
-              @click="useConfig.setCurrentFont('zhankugaoduanhei')"
-              class="y-font--zhankugaoduanhei"
-            >
-              zhankugaoduanhei 字体 测试 TEST test
-            </li>
-            <li @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi">
-              AlibabaPuHuiTi 字体 测试 TEST test
-            </li>
-          </ul>
+          <ListItem @click="useConfig.setCurrentFont('default')" class="y-font--default"
+            >默认 字体 测试 TEST test</ListItem
+          >
+          <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix"
+            >zpix 字体 测试 TEST test</ListItem
+          >
+          <ListItem
+            @click="useConfig.setCurrentFont('zhankugaoduanhei')"
+            class="y-font--zhankugaoduanhei"
+            >zhankugaoduanhei 字体 测试 TEST test</ListItem
+          >
+          <ListItem
+            @click="useConfig.setCurrentFont('AlibabaPuHuiTi')"
+            class="y-font--AlibabaPuHuiTi"
+            >AlibabaPuHuiTi 字体 测试 TEST test</ListItem
+          >
         </div>
       </template>
     </y-modal>
@@ -236,7 +241,7 @@ header {
 
 main {
   margin: 100px;
-  font-family: $font-en;
+  //font-family: $font-en;
   font-weight: 600;
   color: $gray-08;
   font-size: 18px;

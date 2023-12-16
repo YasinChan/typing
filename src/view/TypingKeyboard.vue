@@ -1,12 +1,18 @@
 <script setup lang="ts">
+import { ref, watch, reactive } from 'vue';
+import { KEY_PERMUTATION_68, KEY_PERMUTATION_STANDARD, KEY_PERMUTATION_MBP } from '@/config/key';
+
+// components
 import SingleKey from '@/components/key/SingleKey.vue';
 import KeyWrap from '@/components/key/KeyWrap.vue';
-import { KEY_PERMUTATION_68, KEY_PERMUTATION_STANDARD, KEY_PERMUTATION_MBP } from '@/config/key';
+import YModal from '@/components/ui/Modal.vue';
+import ListItem from '@/components/ui/ListItem.vue';
+
+// stores
 import { storeToRefs } from 'pinia';
 import { useConfigStore } from '@/store/config';
-import { ref, watch, reactive } from 'vue';
-import YModal from '@/components/ui/Modal.vue';
 
+// types
 import type { KeyBoardType, SystemType } from '@/types';
 
 const screenBottomRef = ref();
@@ -158,11 +164,9 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
       </template>
       <template #body>
         <div class="y-show-select__container gray-08">
-          <ul>
-            <li @click="changeKeyboard('standard')">标准配列键盘</li>
-            <li @click="changeKeyboard('68')">68 配列键盘</li>
-            <li @click="changeKeyboard('mbp')">MBP 配列键盘</li>
-          </ul>
+          <ListItem @click="changeKeyboard('standard')">标准配列键盘</ListItem>
+          <ListItem @click="changeKeyboard('68')">68 配列键盘</ListItem>
+          <ListItem @click="changeKeyboard('mbp')">MBP 配列键盘</ListItem>
         </div>
       </template>
     </y-modal>
