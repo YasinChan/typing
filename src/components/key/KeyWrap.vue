@@ -25,7 +25,6 @@ const state = reactive({
 const handleKeyDown = (e: KeyboardEvent) => {
   e.preventDefault();
   const code = e.code;
-
   const capsLockOn = e.getModifierState('CapsLock');
   if (capsLockOn && CAN_PRINT_KEY[code]) {
     configStore.setPrintContent(CAN_PRINT_KEY[code].toUpperCase() || '');
