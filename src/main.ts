@@ -1,5 +1,5 @@
 // 默认用 dark 主题
-import '@/assets/theme/theme-dark.css';
+import '@/assets/theme/theme-dark.scss';
 import './assets/main.scss';
 
 import { createApp } from 'vue';

@@ -2,8 +2,8 @@ import YStorage from '@/common/YStorage';
 import { DARK_THEME, DEFAULT_THEME, LIGHT_THEME, type ThemeType } from '@/config/theme';
 
 const theme: any = {
-  [DARK_THEME]: () => import('@/assets/theme/theme-dark.css'),
-  [LIGHT_THEME]: () => import('@/assets/theme/theme-light.css')
+  [DARK_THEME]: () => import('@/assets/theme/theme-dark.scss'),
+  [LIGHT_THEME]: () => import('@/assets/theme/theme-light.scss')
 };
 
 const cacheTheme: any = {};
