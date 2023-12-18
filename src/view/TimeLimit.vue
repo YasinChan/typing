@@ -15,29 +15,25 @@ const useConfig = useConfigStore();
 const { currentFont } = storeToRefs(useConfig);
 
 const state = reactive({
-  sentence: {} as any,
+  quote: {} as any,
   lastIndex: -1
 });
-state.sentence = getRandomNonRepeatingElement(Sentence);
+state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
 
 function refresh() {
-  state.sentence = getRandomNonRepeatingElement(Sentence);
+  state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
 }
 
-function getRandomNonRepeatingElement<T>(arr: T[]): T | null {
-  // 如果数组为空，返回 null 或者适当的值
+function getRandomNonRepeatingElement(arr: any[]) {
   if (arr.length === 0) {
     return null;
   }
-
-  // 如果数组中只有一个元素，直接返回该元素
   if (arr.length === 1) {
     return arr[0];
   }
 
   let randomIndex: number = state.lastIndex;
 
-  // 确保每次随机选择的索引与上次不同
   while (randomIndex === state.lastIndex) {
     randomIndex = Math.floor(Math.random() * arr.length);
   }
@@ -50,16 +46,16 @@ function getRandomNonRepeatingElement<T>(arr: T[]): T | null {
   <main :class="'y-font--' + currentFont">
     <div class="y-time-limit__refresh" @click="refresh">随机</div>
 
-    <WordInput :sentence="state.sentence?.content"></WordInput>
+    <WordInput :quote="state.quote?.content"></WordInput>
 
     <div class="y-time-limit__info">
       ——
       <span class="y-time-limit__info-title">
-        {{ state.sentence?.title }}
+        {{ state.quote?.title }}
       </span>
       -
       <span class="y-time-limit__info-author">
-        {{ state.sentence?.author }}
+        {{ state.quote?.author }}
       </span>
     </div>
   </main>

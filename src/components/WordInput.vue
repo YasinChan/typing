@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, nextTick, watch } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
+import { useScroll } from '@vueuse/core';
 
 type SentenceArrItem = {
   id: number;
@@ -9,16 +10,20 @@ type SentenceArrItem = {
   isWrong: boolean;
 };
 
-const whiteList = ['”']; // 白名单
+const LINE_HEIGHT = 70;
+const el = ref<HTMLElement | null>(null);
+const { x, y } = useScroll(el, { behavior: 'smooth' });
+const whiteList = ['”', '》', '}', ']', '’']; // 白名单
 const inputAreaRef = ref<HTMLElement | null>(null);
 const props = defineProps<{
-  sentence: string;
+  quote: string;
 }>();
 
 const state = reactive({
+  currentAreaHeight: LINE_HEIGHT,
   isComposing: false,
   inputText: '',
-  sentenceArr: [] as SentenceArrItem[]
+  quoteArr: [] as SentenceArrItem[]
 });
 
 onMounted(async () => {
@@ -28,14 +33,14 @@ onMounted(async () => {
 });
 
 watch(
-  () => props.sentence,
+  () => props.quote,
   (val) => {
     state.inputText = '';
     if (inputAreaRef.value) {
       inputAreaRef.value.innerHTML = '';
       inputAreaRef.value.focus();
     }
-    state.sentenceArr = val.split('').map((item, index) => {
+    state.quoteArr = val.split('').map((item, index) => {
       return {
         id: index,
         word: item,
@@ -53,7 +58,7 @@ watch(
   () => state.inputText,
   (newVal) => {
     const inputTextArr = newVal.split('');
-    state.sentenceArr.forEach((item, index) => {
+    state.quoteArr.forEach((item, index) => {
       item.isInput = false;
       item.isWrong = false;
       if (inputTextArr[index]) {
@@ -65,13 +70,19 @@ watch(
         }
       }
     });
-    console.log('----------', 'state.sentenceArr', state.sentenceArr, '----------cyy log');
   }
 );
 
 function handlerInput(text: string) {
-  console.log('----------', 'text', text, '----------cyy log');
   state.inputText = text;
+  const currentHeight = inputAreaRef.value?.offsetHeight;
+  console.log(currentHeight);
+  if (currentHeight && currentHeight > Math.max(state.currentAreaHeight, LINE_HEIGHT * 2)) {
+    y.value += LINE_HEIGHT;
+  } else if (currentHeight && currentHeight < Math.min(state.currentAreaHeight, LINE_HEIGHT * 2)) {
+    y.value -= LINE_HEIGHT;
+  }
+  state.currentAreaHeight = currentHeight || 70;
 }
 
 function pasteEvent(e: ClipboardEvent) {
@@ -105,10 +116,10 @@ function compositionEndEvent(e: CompositionEvent) {
 </script>
 
 <template>
-  <div class="y-word-input">
-    <div class="y-word-input__sentence">
+  <div class="y-word-input" ref="el">
+    <div class="y-word-input__quote">
       <span
-        v-for="item in state.sentenceArr"
+        v-for="item in state.quoteArr"
         :class="[item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
         :key="item.id"
         >{{ item.word }}</span
@@ -132,8 +143,10 @@ function compositionEndEvent(e: CompositionEvent) {
 .y-word-input {
   position: relative;
   user-select: none;
+  height: 280px;
+  overflow: hidden;
 }
-.y-word-input__sentence {
+.y-word-input__quote {
   line-height: 70px;
   user-select: none;
   color: $gray-04;

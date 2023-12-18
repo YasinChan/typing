@@ -120,7 +120,7 @@ $unit: 40px;
   }
 }
 .y-single-key--half {
-  height: $unit / 2;
+  height: calc($unit / 2);
   margin: 1px 0;
 }
 .y-single-key--active {
