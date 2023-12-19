@@ -90,6 +90,7 @@ const changeTheme = () => {
         <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
         <router-link to="/words" class="y-menu__item">词/成语模式</router-link>
         <router-link to="/quote" class="y-menu__item">句子模式</router-link>
+        <router-link to="/custom" class="y-menu__item">自定义</router-link>
         <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
           >键盘测试</router-link
         >

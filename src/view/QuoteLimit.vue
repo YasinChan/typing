@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
+// @ts-ignore
 import flatten from 'lodash/flatten';
 
 // components
@@ -10,7 +11,7 @@ import { storeToRefs } from 'pinia';
 import { useConfigStore } from '@/store/config';
 
 // files
-import Sentence from '@/files/Sentence.json';
+import Sentence from '@/files/Quote.json';
 
 const useConfig = useConfigStore();
 const { currentFont } = storeToRefs(useConfig);
@@ -72,4 +73,3 @@ function getRandomNonRepeatingElement(arr: any[]) {
   color: $gray-02;
 }
 </style>
-
