@@ -35,7 +35,7 @@ watch(
     if (val && state.selectTime) {
       state.countDown = state.selectTime;
       state.intervalId = setInterval(() => {
-        console.log(`剩余时间：${state.countDown} 秒`);
+        // console.log(`剩余时间：${state.countDown} 秒`);
 
         if (state.countDown) {
           state.countDown -= 1;
@@ -113,7 +113,7 @@ function countdownFunc(options: CountdownOptions): Countdown {
   };
 
   const countdownInterval = setInterval(() => {
-    console.log(`剩余时间：${remainingTime} 秒`);
+    // console.log(`剩余时间：${remainingTime} 秒`);
 
     remainingTime -= 1;
     if (remainingTime < 0) {
