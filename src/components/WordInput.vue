@@ -12,7 +12,7 @@ type SentenceArrItem = {
 
 type TypingRecordItemType = {
   cursorPosition?: number;
-  word?: number | string;
+  word?: string;
   isInput?: boolean;
   isComposition?: boolean;
   isWrong?: boolean;
@@ -41,7 +41,8 @@ const state = reactive({
   timeout: null as null | number,
   typingRecordRealTime: [] as TypingRecordItemType[], // 记录实时输入的字符
   typingRecord: {} as TypingRecordType, // 每 100ms 记录一次 typingRecordRealTime
-  currentInput: '', // 当前非 isComposing 状态输入的字符，每次这里开始记录，currentComposition 都会清空
+  currentInputArr: [] as string[], // 将每次 input 到 composition 切换之前的 currentInput 记录下来，为每次删除时可以从中获取。
+  currentInput: '' as string, // 当前非 isComposing 状态输入的字符，每次这里开始记录，currentComposition 都会清空
   currentComposition: '' // 当处于 isComposing 状态时输入的字符，每次这里开始记录，currentInput 都会清空
 });
 
@@ -50,6 +51,118 @@ onMounted(async () => {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.focus();
 });
+
+// watch(
+//   () => state.currentInput,
+//   (val) => {
+//     if (val) {
+//       console.log('currentInput', val);
+//       state.typingRecordRealTime.push({
+//         word: val,
+//         isInput: true
+//       });
+//     }
+//   }
+// );
+
+// watch(
+//   () => state.currentComposition,
+//   (val) => {
+//     if (state.typingRecordRealTime.length) {
+//       const position = getCursorPosition();
+//       const word = state.typingRecordRealTime[0].word;
+//       if (word && position && word.length > position) {
+//         // 此时表示光标左移过
+//       } else {
+//         state.typingRecordRealTime.push({
+//           word: state.currentComposition,
+//           isComposition: true
+//         });
+//       }
+//     } else {
+//       state.typingRecordRealTime = [
+//         {
+//           word: state.currentComposition,
+//           isComposition: true
+//         }
+//       ];
+//     }
+//     console.log('state.typingRecordRealTime', state.typingRecordRealTime);
+//   }
+// );
+
+watch(
+  () => {
+    return {
+      value: state.currentComposition,
+      isComposing: state.isComposing
+    };
+  },
+  (val, oldVal) => {
+    if (val.isComposing && val.isComposing !== oldVal.isComposing) {
+      // 从非 composition 切换到 composition
+      console.log('从非 composition 切换到 composition');
+      if (state.typingRecordRealTime.length) {
+        const position = getCursorPosition();
+        const word = state.typingRecordRealTime[0].word;
+        if (word && position && word.length > position) {
+          // 此时表示光标左移过
+          const part1 = word.substring(0, position);
+          const part2 = word.substring(position);
+          state.typingRecordRealTime = [
+            {
+              word: part1,
+              isInput: true
+            },
+            {
+              word: '',
+              isComposition: true
+            },
+            {
+              word: part2,
+              isInput: true
+            }
+          ];
+        } else {
+          state.typingRecordRealTime.push({
+            word: state.currentComposition,
+            isComposition: true
+          });
+        }
+      } else {
+        state.typingRecordRealTime = [
+          {
+            word: state.currentComposition,
+            isComposition: true
+          }
+        ];
+      }
+      console.log('state.typingRecordRealTime', state.typingRecordRealTime);
+      return;
+    }
+    if (val.isComposing && val.isComposing === oldVal.isComposing) {
+      // composition 状态
+      if (state.typingRecordRealTime.length && state.typingRecordRealTime[1]) {
+        state.typingRecordRealTime[1] = {
+          word: state.currentComposition,
+          isComposition: true
+        };
+      }
+      console.log('state.typingRecordRealTime', state.typingRecordRealTime);
+      return;
+    }
+    if (!val.isComposing && val.isComposing !== oldVal.isComposing) {
+      // 从 composition 切换到非 composition
+      console.log('从 composition 切换到非 composition');
+      return;
+    }
+    if (!val.isComposing && val.isComposing === oldVal.isComposing) {
+      // 非 composition 状态
+      console.log('非 composition 状态');
+      return;
+    }
+  }
+);
 
 watch(
   () => state.isTyping,
@@ -95,8 +208,14 @@ watch(
       setTimeout(() => {
         reset();
       });
+      return;
     }
-
+    state.typingRecordRealTime = [
+      {
+        word: newVal,
+        isInput: true
+      }
+    ];
     const inputTextArr = newVal.split('');
     state.quoteArr.forEach((item, index) => {
       item.isInput = false;
@@ -122,10 +241,62 @@ function reset() {
   state.typingRecordRealTime = [];
 }
 
-function beforeInputEvent(e: Event) {
-  state.isTyping = true;
+function beforeInputEvent(e: any) {
   console.log('beforeInputEvent', e);
-  console.log('2', state.isComposing);
+  state.isTyping = true;
+  if (e.inputType === 'insertCompositionText') {
+    // 处于 composition 状态
+    if (state.currentInput) {
+      // 将上一次的 currentInput 记录下来。
+      state.currentInputArr.push(state.currentInput);
+    }
+    state.currentInput = '';
+    if (state.currentComposition === e.data || !/\w+/.test(e.data)) {
+      // 这里是 composition 状态结束的条件，比如按了空格、回车。
+      state.isComposing = false;
+      state.currentComposition = '';
+      state.currentInput = e.data;
+      return;
+    }
+    state.currentComposition = e.data;
+    return;
+  }
+
+  if (e.inputType === 'deleteContentBackward') {
+    if (state.currentComposition) {
+      // 如果在 composition 状态下鼠标点了旁边，这时 composition 状态下的输入会被删除，此时只需要将 currentComposition 清空即可。
+      state.currentComposition = '';
+      return;
+    }
+    if (!state.currentInput && !state.currentInputArr.length) {
+      return;
+    }
+    if (!state.currentInput && state.currentInputArr.length) {
+      // @ts-ignore
+      state.currentInput = state.currentInputArr.pop();
+    }
+    state.currentInput = state.currentInput.slice(0, -1);
+    return;
+  }
+
+  if (e.inputType === 'insertText') {
+    state.currentInput += e.data;
+    return;
+  }
+  console.log('beforeInputEvent', e.data);
+}
+
+const selection = window.getSelection();
+function getCursorPosition() {
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const offset = range.startOffset;
+
+    // 直接返回光标所在的偏移量
+    return offset;
+  } else {
+    return null; // 没有光标位置
+  }
 }
 
 function focusInput() {
@@ -178,25 +349,25 @@ function keyDownEvent(e: KeyboardEvent) {
   ) {
     // shift + 左右方向键禁止
     e.preventDefault();
-    console.log('Shift + 左右方向键已被禁止');
+  }
+  if ((e.metaKey || e.ctrlKey) && e.code === KEY_CODE_ENUM['KEY_A']) {
+    // ctrl + a 禁止 或者 command + a 禁止
+    e.preventDefault();
   }
 }
 function inputEvent(e: Event) {
-  console.log('inputEvent');
   const input = e.target as HTMLElement;
   if (!state.isComposing) {
     handlerInput(input?.innerText);
   }
 }
 function compositionStartEvent() {
-  console.log('compositionStartEvent');
   state.isComposing = true;
 }
 function compositionUpdateEvent() {
   state.isComposing = true;
 }
 function compositionEndEvent(e: CompositionEvent) {
-  console.log('compositionEndEvent');
   state.isComposing = false;
   const input = e.target as HTMLElement;
   const text = input?.innerText;

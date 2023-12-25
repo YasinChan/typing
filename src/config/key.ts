@@ -76,7 +76,6 @@ export enum KEY_CODE_ENUM {
   PRINT_SCREEN = 'PrintScreen',
   INSERT = 'Insert',
   DELETE = 'Delete',
-  META = 'Meta',
   CONTEXT_MENU = 'ContextMenu',
   NUM_LOCK = 'NumLock',
   SCROLL_LOCK = 'ScrollLock',
