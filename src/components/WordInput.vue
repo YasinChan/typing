@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, nextTick, watch } from 'vue';
+import { ref, onMounted, reactive, nextTick, watch, computed } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
+import clonedeep from 'lodash/clonedeep';
 
 type SentenceArrItem = {
   id: number;
@@ -24,7 +25,8 @@ type TypingRecordType = {
 const LINE_HEIGHT = 70;
 const el = ref<HTMLElement | null>(null);
 const { x, y } = useScroll(el, { behavior: 'smooth' });
-const whiteList = ['”', '》', '}', ']', '’']; // 白名单
+const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单
+const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’'];
 const inputAreaRef = ref<HTMLElement | null>(null);
 const props = defineProps<{
   quote: string;
@@ -39,11 +41,10 @@ const state = reactive({
   quoteArr: [] as SentenceArrItem[],
   isTyping: false,
   timeout: null as null | number,
+  startTime: 0,
   typingRecordRealTime: [] as TypingRecordItemType[], // 记录实时输入的字符
   typingRecord: {} as TypingRecordType, // 每 100ms 记录一次 typingRecordRealTime
-  currentInputArr: [] as string[], // 将每次 input 到 composition 切换之前的 currentInput 记录下来，为每次删除时可以从中获取。
-  currentInput: '' as string, // 当前非 isComposing 状态输入的字符，每次这里开始记录，currentComposition 都会清空
-  currentComposition: '' // 当处于 isComposing 状态时输入的字符，每次这里开始记录，currentInput 都会清空
+  currentComposition: '' // 当处于 isComposing 状态时输入的字符
 });
 
 onMounted(async () => {
@@ -51,45 +52,6 @@ onMounted(async () => {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.focus();
 });
-
-// watch(
-//   () => state.currentInput,
-//   (val) => {
-//     if (val) {
-//       console.log('currentInput', val);
-//       state.typingRecordRealTime.push({
-//         word: val,
-//         isInput: true
-//       });
-//     }
-//   }
-// );
-
-// watch(
-//   () => state.currentComposition,
-//   (val) => {
-//     if (state.typingRecordRealTime.length) {
-//       const position = getCursorPosition();
-//       const word = state.typingRecordRealTime[0].word;
-//       if (word && position && word.length > position) {
-//         // 此时表示光标左移过
-//       } else {
-//         state.typingRecordRealTime.push({
-//           word: state.currentComposition,
-//           isComposition: true
-//         });
-//       }
-//     } else {
-//       state.typingRecordRealTime = [
-//         {
-//           word: state.currentComposition,
-//           isComposition: true
-//         }
-//       ];
-//     }
-//     console.log('state.typingRecordRealTime', state.typingRecordRealTime);
-//   }
-// );
 
 watch(
   () => {
@@ -101,7 +63,6 @@ watch(
   (val, oldVal) => {
     if (val.isComposing && val.isComposing !== oldVal.isComposing) {
       // 从非 composition 切换到 composition
-      console.log('从非 composition 切换到 composition');
       if (state.typingRecordRealTime.length) {
         const position = getCursorPosition();
         const word = state.typingRecordRealTime[0].word;
@@ -125,42 +86,53 @@ watch(
           ];
         } else {
           state.typingRecordRealTime.push({
-            word: state.currentComposition,
+            word: val.value,
             isComposition: true
           });
         }
       } else {
         state.typingRecordRealTime = [
           {
-            word: state.currentComposition,
+            word: val.value,
             isComposition: true
           }
         ];
       }
-      console.log('state.typingRecordRealTime', state.typingRecordRealTime);
       return;
     }
     if (val.isComposing && val.isComposing === oldVal.isComposing) {
       // composition 状态
       if (state.typingRecordRealTime.length && state.typingRecordRealTime[1]) {
         state.typingRecordRealTime[1] = {
-          word: state.currentComposition,
+          word: val.value,
           isComposition: true
         };
       }
-      console.log('state.typingRecordRealTime', state.typingRecordRealTime);
       return;
     }
     if (!val.isComposing && val.isComposing !== oldVal.isComposing) {
       // 从 composition 切换到非 composition
-      console.log('从 composition 切换到非 composition');
       return;
     }
     if (!val.isComposing && val.isComposing === oldVal.isComposing) {
       // 非 composition 状态
-      console.log('非 composition 状态');
       return;
     }
+  }
+);
+
+watch(
+  () => state.typingRecordRealTime,
+  (val) => {
+    if (!state.startTime) {
+      return;
+    }
+    const relativeTime = new Date().getTime() - state.startTime;
+    state.typingRecord[Math.floor(relativeTime / 100)] = state.typingRecordRealTime;
+    console.log('typingRecord', state.typingRecord);
+  },
+  {
+    deep: true
   }
 );
 
@@ -170,10 +142,9 @@ watch(
     if (val) {
       // 开始输入
       emit('is-typing');
-      // state.timeout = setTimeout(() => {
-      //   // 开始记录
-      //   record();
-      // }, 100);
+      state.startTime = new Date().getTime();
+    } else {
+      state.startTime = 0;
     }
   }
 );
@@ -232,8 +203,6 @@ watch(
   }
 );
 
-function record() {}
-
 function reset() {
   state.inputText = '';
   state.isTyping = false;
@@ -242,20 +211,16 @@ function reset() {
 }
 
 function beforeInputEvent(e: any) {
-  console.log('beforeInputEvent', e);
   state.isTyping = true;
   if (e.inputType === 'insertCompositionText') {
-    // 处于 composition 状态
-    if (state.currentInput) {
-      // 将上一次的 currentInput 记录下来。
-      state.currentInputArr.push(state.currentInput);
+    if (compositionList.includes(e.data)) {
+      return;
     }
-    state.currentInput = '';
+    // 处于 composition 状态
     if (state.currentComposition === e.data || !/\w+/.test(e.data)) {
       // 这里是 composition 状态结束的条件，比如按了空格、回车。
       state.isComposing = false;
       state.currentComposition = '';
-      state.currentInput = e.data;
       return;
     }
     state.currentComposition = e.data;
@@ -268,22 +233,8 @@ function beforeInputEvent(e: any) {
       state.currentComposition = '';
       return;
     }
-    if (!state.currentInput && !state.currentInputArr.length) {
-      return;
-    }
-    if (!state.currentInput && state.currentInputArr.length) {
-      // @ts-ignore
-      state.currentInput = state.currentInputArr.pop();
-    }
-    state.currentInput = state.currentInput.slice(0, -1);
     return;
   }
-
-  if (e.inputType === 'insertText') {
-    state.currentInput += e.data;
-    return;
-  }
-  console.log('beforeInputEvent', e.data);
 }
 
 const selection = window.getSelection();
@@ -380,12 +331,19 @@ function mouseDownEvent() {
   focusInput();
 }
 
+const r = computed(() => {
+  let maxKey = Math.max(...Object.keys(state.typingRecord));
+  return state.typingRecord[maxKey];
+});
+
 defineExpose({
   focusInput
 });
 </script>
 
 <template>
+  <span v-for="i in r">{{ i.word }}</span>
+
   <div class="y-word-input__wrap">
     <Transition name="mask">
       <div v-if="y > 0" class="y-word-input__mask"></div>
