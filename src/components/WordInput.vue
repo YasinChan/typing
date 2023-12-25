@@ -2,7 +2,6 @@
 import { ref, onMounted, reactive, nextTick, watch, computed } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
-import clonedeep from 'lodash/clonedeep';
 
 type SentenceArrItem = {
   id: number;
@@ -332,6 +331,7 @@ function mouseDownEvent() {
 }
 
 const r = computed(() => {
+  // @ts-ignore
   let maxKey = Math.max(...Object.keys(state.typingRecord));
   return state.typingRecord[maxKey];
 });
