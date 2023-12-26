@@ -183,82 +183,68 @@ const setResetAvatar = () => {
       </div>
     </div>
   </div>
-  <Teleport to="body">
-    <y-modal
-      :show="state.showPasswordQuestion"
-      @close="state.showPasswordQuestion = false"
-      @confirm="setPQ"
-    >
-      <template #header>
-        <h3>设置密保问题</h3>
-      </template>
-      <template #body>
-        <div class="y-user-pq__container">
-          <div class="y-user-pq__remind">
-            请设置一个问题与答案，方便在你忘记密码时找回密码，如：
-          </div>
-          <div class="y-user-pq__eg">问：世界上最好的语言</div>
-          <div class="y-user-pq__eg">答：PHP</div>
-          <y-input
-            class="y-user-pq__q"
-            v-model:value="state.question"
-            placeholder="你的问题"
-          ></y-input>
-          <y-input
-            class="y-user-pq__a"
-            v-model:value="state.answer"
-            placeholder="你的回答"
-          ></y-input>
-        </div>
-      </template>
-    </y-modal>
-    <y-modal :show="state.showResetAvatar" @close="state.showResetAvatar = false">
-      <template #header>
-        <h3>重置密码</h3>
-      </template>
-      <template #body> </template>
-    </y-modal>
-  </Teleport>
-  <Teleport to="body">
-    <y-modal :show="state.showSetEmail" @close="state.showSetEmail = false" @confirm="setNewEmail">
-      <template #header>
-        <h3>设置邮箱地址</h3>
-      </template>
-      <template #body>
-        <div class="y-user-set-email__container">
-          <y-input
-            :error-text="state.emailError"
-            placeholder="设置邮箱地址"
-            v-model:value="state.email"
-          ></y-input>
-        </div>
-      </template>
-    </y-modal>
-    <y-modal
-      :show="state.showResetAvatar"
-      @close="state.showResetAvatar = false"
-      @confirm="setResetAvatar"
-    >
-      <template #header>
-        <h3>重置密码</h3>
-      </template>
-      <template #body>
-        <div class="y-user-reset-password__container">
-          <y-input placeholder="旧密码" v-model:value="state.oldPassword"></y-input>
-          <y-input
-            :error-text="state.newPasswordError"
-            placeholder="新密码"
-            v-model:value="state.newPassword"
-          ></y-input>
-          <y-input
-            :error-text="state.confirmNewPasswordError"
-            placeholder="确认新密码"
-            v-model:value="state.confirmNewPassword"
-          ></y-input>
-        </div>
-      </template>
-    </y-modal>
-  </Teleport>
+  <YModal
+    :show="state.showPasswordQuestion"
+    @close="state.showPasswordQuestion = false"
+    @confirm="setPQ"
+  >
+    <template #header>
+      <h3>设置密保问题</h3>
+    </template>
+    <template #body>
+      <div class="y-user-pq__container">
+        <div class="y-user-pq__remind">请设置一个问题与答案，方便在你忘记密码时找回密码，如：</div>
+        <div class="y-user-pq__eg">问：世界上最好的语言</div>
+        <div class="y-user-pq__eg">答：PHP</div>
+        <YInput class="y-user-pq__q" v-model="state.question" placeholder="你的问题"></YInput>
+        <YInput class="y-user-pq__a" v-model="state.answer" placeholder="你的回答"></YInput>
+      </div>
+    </template>
+  </YModal>
+  <YModal :show="state.showResetAvatar" @close="state.showResetAvatar = false">
+    <template #header>
+      <h3>重置密码</h3>
+    </template>
+    <template #body> </template>
+  </YModal>
+  <YModal :show="state.showSetEmail" @close="state.showSetEmail = false" @confirm="setNewEmail">
+    <template #header>
+      <h3>设置邮箱地址</h3>
+    </template>
+    <template #body>
+      <div class="y-user-set-email__container">
+        <YInput
+          :error-text="state.emailError"
+          placeholder="设置邮箱地址"
+          v-model="state.email"
+        ></YInput>
+      </div>
+    </template>
+  </YModal>
+  <YModal
+    :show="state.showResetAvatar"
+    @close="state.showResetAvatar = false"
+    @confirm="setResetAvatar"
+  >
+    <template #header>
+      <h3>重置密码</h3>
+    </template>
+    <template #body>
+      <div class="y-user-reset-password__container">
+        <YInput placeholder="旧密码" v-model="state.oldPassword"></YInput>
+        <YInput
+          :error-text="state.newPasswordError"
+          placeholder="新密码"
+          v-model="state.newPassword"
+        ></YInput>
+        <YInput
+          :error-text="state.confirmNewPasswordError"
+          placeholder="确认新密码"
+          v-model="state.confirmNewPassword"
+        ></YInput>
+      </div>
+    </template>
+  </YModal>
 </template>
 
 <style lang="scss">

@@ -1,45 +1,40 @@
 <script setup lang="ts">
-defineProps({
-  type: {
-    default: 'text',
-    type: String
-  },
-  placeholder: {
-    default: '',
-    type: String
-  },
-  value: {
-    default: '',
-    type: [String, Number]
-  },
-  name: {
-    default: '',
-    type: String
-  },
-  errorText: {
-    default: '',
-    type: String
-  },
-  maxLength: {
-    default: 1000,
-    type: Number
+withDefaults(
+  defineProps<
+    Partial<{
+      type: string;
+      placeholder: string;
+      modelValue: string | number | null;
+      name: string;
+      errorText: string;
+      maxLength: number;
+    }>
+  >(),
+  {
+    type: 'text',
+    placeholder: '',
+    modelValue: '',
+    name: '',
+    errorText: '',
+    maxLength: 1000
   }
-});
-const emitter = defineEmits(['update:value']);
+);
+
+const emitter = defineEmits(['update:modelValue']);
 
 const inputHandler = (event: any): any => {
-  emitter('update:value', (event.target as HTMLInputElement).value);
+  emitter('update:modelValue', (event.target as HTMLInputElement).value);
 };
 
 const blurHandler = (event: any): any => {
-  emitter('update:value', (event.target as HTMLInputElement).value.trim());
+  emitter('update:modelValue', (event.target as HTMLInputElement).value.trim());
 };
 </script>
 <template>
   <div class="y-input" :class="[errorText ? 'y-input--err' : '']">
     <input
       :type="type"
-      :value="value"
+      :value="modelValue"
       @blur="blurHandler"
       :name="name"
       @input="inputHandler"

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, nextTick, watch, computed } from 'vue';
+import { ref, onMounted, reactive, nextTick, watch, computed, unref } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
+import cloneDeep from 'lodash/cloneDeep';
 
 type SentenceArrItem = {
   id: number;
@@ -23,9 +24,9 @@ type TypingRecordType = {
 
 const LINE_HEIGHT = 70;
 const el = ref<HTMLElement | null>(null);
-const { x, y } = useScroll(el, { behavior: 'smooth' });
-const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单
-const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’'];
+const { y } = useScroll(el, { behavior: 'smooth' });
+const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单，这些字符不会被标记为错误
+const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’']; // composition 状态下的字符
 const inputAreaRef = ref<HTMLElement | null>(null);
 const props = defineProps<{
   quote: string;
@@ -60,6 +61,13 @@ watch(
     };
   },
   (val, oldVal) => {
+    if (val.value !== oldVal.value && val.value === '') {
+      // 这里是在 composition 状态下删除了最后一个字符时会触发的，此时需要将 composition 状态下的输入删除
+      state.typingRecordRealTime = state.typingRecordRealTime.filter((item) => {
+        return !item.isComposition;
+      });
+      return;
+    }
     if (val.isComposing && val.isComposing !== oldVal.isComposing) {
       // 从非 composition 切换到 composition
       if (state.typingRecordRealTime.length) {
@@ -85,14 +93,14 @@ watch(
           ];
         } else {
           state.typingRecordRealTime.push({
-            word: val.value,
+            word: unref(val.value),
             isComposition: true
           });
         }
       } else {
         state.typingRecordRealTime = [
           {
-            word: val.value,
+            word: unref(val.value),
             isComposition: true
           }
         ];
@@ -103,7 +111,12 @@ watch(
       // composition 状态
       if (state.typingRecordRealTime.length && state.typingRecordRealTime[1]) {
         state.typingRecordRealTime[1] = {
-          word: val.value,
+          word: unref(val.value),
+          isComposition: true
+        };
+      } else {
+        state.typingRecordRealTime[0] = {
+          word: unref(val.value),
           isComposition: true
         };
       }
@@ -122,13 +135,12 @@ watch(
 
 watch(
   () => state.typingRecordRealTime,
-  (val) => {
+  () => {
     if (!state.startTime) {
       return;
     }
     const relativeTime = new Date().getTime() - state.startTime;
-    state.typingRecord[Math.floor(relativeTime / 100)] = state.typingRecordRealTime;
-    console.log('typingRecord', state.typingRecord);
+    state.typingRecord[Math.floor(relativeTime / 100)] = cloneDeep(state.typingRecordRealTime);
   },
   {
     deep: true

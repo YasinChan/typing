@@ -123,40 +123,34 @@ const changeTheme = () => {
 
   <router-view></router-view>
 
-  <Teleport to="body">
-    <y-modal
-      :show="obj.showChangeFontModal"
-      @close="obj.showChangeFontModal = false"
-      @confirm="obj.showChangeFontModal = false"
-    >
-      <template #header>
-        <h3>选择字体</h3>
-      </template>
-      <template #body>
-        <div class="y-change__container gray-08">
-          <ListItem @click="useConfig.setCurrentFont('default')" class="y-font--default"
-            >默认 字体 测试 TEST test</ListItem
-          >
-          <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix"
-            >zpix 字体 测试 TEST test</ListItem
-          >
-          <ListItem
-            @click="useConfig.setCurrentFont('zhankugaoduanhei')"
-            class="y-font--zhankugaoduanhei"
-            >zhankugaoduanhei 字体 测试 TEST test</ListItem
-          >
-          <ListItem
-            @click="useConfig.setCurrentFont('AlibabaPuHuiTi')"
-            class="y-font--AlibabaPuHuiTi"
-            >AlibabaPuHuiTi 字体 测试 TEST test</ListItem
-          >
-        </div>
-      </template>
-    </y-modal>
-  </Teleport>
-  <Teleport to="body">
-    <message :type="obj.type" :message="obj.message" :visible="obj.visible"></message>
-  </Teleport>
+  <YModal
+    :show="obj.showChangeFontModal"
+    @close="obj.showChangeFontModal = false"
+    @confirm="obj.showChangeFontModal = false"
+  >
+    <template #header>
+      <h3>选择字体</h3>
+    </template>
+    <template #body>
+      <div class="y-change__container gray-08">
+        <ListItem @click="useConfig.setCurrentFont('default')" class="y-font--default"
+          >默认 字体 测试 TEST test</ListItem
+        >
+        <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix"
+          >zpix 字体 测试 TEST test</ListItem
+        >
+        <ListItem
+          @click="useConfig.setCurrentFont('zhankugaoduanhei')"
+          class="y-font--zhankugaoduanhei"
+          >zhankugaoduanhei 字体 测试 TEST test</ListItem
+        >
+        <ListItem @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi"
+          >AlibabaPuHuiTi 字体 测试 TEST test</ListItem
+        >
+      </div>
+    </template>
+  </YModal>
+  <message :type="obj.type" :message="obj.message" :visible="obj.visible"></message>
 </template>
 
 <style lang="scss">

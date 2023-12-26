@@ -17,7 +17,9 @@ defineProps({
 
 <template>
   <Transition name="message">
-    <div class="y-message" v-if="visible" :class="[`y-message--${type}`]">{{ message }}</div>
+    <Teleport to="body">
+      <div class="y-message" v-if="visible" :class="[`y-message--${type}`]">{{ message }}</div>
+    </Teleport>
   </Transition>
 </template>
 

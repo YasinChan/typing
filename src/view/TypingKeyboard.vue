@@ -153,24 +153,22 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
       </template>
     </key-wrap>
   </div>
-  <Teleport to="body">
-    <y-modal
-      :show="state.keyboardModal"
-      @close="state.keyboardModal = false"
-      @confirm="state.keyboardModal = false"
-    >
-      <template #header>
-        <h3>选择键盘</h3>
-      </template>
-      <template #body>
-        <div class="y-show-select__container gray-08">
-          <ListItem @click="changeKeyboard('standard')">标准配列键盘</ListItem>
-          <ListItem @click="changeKeyboard('68')">68 配列键盘</ListItem>
-          <ListItem @click="changeKeyboard('mbp')">MBP 配列键盘</ListItem>
-        </div>
-      </template>
-    </y-modal>
-  </Teleport>
+  <YModal
+    :show="state.keyboardModal"
+    @close="state.keyboardModal = false"
+    @confirm="state.keyboardModal = false"
+  >
+    <template #header>
+      <h3>选择键盘</h3>
+    </template>
+    <template #body>
+      <div class="y-show-select__container gray-08">
+        <ListItem @click="changeKeyboard('standard')">标准配列键盘</ListItem>
+        <ListItem @click="changeKeyboard('68')">68 配列键盘</ListItem>
+        <ListItem @click="changeKeyboard('mbp')">MBP 配列键盘</ListItem>
+      </div>
+    </template>
+  </YModal>
 </template>
 <style lang="scss">
 .y-main__screen-wrap {

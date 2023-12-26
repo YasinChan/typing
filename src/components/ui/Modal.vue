@@ -33,30 +33,31 @@ watch(
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="y-modal__mask" @click="emit('close')">
-      <div class="y-modal__container" @click.stop>
-        <div class="y-modal__header">
-          <slot name="header">default header</slot>
-        </div>
+    <Teleport to="body">
+      <div v-if="show" class="y-modal__mask" @click="emit('close')">
+        <div class="y-modal__container" @click.stop>
+          <div class="y-modal__header">
+            <slot name="header">default header</slot>
+          </div>
 
-        <div class="y-modal__body">
-          <slot name="body">default body</slot>
-        </div>
+          <div class="y-modal__body">
+            <slot name="body">default body</slot>
+          </div>
 
-        <div class="y-modal__footer">
-          <slot name="footer">
-            <y-button @click="emit('confirm')">确定</y-button>
-          </slot>
+          <div class="y-modal__footer">
+            <slot name="footer">
+              <y-button @click="emit('confirm')">确定</y-button>
+            </slot>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </Transition>
 </template>
 
 <style lang="scss">
 .y-modal__mask {
   position: fixed;
-  z-index: 9998;
   top: 0;
   left: 0;
   width: 100%;

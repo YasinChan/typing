@@ -333,132 +333,126 @@ const updatePassword = () => {
       />
     </div>
   </div>
-  <Teleport to="body">
-    <y-modal :show="obj.showLogin" @close="obj.showLogin = false">
-      <template #header>
-        <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
-      </template>
-      <template #body>
-        <div class="y-change-login__container">
-          <template v-if="obj.currentType === 'register'">
-            <div class="y-change-login__remind">用户名中可包含数字、字母、中文、- 或 _</div>
-            <y-input
-              :max-length="25"
-              v-model:value="obj.userName"
+  <YModal :show="obj.showLogin" @close="obj.showLogin = false">
+    <template #header>
+      <h3>{{ obj.currentType === 'register' ? '注册' : '登录' }}</h3>
+    </template>
+    <template #body>
+      <div class="y-change-login__container">
+        <template v-if="obj.currentType === 'register'">
+          <div class="y-change-login__remind">用户名中可包含数字、字母、中文、- 或 _</div>
+          <YInput
+            :max-length="25"
+            v-model="obj.userName"
+            :error-text="obj.userNameError"
+            placeholder="用户名"
+          ></YInput>
+          <YInput
+            v-model="obj.password"
+            :error-text="obj.passwordError"
+            @keydown.enter="passwordEnter"
+            placeholder="密码"
+          ></YInput>
+          <YInput
+            v-model="obj.confirmPassword"
+            @keydown.enter="register"
+            :error-text="obj.confirmPasswordError"
+            placeholder="确认密码"
+          ></YInput>
+          <YInput
+            v-model="obj.email"
+            :error-text="obj.emailError"
+            placeholder="邮箱（可选）"
+          ></YInput>
+        </template>
+        <template v-else>
+          <form id="login-form" action="POST" @submit.prevent="login">
+            <YInput
+              v-model="obj.userName"
               :error-text="obj.userNameError"
+              name="UserName"
               placeholder="用户名"
-            ></y-input>
-            <y-input
-              v-model:value="obj.password"
+            ></YInput>
+            <YInput
+              v-model="obj.password"
               :error-text="obj.passwordError"
+              name="Password"
+              type="password"
               @keydown.enter="passwordEnter"
               placeholder="密码"
-            ></y-input>
-            <y-input
-              v-model:value="obj.confirmPassword"
-              @keydown.enter="register"
-              :error-text="obj.confirmPasswordError"
-              placeholder="确认密码"
-            ></y-input>
-            <y-input
-              v-model:value="obj.email"
-              :error-text="obj.emailError"
-              placeholder="邮箱（可选）"
-            ></y-input>
-          </template>
-          <template v-else>
-            <form id="login-form" action="POST" @submit.prevent="login">
-              <y-input
-                v-model:value="obj.userName"
-                :error-text="obj.userNameError"
-                name="UserName"
-                placeholder="用户名"
-              ></y-input>
-              <y-input
-                v-model:value="obj.password"
-                :error-text="obj.passwordError"
-                name="Password"
-                type="password"
-                @keydown.enter="passwordEnter"
-                placeholder="密码"
-              ></y-input>
-              <div class="y-auth__forget-password" @click="forgetPassword">忘记密码</div>
-            </form>
-          </template>
+            ></YInput>
+            <div class="y-auth__forget-password" @click="forgetPassword">忘记密码</div>
+          </form>
+        </template>
+      </div>
+    </template>
+    <template #footer>
+      <div class="y-auth__footer flex-center--y">
+        <y-button form="login-form" v-if="obj.currentType === 'login'" :disable="obj.disable"
+          >登录</y-button
+        >
+        <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
+        <span
+          style="font-size: 14px"
+          class="y-auth__footer-change main-color"
+          @click="
+            obj.currentType === 'register'
+              ? (obj.currentType = 'login')
+              : (obj.currentType = 'register')
+          "
+          >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
+        >
+      </div>
+    </template>
+  </YModal>
+  <YModal :show="obj.forgetModal" @close="obj.forgetModal = false">
+    <template #header>
+      <h3>忘记密码？</h3>
+    </template>
+    <template #body>
+      <div class="y-forget-modal__container">
+        <div class="y-forget-modal__remind">
+          如果设置过密保问题，则可以通过密保问题找回密码，否则请联系管理员。
         </div>
-      </template>
-      <template #footer>
-        <div class="y-auth__footer flex-center--y">
-          <y-button form="login-form" v-if="obj.currentType === 'login'" :disable="obj.disable"
-            >登录</y-button
-          >
-          <y-button v-else :disable="obj.disable" @click="register">注册</y-button>
-          <span
-            style="font-size: 14px"
-            class="y-auth__footer-change main-color"
-            @click="
-              obj.currentType === 'register'
-                ? (obj.currentType = 'login')
-                : (obj.currentType = 'register')
-            "
-            >{{ obj.currentType === 'register' ? '去登录' : '去注册' }}</span
+        <div class="y-forget-modal__ask">用户名：</div>
+        <div class="y-forget-modal__reply flex-center--y">
+          <YInput
+            v-model="obj.userName1"
+            :error-text="obj.userName1Error"
+            placeholder="你的用户名"
+          ></YInput>
+          <y-button :disable="obj.unDisable" size="small" @click="findQuestionByUserName"
+            >查询</y-button
           >
         </div>
-      </template>
-    </y-modal>
-  </Teleport>
-  <Teleport to="body">
-    <y-modal :show="obj.forgetModal" @close="obj.forgetModal = false">
-      <template #header>
-        <h3>忘记密码？</h3>
-      </template>
-      <template #body>
-        <div class="y-forget-modal__container">
-          <div class="y-forget-modal__remind">
-            如果设置过密保问题，则可以通过密保问题找回密码，否则请联系管理员。
-          </div>
-          <div class="y-forget-modal__ask">用户名：</div>
+        <template v-if="obj.question">
+          <div class="y-forget-modal__ask">{{ obj.question }}：</div>
           <div class="y-forget-modal__reply flex-center--y">
-            <y-input
-              v-model:value="obj.userName1"
-              :error-text="obj.userName1Error"
-              placeholder="你的用户名"
-            ></y-input>
-            <y-button :disable="obj.unDisable" size="small" @click="findQuestionByUserName"
-              >查询</y-button
-            >
+            <YInput
+              v-model="obj.answer"
+              :error-text="obj.answerError"
+              placeholder="你的答案"
+            ></YInput>
+            <y-button :disable="obj.asDisable" size="small" @click="verifyAnswer">验证</y-button>
           </div>
-          <template v-if="obj.question">
-            <div class="y-forget-modal__ask">{{ obj.question }}：</div>
-            <div class="y-forget-modal__reply flex-center--y">
-              <y-input
-                v-model:value="obj.answer"
-                :error-text="obj.answerError"
-                placeholder="你的答案"
-              ></y-input>
-              <y-button :disable="obj.asDisable" size="small" @click="verifyAnswer">验证</y-button>
-            </div>
-          </template>
-          <template v-if="obj.question && obj.canSetNewPassword">
-            <div class="y-forget-modal__ask">重置密码：</div>
-            <div class="y-forget-modal__reply flex-center--y">
-              <y-input
-                v-model:value="obj.newPassword"
-                :error-text="obj.newPasswordError"
-                placeholder="新的密码"
-              ></y-input>
-              <y-button :disable="obj.upDisable" size="small" @click="updatePassword"
-                >确定</y-button
-              >
-            </div>
-          </template>
-        </div>
-      </template>
-      <template #footer>
-        <div></div>
-      </template>
-    </y-modal>
-  </Teleport>
+        </template>
+        <template v-if="obj.question && obj.canSetNewPassword">
+          <div class="y-forget-modal__ask">重置密码：</div>
+          <div class="y-forget-modal__reply flex-center--y">
+            <YInput
+              v-model="obj.newPassword"
+              :error-text="obj.newPasswordError"
+              placeholder="新的密码"
+            ></YInput>
+            <y-button :disable="obj.upDisable" size="small" @click="updatePassword">确定</y-button>
+          </div>
+        </template>
+      </div>
+    </template>
+    <template #footer>
+      <div></div>
+    </template>
+  </YModal>
 </template>
 
 <style lang="scss">

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
+import { inject, reactive, watch } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
+import YModal from '@/components/ui/Modal.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -14,16 +15,21 @@ import Sentence from '@/files/Quote.json';
 // svg
 import IcoSetting from '@/assets/svg/setting.svg';
 import IcoChange from '@/assets/svg/change.svg';
+import YInput from '@/components/ui/Input.vue';
 
+const message: any = inject('message');
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain } = storeToRefs(useConfig);
 const customTime = [15, 30, 60, 120];
 
 const state = reactive({
+  showSetTime: false,
   quote: {} as any,
   lastIndex: -1,
   selectTime: 30 as number,
   countDown: null as null | number,
+  errorText: '',
+  setCountDown: 0,
   isTyping: false,
   intervalId: null as null | number
 });
@@ -48,6 +54,7 @@ watch(
         }
       }, 1000);
     } else {
+      message({ message: '已结束' });
       state.countDown = null;
       if (state.intervalId !== null) {
         clearInterval(state.intervalId);
@@ -128,6 +135,15 @@ function countdownFunc(options: CountdownOptions): Countdown {
     stop: stopCountdown
   };
 }
+function setTime() {
+  debugger;
+  if (!/\d+/.test(state.setCountDown)) {
+    state.errorText = '请输入数字';
+    return;
+  }
+  state.showSetTime = false;
+  state.countDown = state.setCountDown;
+}
 </script>
 <template>
   <main :class="'y-font--' + currentFont">
@@ -154,7 +170,7 @@ function countdownFunc(options: CountdownOptions): Countdown {
             @click="selectTime(item)"
             >{{ item }}</span
           >
-          <IcoSetting class="y-time-limit__time-svg"></IcoSetting>
+          <IcoSetting class="y-time-limit__time-svg" @click="state.showSetTime = true"></IcoSetting>
         </div>
       </Transition>
     </div>
@@ -172,6 +188,21 @@ function countdownFunc(options: CountdownOptions): Countdown {
       </span>
     </div>
   </main>
+  <YModal :show="state.showSetTime" @close="state.showSetTime = false" @confirm="setTime">
+    <template #header>
+      <h3>设置倒计时</h3>
+    </template>
+    <template #body>
+      <div class="time-limit__container">
+        <YInput
+          :error-text="state.errorText"
+          class="time-limit__q"
+          v-model="state.setCountDown"
+          placeholder="请输入倒计时"
+        ></YInput>
+      </div>
+    </template>
+  </YModal>
 </template>
 <style lang="scss">
 .y-time-limit__setting {
@@ -240,5 +271,12 @@ function countdownFunc(options: CountdownOptions): Countdown {
   margin-top: 30px;
   text-align: right;
   color: $gray-02;
+}
+.time-limit__container {
+  color: $gray-04;
+  font-size: 14px;
+}
+.time-limit__remind {
+  padding-bottom: 10px;
 }
 </style>
