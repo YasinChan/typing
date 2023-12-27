@@ -235,7 +235,11 @@ function restart() {
       </div>
     </template>
     <template v-else>
-      <ResultContent :typing-record="state.typingRecord" @restart="restart"></ResultContent>
+      <ResultContent
+        :typing-record="state.typingRecord"
+        @restart="restart"
+        :select-time="state.selectTime"
+      ></ResultContent>
     </template>
   </main>
   <YModal :show="state.showSetTime" @close="state.showSetTime = false" @confirm="setTime">

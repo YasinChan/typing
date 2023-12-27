@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, nextTick, watch, computed, unref } from 'vue';
+import { ref, onMounted, reactive, nextTick, watch, unref } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 import cloneDeep from 'lodash/cloneDeep';
@@ -56,14 +56,29 @@ watch(
       if (state.typingRecordRealTime.length) {
         const position = getCursorPosition();
         const word = state.typingRecordRealTime[0].word;
+        const wrongPos = state.typingRecordRealTime[0].wrongPos;
         if (word && position && word.length > position) {
           // 此时表示光标左移过
           const part1 = word.substring(0, position);
           const part2 = word.substring(position);
+          let part1WrongPos: number[] = [];
+          let part2WrongPos: number[] = [];
+          if (wrongPos) {
+            // 这里是处理如果光标左移过的情况下 isInput 被分割成下面两块，此时其中的 wrongPos 需要重新计算
+            part1WrongPos = wrongPos.filter((item) => {
+              return item < position;
+            });
+            wrongPos.forEach((item) => {
+              if (item >= position) {
+                part2WrongPos = [...part2WrongPos, item - position];
+              }
+            });
+          }
           state.typingRecordRealTime = [
             {
               word: part1,
-              isInput: true
+              isInput: true,
+              wrongPos: part1WrongPos.length ? part1WrongPos : undefined
             },
             {
               word: '',
@@ -71,16 +86,19 @@ watch(
             },
             {
               word: part2,
-              isInput: true
+              isInput: true,
+              wrongPos: part2WrongPos.length ? part2WrongPos : undefined
             }
           ];
         } else {
+          // 光标没有左移则直接将输入的字符添加到 typingRecordRealTime 后面
           state.typingRecordRealTime.push({
             word: unref(val.value),
             isComposition: true
           });
         }
       } else {
+        // 当 typingRecordRealTime 为空时，直接将输入的字符添加到 typingRecordRealTime 中
         state.typingRecordRealTime = [
           {
             word: unref(val.value),
@@ -93,11 +111,15 @@ watch(
     if (val.isComposing && val.isComposing === oldVal.isComposing) {
       // composition 状态
       if (state.typingRecordRealTime.length && state.typingRecordRealTime[1]) {
+        // 当 typingRecordRealTime 长度大于 1 时，将 composition 状态下的输入添加到 typingRecordRealTime 的第二个元素中
+        // 根据上面的逻辑，第二个元素一定是 composition 状态下的输入
         state.typingRecordRealTime[1] = {
           word: unref(val.value),
           isComposition: true
         };
       } else {
+        // 当 typingRecordRealTime 长度小于 1 时，将 composition 状态下的输入添加到 typingRecordRealTime 的第一个元素中
+        // 同理，第一个元素一定是 composition 状态下的输入
         state.typingRecordRealTime[0] = {
           word: unref(val.value),
           isComposition: true
@@ -175,25 +197,30 @@ watch(
       });
       return;
     }
-    state.typingRecordRealTime = [
-      {
-        word: newVal,
-        isInput: true
-      }
-    ];
     const inputTextArr = newVal.split('');
+    const wrongPos: number[] = [];
     state.quoteArr.forEach((item, index) => {
       item.isInput = false;
       item.isWrong = false;
       if (inputTextArr[index]) {
         item.isInput = true;
         item.isWrong = item.word !== inputTextArr[index];
+        if (item.isWrong) {
+          wrongPos.push(index);
+        }
         if (whiteList.includes(inputTextArr[index])) {
           item.isInput = item.word === inputTextArr[index];
           item.isWrong = false;
         }
       }
     });
+    state.typingRecordRealTime = [
+      {
+        word: newVal,
+        isInput: true,
+        wrongPos
+      }
+    ];
   }
 );
 
@@ -329,12 +356,6 @@ function getTypingRecord() {
   return state.typingRecord;
 }
 
-const r = computed(() => {
-  // @ts-ignore
-  let maxKey = Math.max(...Object.keys(state.typingRecord));
-  return state.typingRecord[maxKey];
-});
-
 defineExpose({
   focusInput,
   getTypingRecord
@@ -342,8 +363,6 @@ defineExpose({
 </script>
 
 <template>
-  <span v-for="i in r">{{ i.word }}</span>
-
   <div class="y-word-input__wrap">
     <Transition name="mask">
       <div v-if="y > 0" class="y-word-input__mask"></div>

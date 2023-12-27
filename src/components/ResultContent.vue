@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive } from 'vue';
+import { reactive, computed, onMounted } from 'vue';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -13,25 +13,65 @@ import IcoChange from '@/assets/svg/change.svg';
 
 const props = defineProps<{
   typingRecord?: TypingRecordType;
+  selectTime?: number;
 }>();
 const emit = defineEmits(['restart']);
 const state = reactive({
   currentTime: 0,
-  currentOperation: [] as TypingRecordItemType[]
+  currentOperation: [] as TypingRecordItemType[],
+  timeoutArray: [] as number[],
+  intervalId: null as null | number,
+  countDown: props.selectTime || 0,
+  totalWord: 0,
+  wrongWord: 0,
+  accuracy: '',
+  accuracyInfo: '' as string,
+  speed: '',
+  speedInfo: '' as string
+});
+
+const keys = computed(() => {
+  if (props.typingRecord) {
+    return Object.keys(props.typingRecord)
+      .map(Number)
+      .sort((a, b) => a - b); // 按键值排序
+  } else {
+    return [];
+  }
+});
+
+onMounted(() => {
+  const lastRecord: TypingRecordItemType[] = props.typingRecord
+    ? props.typingRecord[keys.value[keys.value.length - 1]]
+    : [];
+  if (lastRecord.length > 0) {
+    lastRecord.forEach((item) => {
+      if (item.isInput) {
+        state.totalWord += item.word?.length ? item.word?.length : 0;
+        state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
+      }
+    });
+  }
+  state.accuracy = (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
+  state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
+  state.speed = props.selectTime
+    ? (((state.totalWord - state.wrongWord) / props.selectTime) * 60).toFixed(0) + ' 字/分钟'
+    : '';
 });
 
 function replay() {
   console.log(props.typingRecord);
+  state.timeoutArray.forEach((timeout) => {
+    clearTimeout(timeout);
+  });
   state.currentTime = new Date().getTime();
   executeTimeline();
+  countDown();
 }
 function executeTimeline() {
   if (!props.typingRecord) {
     return;
   }
-  const keys = Object.keys(props.typingRecord)
-    .map(Number)
-    .sort((a, b) => a - b); // 按键值排序
 
   let currentIndex = 0;
 
@@ -39,29 +79,49 @@ function executeTimeline() {
     if (!props.typingRecord) {
       return;
     }
-    const currentTime = keys[currentIndex];
+    const currentTime = keys.value[currentIndex];
     state.currentOperation = props.typingRecord[currentTime];
-
-    // if (state.currentOperation) {
-    //   console.log(`Executing at time ${currentTime}: ${state.currentOperation}`);
-    // }
 
     currentIndex++;
 
-    if (currentIndex < keys.length) {
-      const nextTime = keys[currentIndex];
+    if (currentIndex < keys.value.length) {
+      const nextTime = keys.value[currentIndex];
       const delay = nextTime - currentTime;
-      setTimeout(executeStep, delay * 100); // 延时执行下一个操作
+      const timeout = setTimeout(executeStep, delay * 100); // 延时执行下一个操作
+      state.timeoutArray.push(timeout);
     }
   }
 
   executeStep(); // 开始执行时间轴
 }
+
+function countDown() {
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  state.countDown = props.selectTime || 0;
+  state.intervalId = setInterval(() => {
+    if (state.countDown) {
+      state.countDown -= 1;
+      if (state.countDown < 1) {
+        if (state.intervalId !== null) {
+          clearInterval(state.intervalId);
+          state.intervalId = null;
+        }
+      }
+    }
+  }, 1000);
+}
 </script>
 <template>
-  <div class="result-content">正确率：</div>
-  <div class="result-content">速度：</div>
-  <div class="result-content__toolbar">
+  <Tooltip class="result-content cursor-pointer" :content="state.accuracyInfo">
+    正确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
+  </Tooltip>
+  <div class="result-content">
+    速度：<span class="result-content--main-color">{{ state.speed }}</span>
+  </div>
+  <div class="result-content__toolbar flex-center">
     <Tooltip class="result-content__svg" content="重新开始">
       <IcoChange @click="emit('restart')"></IcoChange>
     </Tooltip>
@@ -70,6 +130,9 @@ function executeTimeline() {
     </Tooltip>
   </div>
   <div class="result-content__replay" v-if="state.currentOperation?.length">
+    <div v-if="state.countDown !== null" class="result-content__count-down">
+      {{ state.countDown }}
+    </div>
     <span
       class="result-content__replay-item"
       :class="{
@@ -78,7 +141,12 @@ function executeTimeline() {
       v-for="(item, index) in state.currentOperation"
       :key="index"
     >
-      {{ item.word }}
+      <span
+        v-for="(i, dex) in item.word"
+        :class="{ wrong: item.wrongPos?.includes(dex) }"
+        :key="i"
+        >{{ i }}</span
+      >
     </span>
   </div>
 </template>
@@ -90,22 +158,40 @@ function executeTimeline() {
     fill: $gray-06;
     cursor: pointer;
   }
-  margin-right: 40px;
+  margin: 0 20px;
 }
 .result-content {
-  font-size: 16px;
+  font-size: 20px;
   color: $gray-06;
   margin-bottom: 40px;
+  text-align: center;
+  display: block;
+}
+.result-content--main-color {
+  color: $main-color;
 }
 .result-content__toolbar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 40px;
+  margin-top: 60px;
 }
 .result-content__replay {
   line-height: 28px;
+  margin-top: 40px;
+  position: relative;
 }
 .result-content__replay-item--underline {
   text-decoration: underline;
+}
+.result-content__count-down {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  color: $main-color;
+  font-size: 22px;
+  font-weight: bold;
+}
+.result-content__replay-item {
+  .wrong {
+    color: $main-red;
+  }
 }
 </style>

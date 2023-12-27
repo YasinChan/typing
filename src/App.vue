@@ -136,7 +136,7 @@ function showConfirmModal({
             </div>
           </template>
         </y-drop-down>
-        <div class="y-menu__item y-menu__change">
+        <div class="y-menu__item y-menu__item-auth y-menu__change">
           <auth></auth>
         </div>
       </div>
@@ -253,6 +253,9 @@ header {
     &::after {
       width: 30px;
     }
+  }
+  &.y-menu__item-auth {
+    padding: 0;
   }
 }
 .y-menu__change {

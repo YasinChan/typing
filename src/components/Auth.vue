@@ -462,8 +462,8 @@ const updatePassword = () => {
   }
 }
 .y-auth__login-img-wrap {
-  width: 18px;
-  height: 18px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
 }
 .y-auth__login-img-wrap--login {

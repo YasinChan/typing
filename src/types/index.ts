@@ -15,6 +15,7 @@ export type TypingRecordItemType = {
   isInput?: boolean;
   isComposition?: boolean;
   isWrong?: boolean;
+  wrongPos?: number[];
 };
 export type TypingRecordType = {
   [key: number]: TypingRecordItemType[];
