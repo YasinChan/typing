@@ -24,7 +24,7 @@ import YInput from '@/components/ui/Input.vue';
 
 const message: any = inject('message');
 const confirm: any = inject('confirm');
-const wordInputRef = ref(null);
+const wordInputRef = ref<any>(null);
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain } = storeToRefs(useConfig);
 const customTime = [1, 15, 30, 60, 120];
