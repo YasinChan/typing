@@ -35,11 +35,20 @@ const obj = reactive({
   type: '',
   message: '',
   visible: false,
-  timeout: undefined as undefined | number
+  timeout: undefined as undefined | number,
+  showConfirm: false,
+  confirmTitle: '',
+  confirmContent: '',
+  confirmClose: () => {},
+  confirm: () => {}
 });
 
 provide('message', (obj: any) => {
   showMessage(obj);
+});
+
+provide('confirm', (obj: any) => {
+  showConfirmModal(obj);
 });
 
 onMounted(() => {
@@ -58,7 +67,12 @@ function handleMouseMove() {
   useConfig.setOnlyShowMain(false);
 }
 
-const showMessage = ({ message = '', type = 'success', timeout = 3000 }) => {
+function changeTheme() {
+  const currentTheme = getTheme();
+  currentTheme === 'light' ? setTheme('dark') : setTheme('light');
+}
+
+function showMessage({ message = '', type = 'success', timeout = 3000 }) {
   clearTimeout(obj.timeout);
   // 在这个函数中，设置Message组件的message和show属性，
   // 以显示消息
@@ -70,12 +84,20 @@ const showMessage = ({ message = '', type = 'success', timeout = 3000 }) => {
     // 过一段时间后，隐藏消息
     obj.visible = false;
   }, timeout);
-};
+}
 
-const changeTheme = () => {
-  const currentTheme = getTheme();
-  currentTheme === 'light' ? setTheme('dark') : setTheme('light');
-};
+function showConfirmModal({
+  title = '',
+  content = '',
+  confirmClose = () => {},
+  confirm = () => {}
+}) {
+  obj.confirmTitle = title;
+  obj.confirmContent = content;
+  obj.showConfirm = true;
+  obj.confirmClose = confirmClose;
+  obj.confirm = confirm;
+}
 </script>
 
 <template>
@@ -150,7 +172,17 @@ const changeTheme = () => {
       </div>
     </template>
   </YModal>
-  <message :type="obj.type" :message="obj.message" :visible="obj.visible"></message>
+  <Message :type="obj.type" :message="obj.message" :visible="obj.visible"></Message>
+  <YModal :show="obj.showConfirm" @close="obj.confirmClose" @confirm="obj.confirm">
+    <template #header>
+      <h3>{{ obj.confirmTitle }}</h3>
+    </template>
+    <template #body>
+      <div class="y-change__container gray-08">
+        {{ obj.confirmContent }}
+      </div>
+    </template>
+  </YModal>
 </template>
 
 <style lang="scss">

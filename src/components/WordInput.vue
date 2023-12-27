@@ -3,24 +3,7 @@ import { ref, onMounted, reactive, nextTick, watch, computed, unref } from 'vue'
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 import cloneDeep from 'lodash/cloneDeep';
-
-type SentenceArrItem = {
-  id: number;
-  word: string;
-  isInput: boolean;
-  isWrong: boolean;
-};
-
-type TypingRecordItemType = {
-  cursorPosition?: number;
-  word?: string;
-  isInput?: boolean;
-  isComposition?: boolean;
-  isWrong?: boolean;
-};
-type TypingRecordType = {
-  [key: number]: TypingRecordItemType[];
-};
+import type { SentenceArrItem, TypingRecordItemType, TypingRecordType } from '@/types';
 
 const LINE_HEIGHT = 70;
 const el = ref<HTMLElement | null>(null);
@@ -342,6 +325,10 @@ function mouseDownEvent() {
   focusInput();
 }
 
+function getTypingRecord() {
+  return state.typingRecord;
+}
+
 const r = computed(() => {
   // @ts-ignore
   let maxKey = Math.max(...Object.keys(state.typingRecord));
@@ -349,7 +336,8 @@ const r = computed(() => {
 });
 
 defineExpose({
-  focusInput
+  focusInput,
+  getTypingRecord
 });
 </script>
 

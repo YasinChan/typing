@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { inject, reactive, watch } from 'vue';
+import { inject, reactive, watch, ref } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
 import YModal from '@/components/ui/Modal.vue';
+import ResultContent from '@/components/ResultContent.vue';
+import Tooltip from '@/components/ui/Tooltip.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -12,26 +14,33 @@ import { useConfigStore } from '@/store/config';
 // files
 import Sentence from '@/files/Quote.json';
 
+// types
+import type { TypingRecordType } from '@/types';
+
 // svg
 import IcoSetting from '@/assets/svg/setting.svg';
 import IcoChange from '@/assets/svg/change.svg';
 import YInput from '@/components/ui/Input.vue';
 
 const message: any = inject('message');
+const confirm: any = inject('confirm');
+const wordInputRef = ref(null);
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain } = storeToRefs(useConfig);
-const customTime = [15, 30, 60, 120];
+const customTime = [1, 15, 30, 60, 120];
 
 const state = reactive({
   showSetTime: false,
   quote: {} as any,
   lastIndex: -1,
-  selectTime: 30 as number,
+  selectTime: 15 as number,
   countDown: null as null | number,
   errorText: '',
-  setCountDown: 0,
+  setCountDown: '' as any,
   isTyping: false,
-  intervalId: null as null | number
+  intervalId: null as null | number,
+  showResult: false,
+  typingRecord: {} as TypingRecordType
 });
 state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
 
@@ -49,17 +58,47 @@ watch(
             if (state.intervalId !== null) {
               clearInterval(state.intervalId);
               state.intervalId = null;
+              state.showResult = true;
+              state.typingRecord = wordInputRef.value?.getTypingRecord();
+              // confirm({
+              //   title: '时间到',
+              //   content: '是否继续？',
+              //   confirm: () => {
+              //     state.countDown = state.selectTime;
+              //   },
+              //   confirmText: '继续',
+              //   cancelText: '结束',
+              //   cancel: () => {
+              //     state.countDown = null;
+              //     if (state.intervalId !== null) {
+              //       clearInterval(state.intervalId);
+              //       state.intervalId = null;
+              //     }
+              //   }
+              // });
             }
           }
         }
       }, 1000);
     } else {
-      message({ message: '已结束' });
+      // message({ message: '已结束' });
       state.countDown = null;
       if (state.intervalId !== null) {
         clearInterval(state.intervalId);
         state.intervalId = null;
       }
+    }
+  }
+);
+
+watch(
+  () => state.setCountDown,
+  () => {
+    // @ts-ignore
+    if (!/\d+/.test(Number(state.setCountDown))) {
+      state.errorText = '请输入数字';
+    } else {
+      state.errorText = '';
     }
   }
 );
@@ -136,57 +175,68 @@ function countdownFunc(options: CountdownOptions): Countdown {
   };
 }
 function setTime() {
-  debugger;
-  if (!/\d+/.test(state.setCountDown)) {
+  // @ts-ignore
+  if (!/\d+/.test(Number(state.setCountDown))) {
     state.errorText = '请输入数字';
     return;
   }
   state.showSetTime = false;
   state.countDown = state.setCountDown;
 }
+function restart() {
+  state.isTyping = false;
+  state.showResult = false;
+}
 </script>
 <template>
   <main :class="'y-font--' + currentFont">
-    <div class="y-time-limit__setting">
-      <div v-if="state.countDown !== null" class="y-time-limit__count-down">
-        {{ state.countDown }}
-      </div>
-      <Transition name="menu">
-        <div
-          v-show="!onlyShowMain"
-          class="y-time-limit__setting-item y-time-limit__refresh"
-          @click="refresh"
-        >
-          <IcoChange></IcoChange>
+    <template v-if="!state.showResult">
+      <div class="y-time-limit__setting">
+        <div v-if="state.countDown !== null" class="y-time-limit__count-down">
+          {{ state.countDown }}
         </div>
-      </Transition>
-      <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__time">
-          <span
-            v-for="item in customTime"
-            :key="item"
-            class="y-time-limit__time-item"
-            :class="{ 'y-time-limit__time-item--active': state.selectTime === item }"
-            @click="selectTime(item)"
-            >{{ item }}</span
+        <Transition name="menu">
+          <div
+            v-show="!onlyShowMain"
+            class="y-time-limit__setting-item y-time-limit__refresh"
+            @click="refresh"
           >
-          <IcoSetting class="y-time-limit__time-svg" @click="state.showSetTime = true"></IcoSetting>
-        </div>
-      </Transition>
-    </div>
-
-    <WordInput :quote="state.quote?.content" @is-typing="isTyping"></WordInput>
-
-    <div class="y-time-limit__info">
-      ——
-      <span class="y-time-limit__info-title">
-        {{ state.quote?.title }}
-      </span>
-      -
-      <span class="y-time-limit__info-author">
-        {{ state.quote?.author }}
-      </span>
-    </div>
+            <Tooltip class="y-time-limit__time-svg" content="刷新">
+              <IcoChange></IcoChange>
+            </Tooltip>
+          </div>
+        </Transition>
+        <Transition name="menu">
+          <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__time">
+            <span
+              v-for="item in customTime"
+              :key="item"
+              class="y-time-limit__time-item"
+              :class="{ 'y-time-limit__time-item--active': state.selectTime === item }"
+              @click="selectTime(item)"
+              >{{ item }}</span
+            >
+            <Tooltip class="y-time-limit__time-svg" content="设置倒计时">
+              <IcoSetting @click="state.showSetTime = true"></IcoSetting>
+            </Tooltip>
+          </div>
+        </Transition>
+      </div>
+      <WordInput ref="wordInputRef" :quote="state.quote?.content" @is-typing="isTyping"></WordInput>
+      <div class="y-time-limit__info">
+        ——
+        <span class="y-time-limit__info-title">
+          {{ state.quote?.title }}
+        </span>
+        -
+        <span class="y-time-limit__info-author">
+          {{ state.quote?.author }}
+        </span>
+      </div>
+    </template>
+    <template v-else>
+      <ResultContent :typing-record="state.typingRecord" @restart="restart"></ResultContent>
+    </template>
   </main>
   <YModal :show="state.showSetTime" @close="state.showSetTime = false" @confirm="setTime">
     <template #header>
@@ -247,19 +297,33 @@ function setTime() {
 .y-time-limit__time-item {
   margin-right: 10px;
   cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    color: $main-color-hover;
+  }
 }
 .y-time-limit__time-item--active {
   color: $main-color;
 }
 .y-time-limit__time-svg {
-  width: 18px;
-  height: 18px;
-  fill: $gray-06;
-  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: $gray-06;
+    cursor: pointer;
+  }
 }
 .y-time-limit__refresh {
   cursor: pointer;
-  height: 18px;
   margin-right: 20px;
   svg {
     fill: $gray-06;
