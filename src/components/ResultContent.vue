@@ -231,6 +231,9 @@ function speedUp() {
     height: 24px;
     fill: $gray-06;
     cursor: pointer;
+    &:active {
+      fill: $main-color;
+    }
   }
   .result-content__speed-up-ratio {
     margin-left: 4px;
