@@ -10,6 +10,7 @@ import type { TypingRecordType, TypingRecordItemType } from '@/types';
 // svg
 import IcoReplay from '@/assets/svg/replay.svg';
 import IcoChange from '@/assets/svg/change.svg';
+import IcoSpeedUp from '@/assets/svg/speed-up.svg';
 
 const props = defineProps<{
   typingRecord?: TypingRecordType;
@@ -18,16 +19,17 @@ const props = defineProps<{
 const emit = defineEmits(['restart']);
 const state = reactive({
   currentTime: 0,
-  currentOperation: [] as TypingRecordItemType[],
+  currentOperation: null as TypingRecordItemType[] | null,
   timeoutArray: [] as number[],
   intervalId: null as null | number,
-  countDown: props.selectTime || 0,
+  countDown: (props.selectTime || 0) as any,
   totalWord: 0,
   wrongWord: 0,
   accuracy: '',
   accuracyInfo: '' as string,
   speed: '',
-  speedInfo: '' as string
+  speedInfo: '' as string,
+  playRatio: 1
 });
 
 const keys = computed(() => {
@@ -60,7 +62,7 @@ onMounted(() => {
 });
 
 function replay() {
-  console.log(props.typingRecord);
+  state.playRatio = 1;
   state.timeoutArray.forEach((timeout) => {
     clearTimeout(timeout);
   });
@@ -87,7 +89,7 @@ function executeTimeline() {
     if (currentIndex < keys.value.length) {
       const nextTime = keys.value[currentIndex];
       const delay = nextTime - currentTime;
-      const timeout = setTimeout(executeStep, delay * 100); // 延时执行下一个操作
+      const timeout = setTimeout(executeStep, (delay * 100) / state.playRatio); // 延时执行下一个操作
       state.timeoutArray.push(timeout);
     }
   }
@@ -95,23 +97,44 @@ function executeTimeline() {
   executeStep(); // 开始执行时间轴
 }
 
-function countDown() {
+function countDown(refresh = false) {
   if (state.intervalId !== null) {
     clearInterval(state.intervalId);
     state.intervalId = null;
   }
-  state.countDown = props.selectTime || 0;
+  if (!refresh) {
+    state.countDown = props.selectTime || 0;
+  }
   state.intervalId = setInterval(() => {
     if (state.countDown) {
-      state.countDown -= 1;
-      if (state.countDown < 1) {
+      state.countDown -= 0.1 * state.playRatio;
+      if (state.countDown % 1 === 0) {
+        state.countDown = String(state.countDown) + '.0';
+      } else {
+        state.countDown = Number(state.countDown.toFixed(1));
+      }
+      if (state.countDown < 0.1 * state.playRatio) {
         if (state.intervalId !== null) {
+          state.countDown = 0;
           clearInterval(state.intervalId);
           state.intervalId = null;
         }
       }
     }
-  }, 1000);
+  }, 100);
+}
+
+function speedUp() {
+  if (state.playRatio === 1) {
+    state.playRatio = 1.5;
+  } else if (state.playRatio === 1.5) {
+    state.playRatio = 2;
+  } else if (state.playRatio === 2) {
+    state.playRatio = 3;
+  } else if (state.playRatio === 3) {
+    state.playRatio = 1;
+  }
+  countDown(true);
 }
 </script>
 <template>
@@ -129,9 +152,15 @@ function countDown() {
       <IcoReplay @click="replay"></IcoReplay>
     </Tooltip>
   </div>
-  <div class="result-content__replay" v-if="state.currentOperation?.length">
+  <div class="result-content__replay" v-if="state.currentOperation">
     <div v-if="state.countDown !== null" class="result-content__count-down">
       {{ state.countDown }}
+    </div>
+    <div class="result-content__speed-up flex-center--y">
+      <Tooltip content="加速">
+        <IcoSpeedUp @click="speedUp"></IcoSpeedUp>
+      </Tooltip>
+      <span class="result-content__speed-up-ratio">{{ state.playRatio }} 倍速</span>
     </div>
     <span
       class="result-content__replay-item"
@@ -188,6 +217,24 @@ function countDown() {
   color: $main-color;
   font-size: 22px;
   font-weight: bold;
+}
+.result-content__speed-up {
+  user-select: none;
+  position: absolute;
+  top: -40px;
+  left: 60px;
+  color: $gray-04;
+  font-size: 14px;
+  font-weight: bold;
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: $gray-06;
+    cursor: pointer;
+  }
+  .result-content__speed-up-ratio {
+    margin-left: 4px;
+  }
 }
 .result-content__replay-item {
   .wrong {
