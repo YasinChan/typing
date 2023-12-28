@@ -45,8 +45,7 @@ const imgLoad = () => {
     right: 0;
     bottom: 0;
     left: 0;
-    background: url(https://tf.yasinchan.com/YDHpqNpF0xPDsxIiDCPOejwCdnsLi2bf/f83f561a35c2ef1b2ad3b4b1342ad249%20%281%29.png)
-      no-repeat;
+    background: url('@/assets/img/avatar.png') no-repeat;
     background-size: 100%;
     opacity: 0.6;
     z-index: -1;

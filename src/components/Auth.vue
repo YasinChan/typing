@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import avatar from '@/assets/img/avatar.png';
 import YModal from '@/components/ui/Modal.vue';
 import { inject, reactive, watch } from 'vue';
 import YInput from '@/components/ui/Input.vue';
@@ -326,11 +327,7 @@ const updatePassword = () => {
       "
       class="y-auth__login-img-wrap flex-center"
     >
-      <img
-        class="y-auth__login-img"
-        src="https://tf.yasinchan.com/aAo3RCau7RL9WsKC8I5TScUVmQaLLmA7/f83f561a35c2ef1b2ad3b4b1342ad249.png"
-        alt="user"
-      />
+      <img class="y-auth__login-img" :src="avatar" alt="user" />
     </div>
   </div>
   <YModal :show="obj.showLogin" @close="obj.showLogin = false">

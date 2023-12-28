@@ -27,6 +27,7 @@ const { onlyShowMain } = storeToRefs(useConfig);
 setTheme(getTheme());
 
 const obj = reactive({
+  showRemind: true,
   showChangeFontModal: false,
   userName: '',
   password: '',
@@ -101,7 +102,13 @@ function showConfirmModal({
 </script>
 
 <template>
-  <div v-if="'showRemind' in config && config.showRemind" class="y-remind">{{ config.remind }}</div>
+  <div
+    v-if="'showRemind' in config && config.showRemind && obj.showRemind"
+    @click="obj.showRemind = false"
+    class="y-remind"
+  >
+    {{ config.remind }}
+  </div>
   <header>
     <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
       <a href="/" class="y-info__title main-color">Typing</a>
@@ -197,6 +204,7 @@ function showConfirmModal({
   color: $main-orange;
   font-weight: bold;
   background: $main-color-gradient;
+  cursor: pointer;
 }
 header {
   display: flex;

@@ -33,10 +33,10 @@ const state = reactive({
   showSetTime: false,
   quote: {} as any,
   lastIndex: -1,
-  selectTime: 15 as number,
-  countDown: null as null | number,
+  selectTime: 15 as number, // 设置的倒计时
+  countDown: null as null | number, // 实时倒计时
   errorText: '',
-  setCountDown: '' as any,
+  setCountDown: '' as any, // 自定义的倒计时
   isTyping: false,
   intervalId: null as null | number,
   showResult: false,
@@ -175,13 +175,18 @@ function countdownFunc(options: CountdownOptions): Countdown {
   };
 }
 function setTime() {
+  if (!state.setCountDown) {
+    state.showSetTime = false;
+    return;
+  }
   // @ts-ignore
   if (!/\d+/.test(Number(state.setCountDown))) {
     state.errorText = '请输入数字';
     return;
   }
+  refresh();
   state.showSetTime = false;
-  state.countDown = state.setCountDown;
+  state.selectTime = state.setCountDown;
 }
 function restart() {
   state.isTyping = false;
@@ -208,15 +213,17 @@ function restart() {
         </Transition>
         <Transition name="menu">
           <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__time">
-            <span
-              v-for="item in customTime"
-              :key="item"
-              class="y-time-limit__time-item"
-              :class="{ 'y-time-limit__time-item--active': state.selectTime === item }"
-              @click="selectTime(item)"
-              >{{ item }}</span
-            >
-            <Tooltip class="y-time-limit__time-svg" content="设置倒计时">
+            <Tooltip content="选择倒计时">
+              <span
+                v-for="item in customTime"
+                :key="item"
+                class="y-time-limit__time-item"
+                :class="{ 'y-time-limit__time-item--active': state.selectTime === item }"
+                @click="selectTime(item)"
+                >{{ item }}</span
+              >
+            </Tooltip>
+            <Tooltip class="y-time-limit__time-svg" content="自定义倒计时">
               <IcoSetting @click="state.showSetTime = true"></IcoSetting>
             </Tooltip>
           </div>
@@ -252,7 +259,7 @@ function restart() {
           :error-text="state.errorText"
           class="time-limit__q"
           v-model="state.setCountDown"
-          placeholder="请输入倒计时"
+          placeholder="请输入倒计时 单位：秒"
         ></YInput>
       </div>
     </template>
