@@ -301,7 +301,7 @@ const updatePassword = () => {
 
 <template>
   <div class="y-auth flex-center">
-    <y-drop-down v-if="'userName' in profile && profile.userName">
+    <y-drop-down class="y-auth__login flex-center" v-if="'userName' in profile && profile.userName">
       <template #title>
         <div class="y-auth__login-img-wrap--login flex-center">
           <y-image class="y-auth__login-img" :src="profile.avatar" alt="user"></y-image>
@@ -457,6 +457,10 @@ const updatePassword = () => {
   .y-drop-down__menu {
     margin: 10px 0;
   }
+}
+.y-auth__login {
+  width: 44px;
+  height: 44px;
 }
 .y-auth__login-img-wrap {
   width: 44px;
