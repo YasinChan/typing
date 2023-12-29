@@ -16,20 +16,34 @@ export type profileType = {
 export type configType = {
   showRemind: boolean;
   latestUserId: string;
-  region: string;
+  region: Record<string, any>;
   remind: string;
   updatedAt: string;
 };
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    profile: {} as profileType | {},
-    config: {} as configType | {}
+    profile: {} as Partial<profileType>,
+    config: {} as Partial<configType>
   }),
   getters: {
     myUserId(): any {
       if ('userId' in this.profile) {
         return this.profile.userId;
+      }
+      return '';
+    },
+    regionFormat(): string[] {
+      if ('region' in this.config) {
+        const region = this.config.region?.region || '';
+        // 国家|区域|省份|城市|ISP
+        return region.split('|');
+      }
+      return [];
+    },
+    getProvince(): string {
+      if (this.regionFormat.length) {
+        return this.regionFormat[2];
       }
       return '';
     }

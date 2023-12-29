@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { watch } from 'vue';
 import YButton from '@/components/ui/Button.vue';
-const props = defineProps({
-  show: {
-    default: false,
-    type: Boolean
+import IcoClose from '@/assets/svg/close.svg';
+const props = withDefaults(
+  defineProps<
+    Partial<{
+      show: boolean;
+      className: string;
+    }>
+  >(),
+  {
+    show: false
   }
-});
+);
 
 const emit = defineEmits(['close', 'confirm']);
 
@@ -35,9 +41,10 @@ watch(
   <Transition name="modal">
     <Teleport to="body">
       <div v-if="show" class="y-modal__mask" @click="emit('close')">
-        <div class="y-modal__container" @click.stop>
-          <div class="y-modal__header">
+        <div class="y-modal__container" :class="className" @click.stop>
+          <div class="y-modal__header flex-center--y">
             <slot name="header">default header</slot>
+            <IcoClose @click="emit('close')"></IcoClose>
           </div>
 
           <div class="y-modal__body">
@@ -46,7 +53,7 @@ watch(
 
           <div class="y-modal__footer">
             <slot name="footer">
-              <y-button @click="emit('confirm')">确定</y-button>
+              <YButton @click="emit('confirm')">确定</YButton>
             </slot>
           </div>
         </div>
@@ -71,22 +78,41 @@ watch(
 .y-modal__container {
   width: 300px;
   margin: auto;
-  padding: 20px 30px;
+  padding: 20px;
   background-color: $layout-background-gray;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 72px;
 }
 
 .y-modal__header {
   color: $gray-08;
+  justify-content: space-between;
+  width: 100%;
   h3 {
     margin-top: 0;
+  }
+  svg {
+    fill: $gray-08;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
   }
 }
 
 .y-modal__body {
   margin: 20px 0;
+}
+
+.y-modal__footer {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  bottom: 0;
+  background-color: $layout-background-gray;
 }
 
 .modal-enter-from {

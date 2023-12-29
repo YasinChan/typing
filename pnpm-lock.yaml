@@ -16,6 +16,7 @@ specifiers:
   eslint-plugin-vue: ^9.11.0
   js-cookie: ^3.0.5
   lodash: ^4.17.21
+  nanoid: ^5.0.4
   npm-run-all: ^4.1.5
   pinia: ^2.1.4
   pinyin-pro: ^3.15.4
@@ -33,6 +34,7 @@ dependencies:
   axios: 1.4.0
   js-cookie: 3.0.5
   lodash: 4.17.21
+  nanoid: 5.0.4
   pinia: 2.1.4_typescript@5.0.4+vue@3.3.4
   pinyin-pro: 3.15.4
   vite-svg-loader: 5.1.0_vue@3.3.4
@@ -2307,6 +2309,12 @@ packages:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid/5.0.4:
+    resolution: {integrity: sha512-vAjmBf13gsmhXSgBrtIclinISzFFy22WwCYoyilZlsrRXNIHSwgFQ1bEdjRwMT3aoadeIF6HMuDRlOxzfXV8ig==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: false
 
   /natural-compare-lite/1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}
