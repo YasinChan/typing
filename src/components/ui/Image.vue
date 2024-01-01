@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-const props = defineProps({
+defineProps({
   src: {
     type: String,
     default: ''
@@ -10,7 +10,7 @@ const props = defineProps({
     default: ''
   }
 });
-const emitter = defineEmits(['click']);
+const emit = defineEmits(['click']);
 const state = reactive({
   showImg: false
 });
@@ -56,6 +56,7 @@ const imgLoad = () => {
   opacity: 0;
   width: 100%;
   height: 100%;
+  background: $layout-background-gray;
 }
 .y-image__img--show {
   opacity: 1;

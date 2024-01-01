@@ -25,7 +25,7 @@ const handlerClick = () => {
 
 <template>
   <button
-    @click="handlerClick"
+    v-throttle-click:1000="handlerClick"
     :disabled="disable"
     :form="form"
     class="y-button"

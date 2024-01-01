@@ -1,0 +1,305 @@
+<script lang="ts" setup>
+import { computed, reactive, onMounted, inject } from 'vue';
+import { nanoid } from 'nanoid';
+import dayjs from 'dayjs';
+
+// components
+import YTextarea from '@/components/ui/Textarea.vue';
+import YModal from '@/components/ui/Modal.vue';
+import YButton from '@/components/ui/Button.vue';
+import YTag from '@/components/ui/Tag.vue';
+
+// stores
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '@/store/user';
+
+// apis
+import { getSuggest, createSuggest } from '@/request';
+
+// svg
+import IcoUp from '@/assets/svg/up.svg';
+import IcoFilter from '@/assets/svg/filter.svg';
+
+const userStore = useUserStore();
+const { profile, getProvince } = storeToRefs(userStore);
+
+type SuggestItem = {
+  id: string;
+  content: string;
+  updatedAt: string;
+  userName: string;
+  userId: string;
+  up: number;
+  canShow: boolean;
+  down: number;
+  accept: boolean;
+  done: boolean;
+};
+
+const message: any = inject('message');
+const state = reactive({
+  show: false,
+  isAnonymity: false,
+  suggestList: [] as SuggestItem[],
+  currentSort: 'time' as 'time' | 'hot',
+  suggestContent: ''
+});
+
+onMounted(() => {
+  getSuggestList();
+});
+
+const replyName = computed(() => {
+  if (profile.value?.userName) {
+    return profile.value.userName;
+  } else if (getProvince.value) {
+    return `来自${getProvince.value}的用户 - ${nanoid(4)}`;
+  }
+  return '';
+});
+
+async function getSuggestList(sort?: 'time' | 'hot') {
+  const suggest = await getSuggest({ sort });
+  const suggetList: SuggestItem[] = suggest.data?.result?.suggest || [];
+  const done = suggetList.filter((item) => item.done);
+  const accept = suggetList.filter((item) => !item.done).filter((item) => item.accept);
+  const left = suggetList.filter((item) => !item.accept && !item.done);
+  state.suggestList = [...done, ...accept, ...left];
+}
+
+function showSuggest() {
+  state.show = true;
+}
+
+function filter() {
+  if (state.currentSort === 'time') {
+    state.currentSort = 'hot';
+    getSuggestList('hot');
+  } else {
+    state.currentSort = 'time';
+    getSuggestList('time');
+  }
+}
+
+async function confirmSuggest() {
+  try {
+    let params: any = {
+      content: state.suggestContent
+    };
+    if (!state.isAnonymity) {
+      if (profile.value?.userName && profile.value?.userId) {
+        params = {
+          content: state.suggestContent,
+          userId: profile.value?.userId,
+          userName: profile.value?.userName
+        };
+      } else if (replyName.value) {
+        params = {
+          content: state.suggestContent,
+          userName: replyName.value
+        };
+      }
+    }
+    const res = await createSuggest(params);
+    state.suggestContent = '';
+    if (res.data?.message) {
+      message({ message: res.data?.message });
+    } else {
+      message({ message: '发布成功' });
+    }
+  } catch (error: any) {
+    const msg = error.response?.data?.message;
+    message({ message: msg, type: 'error' });
+  }
+}
+
+function upClick(id: string) {
+  console.log('----------', 'id', id, '----------cyy log');
+}
+function downClick(id: string) {
+  console.log('----------', 'id', id, '----------cyy log');
+}
+
+defineExpose({
+  showSuggest
+});
+</script>
+<template>
+  <YModal
+    class-name="y-submit-suggest__modal"
+    :show="state.show"
+    @close="state.show = false"
+    @confirm="state.show = false"
+  >
+    <template #header>
+      <h3>建议</h3>
+    </template>
+    <template #body>
+      <div class="y-submit-suggest__tips flex-center--y-between">
+        <span>*各位提出的建议将会收集整理后发布在此。</span>
+        <span class="y-submit-suggest__filter flex-center--y" v-throttle-click:500="filter"
+          ><IcoFilter></IcoFilter>{{ state.currentSort === 'time' ? '最新' : '最热' }}</span
+        >
+      </div>
+      <div
+        class="y-submit-suggest__list gray-08"
+        :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
+        v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"
+        :key="item.id"
+      >
+        <div class="y-submit-suggest__list-content">
+          <YTag v-if="item.done" text="已完成"></YTag>
+          <YTag v-if="item.accept" text="已采纳"></YTag>
+          {{ item.content }}
+        </div>
+        <div class="y-submit-suggest__list-info">
+          <div class="y-submit-suggest__list-data">
+            <span
+              v-throttle-click:1000="upClick.bind(null, item.id)"
+              class="y-submit-suggest__list-data-up"
+            >
+              <IcoUp></IcoUp>
+              {{ item.up ? item.up : '' }}
+            </span>
+            <span
+              v-throttle-click:1000="downClick.bind(null, item.id)"
+              class="y-submit-suggest__list-data-down"
+            >
+              <IcoUp></IcoUp>
+              {{ item.down ? item.down : '' }}
+            </span>
+          </div>
+          <div>
+            <span class="gray-08">{{ item.userName }}</span>
+            <span> · </span>
+            <span class="gray-06">{{ dayjs(item.updatedAt).format('YY-MM-DD HH:mm') }}</span>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <div class="y-submit-suggest__reply gray-08">
+        <p class="y-submit-suggest__reply-title">回复</p>
+        <div class="y-submit-suggest__reply-name" v-if="replyName">
+          发布者：
+          <span @click="state.isAnonymity = false" :class="{ active: !state.isAnonymity }">{{
+            replyName
+          }}</span>
+          <span>/</span>
+          <span @click="state.isAnonymity = true" :class="{ active: state.isAnonymity }"
+            >匿名发布</span
+          >
+        </div>
+        <YTextarea placeholder="请提出你的建议~" v-model="state.suggestContent"></YTextarea>
+        <YButton
+          :disable="!state.suggestContent"
+          style="margin-top: 10px"
+          size="small"
+          @click="confirmSuggest"
+          >确定</YButton
+        >
+      </div>
+    </template>
+  </YModal>
+</template>
+<style lang="scss">
+.y-submit-suggest.tooltip {
+  position: fixed;
+  right: 60px;
+  bottom: 20px;
+  .y-submit-suggest__svg {
+    width: 30px;
+    height: 30px;
+    fill: $main-color;
+    cursor: pointer;
+    z-index: 999;
+  }
+}
+.y-submit-suggest__modal {
+  width: 800px;
+  height: 80vh;
+  .y-modal__body {
+    max-height: calc(80vh - 256px);
+    overflow: auto;
+    padding-bottom: 20px;
+  }
+  .y-modal__footer {
+    border-top: 1px solid $gray-02;
+    padding-top: 10px;
+  }
+}
+.y-submit-suggest__tips {
+  color: $gray-04;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.y-submit-suggest__filter {
+  cursor: pointer;
+  svg {
+    fill: $gray-06;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+}
+
+.y-submit-suggest__list {
+  padding: 16px 8px;
+  font-size: 14px;
+}
+.y-submit-suggest__list-even {
+  background: $background-gray;
+}
+.y-submit-suggest__list-content {
+  margin-bottom: 4px;
+  line-height: 20px;
+}
+.y-submit-suggest__list-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.y-submit-suggest__list-data {
+  display: flex;
+  align-items: center;
+}
+.y-submit-suggest__list-data-up,
+.y-submit-suggest__list-data-down {
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  width: 40px;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+  svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    fill: $gray-06;
+  }
+}
+.y-submit-suggest__list-data-down {
+  svg {
+    transform: rotate(180deg);
+  }
+}
+
+.y-submit-suggest__reply-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+.y-submit-suggest__reply-name {
+  padding-bottom: 10px;
+  font-size: 14px;
+  span {
+    margin-right: 10px;
+    cursor: pointer;
+    color: $gray-04;
+    &.active {
+      color: $main-color;
+    }
+  }
+}
+</style>

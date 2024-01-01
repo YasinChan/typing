@@ -70,11 +70,22 @@ a {
   display: flex;
   align-items: center;
 }
+.flex-center--y-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .main-color {
   color: $main-color;
 }
 .gray-08 {
   color: $gray-08;
+}
+.gray-06 {
+  color: $gray-06;
+}
+.gray-04 {
+  color: $gray-04;
 }
 
 .cursor-pointer {

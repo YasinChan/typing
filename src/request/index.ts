@@ -46,3 +46,18 @@ export const updatePasswordWithAnswer = (params: {
 export const postVerifyAnswer = (params: { userName: string; answer: string }) => {
   return axios.post('/api/users/verify-answer', params);
 };
+
+// 获取建议
+export const getSuggest = (params?: { sort?: 'time' | 'hot' }) => {
+  return axios.get('/api/suggest', { params });
+};
+
+// 提出建议
+export const createSuggest = (params: { content: string; userId?: string; userName?: string }) => {
+  return axios.post('/api/suggest/create', params);
+};
+
+// 获取将要做的列表
+export const getTodo = () => {
+  return axios.get('/api/todo');
+};

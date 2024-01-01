@@ -4,6 +4,7 @@ import QuoteLimit from '@/view/QuoteLimit.vue';
 import TypingKeyboard from '@/view/TypingKeyboard.vue';
 import CustomPage from '@/view/CustomPage.vue';
 import User from '@/view/User.vue';
+import Log from '@/view/Log.vue';
 
 export default [
   { path: '/', name: 'TimeLimit', component: TimeLimit },
@@ -11,5 +12,6 @@ export default [
   { path: '/quote', name: 'QuoteLimit', component: QuoteLimit },
   { path: '/keyboard', name: 'TypingKeyboard', component: TypingKeyboard },
   { path: '/custom', name: 'Custom', component: CustomPage },
-  { path: '/user/:id', name: 'User', component: User }
+  { path: '/user/:id', name: 'User', component: User },
+  { path: '/log', name: 'Log', component: Log }
 ];

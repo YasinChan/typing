@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import { computed, inject, reactive, watch } from 'vue';
 import avatar from '@/assets/img/avatar.png';
+
+// components
 import YModal from '@/components/ui/Modal.vue';
-import { inject, reactive, watch } from 'vue';
 import YInput from '@/components/ui/Input.vue';
 import YButton from '@/components/ui/Button.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
+import YImage from '@/components/ui/Image.vue';
+
+// apis
 import {
   getUserInfo,
   postLogin,
@@ -13,11 +18,16 @@ import {
   postVerifyAnswer,
   updatePasswordWithAnswer
 } from '@/request';
-import YImage from '@/components/ui/Image.vue';
+
+// config
 import { EMAIL_REG, PASSWORD_REG, USERNAME_REG } from '@/common/reg';
 
+// stores
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
+
+// utils
+import { generateAvatar } from '@/utils/generate-avatar';
 
 const obj = reactive({
   showLogin: false,
@@ -46,6 +56,10 @@ const obj = reactive({
 });
 
 const message: any = inject('message');
+
+const avatarUrl = computed(() => {
+  return profile.value?.userName ? generateAvatar(profile.value.userName) : '';
+});
 
 const reset = () => {
   obj.userName = '';
@@ -304,7 +318,7 @@ const updatePassword = () => {
     <y-drop-down class="y-auth__login flex-center" v-if="'userName' in profile && profile.userName">
       <template #title>
         <div class="y-auth__login-img-wrap--login flex-center">
-          <y-image class="y-auth__login-img" :src="profile.avatar" alt="user"></y-image>
+          <y-image class="y-auth__login-img" :src="avatarUrl" alt="user"></y-image>
         </div>
       </template>
       <template #menu>
@@ -491,6 +505,9 @@ const updatePassword = () => {
 .y-auth__menu {
   white-space: nowrap;
   font-size: 14px;
+  .router-link-active {
+    color: $main-color;
+  }
 }
 .y-auth__menu-item {
   border-radius: 2px;

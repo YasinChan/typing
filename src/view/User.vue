@@ -1,14 +1,24 @@
 <script setup lang="ts">
+import { reactive, watch, inject, computed } from 'vue';
 import { useRouter } from 'vue-router';
+
+// api
 import { getUserInfo, setPersonalInfo, updatePassword } from '@/request';
-import { reactive, watch, inject } from 'vue';
+
+// components
 import YModal from '@/components/ui/Modal.vue';
 import YInput from '@/components/ui/Input.vue';
 import YImage from '@/components/ui/Image.vue';
+
+// config
 import { EMAIL_REG, PASSWORD_REG } from '@/common/reg';
 
+// stores
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
+
+// utils
+import { generateAvatar } from '@/utils/generate-avatar';
 
 const userStore = useUserStore();
 const { profile, myUserId } = storeToRefs(userStore);
@@ -36,6 +46,10 @@ const state = reactive({
 });
 
 const router = useRouter();
+
+const avatarUrl = computed(() => {
+  return state.info.userName ? generateAvatar(state.info.userName) : '';
+});
 
 watch(
   () => router.currentRoute.value.params,
@@ -163,7 +177,7 @@ const setResetAvatar = () => {
 <template>
   <div class="y-user y-main">
     <div class="y-user__info">
-      <y-image class="y-user__image" :src="state.info.avatar"></y-image>
+      <y-image class="y-user__image" :src="avatarUrl"></y-image>
       <div class="y-user__name-info">
         <div class="y-user__user-name">
           {{ state.info.userName }}

@@ -32,6 +32,12 @@ watch(
     immediate: true
   }
 );
+watch(
+  () => props.modelValue,
+  (val) => {
+    state.value = val as string;
+  }
+);
 </script>
 <template>
   <div class="y-textarea">

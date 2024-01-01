@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, provide, onMounted, computed } from 'vue';
+import { reactive, provide, onMounted, computed, ref, nextTick } from 'vue';
 import { nanoid } from 'nanoid';
 
 // components
@@ -9,8 +9,7 @@ import YModal from '@/components/ui/Modal.vue';
 import ListItem from '@/components/ui/ListItem.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
-import YTextarea from '@/components/ui/Textarea.vue';
-import YButton from '@/components/ui/Button.vue';
+import SuggestModal from '@/components/SuggestModal.vue';
 
 // utils
 import { setTheme, getTheme } from '@/common/theme';
@@ -23,12 +22,13 @@ import { storeToRefs } from 'pinia';
 // svg
 import IcoMessage from '@/assets/svg/message.svg';
 
+const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
 const useConfig = useConfigStore();
 
-const { config, profile, getProvince } = storeToRefs(userStore);
+const { config } = storeToRefs(userStore);
 const { onlyShowMain } = storeToRefs(useConfig);
 
 setTheme(getTheme());
@@ -36,7 +36,6 @@ setTheme(getTheme());
 const obj = reactive({
   showRemind: true,
   showSuggest: false,
-  isAnonymity: false,
   showChangeFontModal: false,
   userName: '',
   password: '',
@@ -59,14 +58,6 @@ provide('message', (obj: any) => {
 
 provide('confirm', (obj: any) => {
   showConfirmModal(obj);
-});
-
-const replyName = computed(() => {
-  if (profile.value?.userName) {
-    return profile.value.userName;
-  } else {
-    return `来自${getProvince.value}的用户 - ${nanoid(4)}`;
-  }
 });
 
 onMounted(() => {
@@ -138,6 +129,14 @@ function showConfirmModal({
   obj.confirmClose = confirmClose;
   obj.confirm = confirm;
 }
+
+async function suggestClick() {
+  obj.showSuggest = true;
+  await nextTick();
+  if (suggestModalRef.value) {
+    suggestModalRef.value.showSuggest();
+  }
+}
 </script>
 
 <template>
@@ -158,7 +157,7 @@ function showConfirmModal({
         <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
         <router-link to="/words" class="y-menu__item">词/成语模式</router-link>
         <router-link to="/quote" class="y-menu__item">句子模式</router-link>
-        <router-link to="/custom" class="y-menu__item">自定义</router-link>
+        <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
         <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
           >键盘测试</router-link
         >
@@ -179,6 +178,7 @@ function showConfirmModal({
                 切换字体
               </div>
               <div class="y-menu__change" @click="changeTheme">切换主题</div>
+              <router-link to="/log" class="y-menu__change">更新日志</router-link>
             </div>
           </template>
         </y-drop-down>
@@ -193,39 +193,10 @@ function showConfirmModal({
 
   <Transition name="menu">
     <Tooltip v-if="!onlyShowMain" class="y-submit-suggest" content="提出建议">
-      <IcoMessage @click="obj.showSuggest = true" class="y-submit-suggest__svg"></IcoMessage>
+      <IcoMessage @click="suggestClick" class="y-submit-suggest__svg"></IcoMessage>
     </Tooltip>
   </Transition>
-
-  <YModal
-    class-name="y-submit-suggest__modal"
-    :show="obj.showSuggest"
-    @close="obj.showSuggest = false"
-    @confirm="obj.showSuggest = false"
-  >
-    <template #header>
-      <h3>建议</h3>
-    </template>
-    <template #body>
-      <div class="y-submit-suggest__tips">*各位提出的建议将会收集整理后发布在此。</div>
-      <div class="gray-08">asdfasdf</div>
-    </template>
-    <template #footer>
-      <div class="y-submit-suggest__reply gray-08">
-        <p class="y-submit-suggest__reply-title">回复</p>
-        <div class="y-submit-suggest__reply-name">
-          发布者：
-          <span @click="obj.isAnonymity = false" :class="{ active: !obj.isAnonymity }">{{
-            replyName
-          }}</span>
-          <span>/</span>
-          <span @click="obj.isAnonymity = true" :class="{ active: obj.isAnonymity }">匿名发布</span>
-        </div>
-        <YTextarea placeholder="请提出你的建议~"></YTextarea>
-        <YButton style="margin-top: 10px" size="small">确定</YButton>
-      </div>
-    </template>
-  </YModal>
+  <SuggestModal ref="suggestModalRef" v-if="obj.showSuggest"></SuggestModal>
 
   <YModal
     :show="obj.showChangeFontModal"
@@ -270,6 +241,7 @@ function showConfirmModal({
 <style lang="scss">
 .y-remind {
   position: fixed;
+  z-index: 1;
   top: 0;
   left: 0;
   width: 100%;
@@ -347,6 +319,7 @@ header {
   padding: 10px 15px;
   display: block;
   transition: background 0.2s;
+  color: inherit;
   &:hover {
     background: $layout-background-gray-hover;
   }
@@ -379,47 +352,5 @@ main {
 .menu-enter-from,
 .menu-leave-to {
   opacity: 0;
-}
-
-.y-submit-suggest.tooltip {
-  position: fixed;
-  right: 60px;
-  bottom: 20px;
-  .y-submit-suggest__svg {
-    width: 30px;
-    height: 30px;
-    fill: $main-color;
-    cursor: pointer;
-    z-index: 999;
-  }
-}
-.y-submit-suggest__modal {
-  width: 800px;
-  height: 60vh;
-  .y-modal__footer {
-    border-top: 1px solid $gray-02;
-    padding-top: 10px;
-  }
-}
-.y-submit-suggest__tips {
-  color: $gray-04;
-  font-size: 14px;
-}
-.y-submit-suggest__reply-title {
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-.y-submit-suggest__reply-name {
-  padding-bottom: 10px;
-  font-size: 14px;
-  span {
-    margin-right: 10px;
-    cursor: pointer;
-    color: $gray-04;
-    &.active {
-      color: $main-color;
-    }
-  }
 }
 </style>
