@@ -27,7 +27,7 @@ const confirm: any = inject('confirm');
 const wordInputRef = ref<any>(null);
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain } = storeToRefs(useConfig);
-const customTime = [1, 15, 30, 60, 120];
+const customTime = [15, 30, 60, 120];
 
 const state = reactive({
   showSetTime: false,

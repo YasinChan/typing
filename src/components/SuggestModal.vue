@@ -14,7 +14,7 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
 
 // apis
-import { getSuggest, createSuggest } from '@/request';
+import { getSuggest, createSuggest, voteSuggest } from '@/request';
 
 // svg
 import IcoUp from '@/assets/svg/up.svg';
@@ -113,11 +113,117 @@ async function confirmSuggest() {
   }
 }
 
+function getVoteInfo(id: string) {
+  return localStorage.getItem('typing:vote:' + id);
+}
+function setVoteInfo(id: string, value: string) {
+  // 这里的 value 只能是 '1' '-1' '0'
+  if (value === '0') {
+    localStorage.removeItem('typing:vote:' + id);
+    return;
+  }
+  localStorage.setItem('typing:vote:' + id, value);
+}
+
 function upClick(id: string) {
-  console.log('----------', 'id', id, '----------cyy log');
+  // value '3' 表示 up - 1 down 不动
+  // value '2' 表示 up + 1 down - 1
+  // value '1' 表示 up + 1 down 不动
+  // value '-1' 表示 up 不动 down + 1
+  // value '-2' 表示 up - 1 down + 1
+  // value '-3' 表示 up 不动 down - 1
+  const voteInfo = getVoteInfo(id);
+  if (voteInfo === '1') {
+    voteSuggest({
+      id,
+      value: '3'
+    }).then((res) => {
+      message({ message: '取消投票' });
+      setVoteInfo(id, '0');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.up = item.up - 1;
+        }
+        return item;
+      });
+    });
+  } else if (voteInfo === '-1') {
+    voteSuggest({
+      id,
+      value: '2'
+    }).then((res) => {
+      message({ message: '已投票' });
+      setVoteInfo(id, '1');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.up = item.up + 1;
+          item.down = item.down - 1;
+        }
+        return item;
+      });
+    });
+  } else {
+    voteSuggest({
+      id,
+      value: '1'
+    }).then((res) => {
+      message({ message: '已投票' });
+      setVoteInfo(id, '1');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.up = item.up + 1;
+        }
+        return item;
+      });
+    });
+  }
 }
 function downClick(id: string) {
-  console.log('----------', 'id', id, '----------cyy log');
+  const voteInfo = getVoteInfo(id);
+  if (voteInfo === '1') {
+    voteSuggest({
+      id,
+      value: '-2'
+    }).then((res) => {
+      message({ message: '已投票' });
+      setVoteInfo(id, '-1');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.up = item.up - 1;
+          item.down = item.down + 1;
+        }
+        return item;
+      });
+    });
+  } else if (voteInfo === '-1') {
+    voteSuggest({
+      id,
+      value: '-3'
+    }).then((res) => {
+      message({ message: '取消投票' });
+      setVoteInfo(id, '0');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.down = item.down - 1;
+        }
+        return item;
+      });
+    });
+  } else {
+    voteSuggest({
+      id,
+      value: '-1'
+    }).then((res) => {
+      message({ message: '已投票' });
+      setVoteInfo(id, '-1');
+      state.suggestList = state.suggestList.map((item) => {
+        if (item.id === id) {
+          item.down = item.down + 1;
+        }
+        return item;
+      });
+    });
+  }
 }
 
 defineExpose({
@@ -155,24 +261,26 @@ defineExpose({
         <div class="y-submit-suggest__list-info">
           <div class="y-submit-suggest__list-data">
             <span
-              v-throttle-click:1000="upClick.bind(null, item.id)"
+              v-throttle-click:2000="upClick.bind(null, item.id)"
               class="y-submit-suggest__list-data-up"
+              :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1' }"
             >
               <IcoUp></IcoUp>
               {{ item.up ? item.up : '' }}
             </span>
             <span
-              v-throttle-click:1000="downClick.bind(null, item.id)"
+              v-throttle-click:2000="downClick.bind(null, item.id)"
               class="y-submit-suggest__list-data-down"
+              :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '-1' }"
             >
               <IcoUp></IcoUp>
               {{ item.down ? item.down : '' }}
             </span>
           </div>
           <div>
-            <span class="gray-08">{{ item.userName }}</span>
-            <span> · </span>
-            <span class="gray-06">{{ dayjs(item.updatedAt).format('YY-MM-DD HH:mm') }}</span>
+            <span v-if="item.userName" class="gray-08">{{ item.userName }}</span>
+            <span v-if="item.userName"> · </span>
+            <span class="gray-06">{{ dayjs(item.updatedAt).format('YY/MM/DD HH:mm') }}</span>
           </div>
         </div>
       </div>
@@ -262,6 +370,7 @@ defineExpose({
 .y-submit-suggest__list-data {
   display: flex;
   align-items: center;
+  height: 18px;
 }
 .y-submit-suggest__list-data-up,
 .y-submit-suggest__list-data-down {
@@ -282,6 +391,12 @@ defineExpose({
 .y-submit-suggest__list-data-down {
   svg {
     transform: rotate(180deg);
+  }
+}
+.y-submit-suggest__list-data--active {
+  color: $main-color;
+  svg {
+    fill: $main-color;
   }
 }
 

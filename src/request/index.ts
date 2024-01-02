@@ -57,6 +57,10 @@ export const createSuggest = (params: { content: string; userId?: string; userNa
   return axios.post('/api/suggest/create', params);
 };
 
+export const voteSuggest = (params: { id: string; value: string }) => {
+  return axios.post('/api/suggest/vote', params);
+};
+
 // 获取将要做的列表
 export const getTodo = () => {
   return axios.get('/api/todo');
