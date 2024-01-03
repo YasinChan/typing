@@ -2,6 +2,7 @@
 import { ref, onMounted, reactive, nextTick, watch, unref } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
+// @ts-ignore
 import cloneDeep from 'lodash/cloneDeep';
 import type { SentenceArrItem, TypingRecordItemType, TypingRecordType } from '@/types';
 
@@ -11,11 +12,17 @@ const { y } = useScroll(el, { behavior: 'smooth' });
 const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单，这些字符不会被标记为错误
 const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’']; // composition 状态下的字符
 const inputAreaRef = ref<HTMLElement | null>(null);
-const props = defineProps<{
-  quote: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    quote: string;
+    showMask?: boolean;
+  }>(),
+  {
+    showMask: true
+  }
+);
 
-const emit = defineEmits(['is-typing']);
+const emit = defineEmits(['is-typing', 'keydown-event']);
 
 const state = reactive({
   currentAreaHeight: LINE_HEIGHT,
@@ -312,6 +319,7 @@ function pasteEvent(e: ClipboardEvent) {
   e.preventDefault();
 }
 function keyDownEvent(e: KeyboardEvent) {
+  emit('keydown-event', e);
   if (e.code === KEY_CODE_ENUM['ENTER'] || e.code === KEY_CODE_ENUM['SPACE']) {
     e.preventDefault();
   }
@@ -324,6 +332,14 @@ function keyDownEvent(e: KeyboardEvent) {
   }
   if ((e.metaKey || e.ctrlKey) && e.code === KEY_CODE_ENUM['KEY_A']) {
     // ctrl + a 禁止 或者 command + a 禁止
+    e.preventDefault();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.code === KEY_CODE_ENUM['KEY_Z']) {
+    // ctrl + z 禁止 或者 command + z 禁止
+    e.preventDefault();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.code === KEY_CODE_ENUM['BACKSPACE']) {
+    // ctrl + back space 禁止 或者 command + back space 禁止
     e.preventDefault();
   }
 }
@@ -367,7 +383,7 @@ defineExpose({
     <Transition name="mask">
       <div v-if="y > 0" class="y-word-input__mask"></div>
     </Transition>
-    <div class="y-word-input__mask-bottom"></div>
+    <div class="y-word-input__mask-bottom" v-if="showMask"></div>
     <div class="y-word-input" ref="el">
       <div class="y-word-input__quote">
         <span
@@ -399,7 +415,7 @@ defineExpose({
 .y-word-input__wrap {
   position: relative;
   width: 100%;
-  height: 280px;
+  min-height: 150px;
   overflow: hidden;
 }
 
@@ -436,7 +452,7 @@ defineExpose({
   position: absolute;
   top: -10px;
   user-select: none;
-  height: 280px;
+  min-height: 150px;
   overflow: hidden;
 }
 .y-word-input__quote {

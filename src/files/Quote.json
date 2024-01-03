@@ -23,15 +23,133 @@
         }
     ],
     "medium": [
-        
-    ],
-    "short": [
         {
             "title": "《关雎》",
             "author": "佚名",
             "type": "诗歌",
-            "length": "medium",
+            "length": "short",
             "content": "关关雎鸠，在河之洲。窈窕淑女，君子好逑。参差荇菜，左右流之。窈窕淑女，寤寐求之。求之不得，寤寐思服。悠哉悠哉，辗转反侧。参差荇菜，左右采之。窈窕淑女，琴瑟友之。参差荇菜，左右芼之。窈窕淑女，钟鼓乐之。"
+        }
+    ],
+    "short": [
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "声音的传播需要时间，我们面对面说着话，我在过去，你在未来。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "爱是两个人眼睛间不断来回反射的光。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "工人罢了工，于是成了人。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "敬老院的新人都是老人，这世界的大人都是小人。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "很多人看不到未来，其实是看到了未来。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "我是孤独大赛的第一名，也是最后一名。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "会不会我已经死了，而大家都瞒着我呢。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "枫叶落在我头上，秋天给了我一巴掌。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "雨天，我走进水坑里，不小心踩碎了天空。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "怀念过去是不是在记忆的长河里刻舟求剑，展望未来是不是在前行的道路上望梅止渴。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "我们都以为是雨滴落向地面，其实是我们坠入天空。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "这台手术很成功，我失败的人生结束了。"
+        },
+        {
+            "title": "“弱智吧”语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "我租下了世界，直到我将死去的那天。"
+        },
+        {
+            "title": "B站评论区语录",
+            "author": "佚名",
+            "type": "语录",
+            "length": "short",
+            "content": "上天给了我怜悯之心，却没有给我解救众生的能力。明明自己都过得不尽人意，却又偏偏见不得这世间万般疾苦。"
+        },
+        {
+            "title": "《在细雨中呼喊》片段",
+            "author": "余华",
+            "type": "片段",
+            "length": "short",
+            "content": "我的弟弟不小心走出了时间。他一旦脱离时间便固定下来，我们则在时间的推移下继续前行。"
+        },
+        {
+            "title": "《祖国》片段",
+            "author": "海子",
+            "type": "片段",
+            "length": "short",
+            "content": "和所有以梦为马的诗人一样，最后我被黄昏的众神抬入不朽的太阳。"
+        },
+        {
+            "title": "《怦然心动》片段",
+            "author": "佚名",
+            "type": "片段",
+            "length": "short",
+            "content": "斯人若彩虹，遇上方知有。"
         }
     ]
 }

@@ -117,7 +117,8 @@ export enum KEY_CODE_ENUM {
   KEY_A = 'KeyA',
   KEY_B = 'KeyB',
   KEY_C = 'KeyC',
-  KEY_D = 'KeyD'
+  KEY_D = 'KeyD',
+  KEY_Z = 'KeyZ'
 }
 
 export const CAN_PRINT_KEY: Record<string, string> = {

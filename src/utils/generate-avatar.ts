@@ -1,3 +1,4 @@
+// @ts-ignore
 import { toSvg } from 'jdenticon';
 
 export function generateAvatar(name: string, size: number = 40) {

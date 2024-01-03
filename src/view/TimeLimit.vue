@@ -6,6 +6,7 @@ import WordInput from '@/components/WordInput.vue';
 import YModal from '@/components/ui/Modal.vue';
 import ResultContent from '@/components/ResultContent.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
+import DetailModal from '@/components/DetailModal.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -25,11 +26,13 @@ import YInput from '@/components/ui/Input.vue';
 const message: any = inject('message');
 const confirm: any = inject('confirm');
 const wordInputRef = ref<any>(null);
+const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain } = storeToRefs(useConfig);
 const customTime = [15, 30, 60, 120];
 
 const state = reactive({
+  showDetail: false,
   showSetTime: false,
   quote: {} as any,
   lastIndex: -1,
@@ -136,44 +139,6 @@ function isTyping() {
   state.isTyping = true;
 }
 
-interface CountdownOptions {
-  duration: number;
-  onEnd: () => void;
-}
-
-interface Countdown {
-  stop: () => void;
-}
-
-function countdownFunc(options: CountdownOptions): Countdown {
-  const { duration, onEnd } = options;
-
-  let remainingTime = duration;
-  let intervalId: number | null = null;
-
-  const stopCountdown = (): void => {
-    if (intervalId !== null) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  };
-
-  const countdownInterval = setInterval(() => {
-    // console.log(`剩余时间：${remainingTime} 秒`);
-
-    remainingTime -= 1;
-    if (remainingTime < 0) {
-      stopCountdown();
-      onEnd();
-    }
-  }, 1000);
-
-  intervalId = countdownInterval;
-
-  return {
-    stop: stopCountdown
-  };
-}
 function setTime() {
   if (!state.setCountDown) {
     state.showSetTime = false;
@@ -194,7 +159,7 @@ function restart() {
 }
 </script>
 <template>
-  <main :class="'y-font--' + currentFont">
+  <main class="y-time-limit" :class="'y-font--' + currentFont">
     <template v-if="!state.showResult">
       <div class="y-time-limit__setting">
         <div v-if="state.countDown !== null" class="y-time-limit__count-down">
@@ -240,6 +205,7 @@ function restart() {
           {{ state.quote?.author }}
         </span>
       </div>
+      <div class="y-time-limit__detail" @click="detailModalRef?.setShowDetail()">查看全文</div>
     </template>
     <template v-else>
       <ResultContent
@@ -264,8 +230,15 @@ function restart() {
       </div>
     </template>
   </YModal>
+  <DetailModal ref="detailModalRef" :quote="state.quote"></DetailModal>
 </template>
 <style lang="scss">
+.y-time-limit {
+  .y-word-input__wrap,
+  .y-word-input {
+    height: 280px;
+  }
+}
 .y-time-limit__setting {
   position: relative;
   margin-bottom: 30px;
@@ -346,6 +319,14 @@ function restart() {
   margin-top: 30px;
   text-align: right;
   color: $gray-02;
+}
+.y-time-limit__detail {
+  text-align: right;
+  color: $gray-02;
+  font-size: 14px;
+  font-weight: normal;
+  margin-top: 20px;
+  cursor: pointer;
 }
 .time-limit__container {
   color: $gray-04;
