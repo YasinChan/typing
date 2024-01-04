@@ -30,6 +30,7 @@ onMounted(async () => {
 .log {
   width: 880px;
   margin: 50px auto;
+  line-height: 1.4;
   h2 {
     margin: 30px 0 20px;
   }
@@ -43,6 +44,7 @@ onMounted(async () => {
   }
   li {
     margin-left: 20px;
+    padding-bottom: 10px;
   }
   a {
     text-decoration: underline;

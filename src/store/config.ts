@@ -5,9 +5,13 @@ export const useConfigStore = defineStore('config', {
     onlyShowMain: false as boolean,
     currentFont: 'default' as string,
     printContent: '' as string,
-    currentCode: [] as any[]
+    currentCode: [] as any[],
+    isEscape: false as boolean
   }),
   actions: {
+    setIsEscape(val: boolean) {
+      this.isEscape = val;
+    },
     setOnlyShowMain(val: boolean) {
       this.onlyShowMain = val;
     },

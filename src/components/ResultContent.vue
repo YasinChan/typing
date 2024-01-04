@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, computed, onMounted } from 'vue';
+import { reactive, computed, onMounted, onUnmounted } from 'vue';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -14,7 +14,8 @@ import IcoSpeedUp from '@/assets/svg/speed-up.svg';
 
 const props = defineProps<{
   typingRecord?: TypingRecordType;
-  selectTime?: number;
+  totalTime: number;
+  isPositive?: boolean; // 是否是正向计时
 }>();
 const emit = defineEmits(['restart']);
 const state = reactive({
@@ -22,7 +23,7 @@ const state = reactive({
   currentOperation: null as TypingRecordItemType[] | null,
   timeoutArray: [] as number[],
   intervalId: null as null | number,
-  countDown: (props.selectTime || 0) as any,
+  currentRecordTime: 0 as any,
   totalWord: 0,
   wrongWord: 0,
   accuracy: '',
@@ -56,19 +57,34 @@ onMounted(() => {
   }
   state.accuracy = (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
   state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
-  state.speed = props.selectTime
-    ? (((state.totalWord - state.wrongWord) / props.selectTime) * 60).toFixed(0) + ' 字/分钟'
+  state.speed = props.totalTime
+    ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0) + ' 字/分钟'
     : '';
 });
 
+onUnmounted(() => {
+  if (state.intervalId) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+});
+
 function replay() {
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
   state.playRatio = 1;
   state.timeoutArray.forEach((timeout) => {
     clearTimeout(timeout);
   });
   state.currentTime = new Date().getTime();
   executeTimeline();
-  countDown();
+  if (props.isPositive) {
+    keepTime();
+  } else {
+    countDown();
+  }
 }
 function executeTimeline() {
   if (!props.typingRecord) {
@@ -103,26 +119,50 @@ function countDown(refresh = false) {
     state.intervalId = null;
   }
   if (!refresh) {
-    state.countDown = props.selectTime || 0;
+    state.currentRecordTime = props.totalTime || 0;
   }
   state.intervalId = setInterval(() => {
-    if (state.countDown) {
-      state.countDown -= 0.1 * state.playRatio;
-      if (state.countDown % 1 === 0) {
-        state.countDown = String(state.countDown) + '.0';
-      } else {
-        state.countDown = Number(state.countDown.toFixed(1));
-      }
-      if (state.countDown < 0.1 * state.playRatio) {
+    if (state.currentRecordTime) {
+      state.currentRecordTime -= 0.1 * state.playRatio;
+      if (state.currentRecordTime < 0.1 * state.playRatio) {
         if (state.intervalId !== null) {
-          state.countDown = 0;
-          clearInterval(state.intervalId);
+          state.currentRecordTime = 0;
+          clearInterval(state.currentRecordTime);
           state.intervalId = null;
         }
       }
     }
   }, 100);
 }
+function keepTime(refresh = false) {
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  if (!refresh) {
+    state.currentRecordTime = 0;
+  }
+  state.intervalId = setInterval(() => {
+    state.currentRecordTime += 0.1 * state.playRatio;
+
+    if (state.currentRecordTime > Number(props.totalTime)) {
+      if (state.intervalId !== null) {
+        state.currentRecordTime = props.totalTime;
+        clearInterval(state.intervalId);
+        state.intervalId = null;
+      }
+    }
+  }, 100);
+}
+
+const timeFormat = computed(() => {
+  const time = Number(state.currentRecordTime.toFixed(1));
+  if (time % 1 === 0) {
+    return time + '.0';
+  } else {
+    return time;
+  }
+});
 
 function speedUp() {
   if (state.playRatio === 1) {
@@ -134,7 +174,19 @@ function speedUp() {
   } else if (state.playRatio === 3) {
     state.playRatio = 1;
   }
-  countDown(true);
+  if (props.isPositive) {
+    keepTime(true);
+  } else {
+    countDown(true);
+  }
+}
+
+function restart() {
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  emit('restart');
 }
 </script>
 <template>
@@ -144,17 +196,20 @@ function speedUp() {
   <div class="result-content">
     速度：<span class="result-content--main-color">{{ state.speed }}</span>
   </div>
+  <div class="result-content">
+    时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
+  </div>
   <div class="result-content__toolbar flex-center">
     <Tooltip class="result-content__svg" content="重新开始">
-      <IcoChange @click="emit('restart')"></IcoChange>
+      <IcoChange @click="restart"></IcoChange>
     </Tooltip>
     <Tooltip class="result-content__svg" content="查看回放">
       <IcoReplay @click="replay"></IcoReplay>
     </Tooltip>
   </div>
   <div class="result-content__replay" v-if="state.currentOperation">
-    <div v-if="state.countDown !== null" class="result-content__count-down">
-      {{ state.countDown }}
+    <div v-if="timeFormat !== null" class="result-content__count-down">
+      {{ timeFormat }}
     </div>
     <div class="result-content__speed-up flex-center--y">
       <Tooltip content="加速">
@@ -173,7 +228,7 @@ function speedUp() {
       <span
         v-for="(i, dex) in item.word"
         :class="{ wrong: item.wrongPos?.includes(dex) }"
-        :key="i"
+        :key="index + dex"
         >{{ i }}</span
       >
     </span>
@@ -240,6 +295,7 @@ function speedUp() {
   }
 }
 .result-content__replay-item {
+  word-wrap: break-word;
   .wrong {
     color: $main-red;
   }

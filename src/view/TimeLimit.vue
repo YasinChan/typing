@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, reactive, watch, ref } from 'vue';
+import { inject, reactive, watch, ref, onUnmounted } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -46,6 +46,14 @@ const state = reactive({
   typingRecord: {} as TypingRecordType
 });
 state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+
+onUnmounted(() => {
+  state.countDown = null;
+  if (state.intervalId) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+});
 
 watch(
   () => state.isTyping,
@@ -135,7 +143,7 @@ function selectTime(time: number) {
   refresh();
 }
 
-function isTyping() {
+function isTypingFunc() {
   state.isTyping = true;
 }
 
@@ -194,7 +202,11 @@ function restart() {
           </div>
         </Transition>
       </div>
-      <WordInput ref="wordInputRef" :quote="state.quote?.content" @is-typing="isTyping"></WordInput>
+      <WordInput
+        ref="wordInputRef"
+        :quote="state.quote?.content"
+        @is-typing="isTypingFunc"
+      ></WordInput>
       <div class="y-time-limit__info">
         ——
         <span class="y-time-limit__info-title">
@@ -205,13 +217,22 @@ function restart() {
           {{ state.quote?.author }}
         </span>
       </div>
-      <div class="y-time-limit__detail" @click="detailModalRef?.setShowDetail()">查看全文</div>
+      <Transition name="menu">
+        <div
+          v-show="!onlyShowMain"
+          class="y-time-limit__detail"
+          @click="detailModalRef?.setShowDetail()"
+        >
+          查看全文
+        </div>
+      </Transition>
     </template>
     <template v-else>
       <ResultContent
         :typing-record="state.typingRecord"
         @restart="restart"
-        :select-time="state.selectTime"
+        :total-time="state.selectTime"
+        :is-positive="false"
       ></ResultContent>
     </template>
   </main>

@@ -16,18 +16,20 @@ const props = withDefaults(
   defineProps<{
     quote: string;
     showMask?: boolean;
+    className?: string;
   }>(),
   {
     showMask: true
   }
 );
 
-const emit = defineEmits(['is-typing', 'keydown-event']);
+const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished']);
 
 const state = reactive({
   currentAreaHeight: LINE_HEIGHT,
   isComposing: false,
   inputText: '',
+  quoteLength: 0,
   quoteArr: [] as SentenceArrItem[],
   isTyping: false,
   timeout: null as null | number,
@@ -176,6 +178,7 @@ watch(
   () => props.quote,
   (val) => {
     // 传入的内容发生变化时，重置
+    state.quoteLength = val.length;
     state.inputText = '';
     if (inputAreaRef.value) {
       inputAreaRef.value.innerHTML = '';
@@ -203,6 +206,10 @@ watch(
         reset();
       });
       return;
+    }
+    if (newVal.length >= state.quoteLength) {
+      // 输入完成
+      emit('is-finished');
     }
     const inputTextArr = newVal.split('');
     const wrongPos: number[] = [];
@@ -379,7 +386,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="y-word-input__wrap">
+  <div class="y-word-input__wrap" :class="className">
     <Transition name="mask">
       <div v-if="y > 0" class="y-word-input__mask"></div>
     </Transition>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { reactive, provide, onMounted, computed, ref, nextTick } from 'vue';
-import { nanoid } from 'nanoid';
+import { reactive, provide, onMounted, ref, nextTick } from 'vue';
 
 // components
 import Message from '@/components/ui/Message.vue';
@@ -21,6 +20,7 @@ import { storeToRefs } from 'pinia';
 
 // svg
 import IcoMessage from '@/assets/svg/message.svg';
+import { KEY_CODE_ENUM } from '@/config/key';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const userStore = useUserStore();
@@ -66,7 +66,13 @@ onMounted(() => {
   document.addEventListener('mousemove', handleMouseMove);
 });
 
-function handleKeyDown() {
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.code === KEY_CODE_ENUM['ESCAPE']) {
+    useConfig.setIsEscape(true);
+    setTimeout(() => {
+      useConfig.setIsEscape(false);
+    }, 100);
+  }
   useConfig.setOnlyShowMain(true);
 }
 
@@ -155,8 +161,8 @@ async function suggestClick() {
     <Transition name="menu">
       <div class="y-menu" v-show="!onlyShowMain">
         <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
-        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>
-        <router-link to="/quote" class="y-menu__item">句子模式</router-link>
+        <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
+        <router-link to="/quote" class="y-menu__item">计时模式</router-link>
         <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
         <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
           >键盘测试</router-link
