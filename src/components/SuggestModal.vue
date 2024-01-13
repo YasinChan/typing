@@ -238,11 +238,15 @@ defineExpose({
     @confirm="state.show = false"
   >
     <template #header>
-      <h3>建议</h3>
+      <h3>建议与反馈</h3>
     </template>
     <template #body>
       <div class="y-submit-suggest__tips flex-center--y-between">
-        <span>*各位提出的建议将会收集整理后发布在此。</span>
+        <span>
+          欢迎各位在此提出建议或反馈 BUG。如果你也是开发者，欢迎在
+          <a href="https://github.com/YasinChan/typing/issues" target="_blank">Github</a>
+          中反馈或者共创。
+        </span>
         <span class="y-submit-suggest__filter flex-center--y" v-throttle-click:500="filter"
           ><IcoFilter></IcoFilter>{{ state.currentSort === 'time' ? '最新' : '最热' }}</span
         >
@@ -306,6 +310,9 @@ defineExpose({
           @click="confirmSuggest"
           >确定</YButton
         >
+        <span class="y-submit-suggest__reply-tips">
+          *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~
+        </span>
       </div>
     </template>
   </YModal>
@@ -416,5 +423,10 @@ defineExpose({
       color: $main-color;
     }
   }
+}
+.y-submit-suggest__reply-tips {
+  color: $gray-04;
+  font-size: 12px;
+  margin-left: 10px;
 }
 </style>

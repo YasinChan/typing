@@ -14,6 +14,7 @@ import IcoSpeedUp from '@/assets/svg/speed-up.svg';
 
 const props = defineProps<{
   typingRecord?: TypingRecordType;
+  typingRecordArr?: TypingRecordType[];
   totalTime: number;
   isPositive?: boolean; // 是否是正向计时
 }>();
@@ -43,17 +44,42 @@ const keys = computed(() => {
   }
 });
 
+const isShort = computed(() => {
+  // 是否是短句模式
+  return props.typingRecordArr && props.typingRecordArr.length > 0;
+});
+
 onMounted(() => {
-  const lastRecord: TypingRecordItemType[] = props.typingRecord
-    ? props.typingRecord[keys.value[keys.value.length - 1]]
-    : [];
-  if (lastRecord.length > 0) {
-    lastRecord.forEach((item) => {
-      if (item.isInput) {
-        state.totalWord += item.word?.length ? item.word?.length : 0;
-        state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
+  if (props.typingRecordArr && props.typingRecordArr.length > 0) {
+    // 短句模式下特别处理
+    for (let i = 0; i < props.typingRecordArr.length; i++) {
+      const keys = Object.keys(props.typingRecordArr[i])
+        .map(Number)
+        .sort((a, b) => a - b);
+      const lastRecord: TypingRecordItemType[] = props.typingRecordArr[i]
+        ? props.typingRecordArr[i][keys[keys.length - 1]]
+        : [];
+      if (lastRecord.length > 0) {
+        lastRecord.forEach((item) => {
+          if (item.isInput) {
+            state.totalWord += item.word?.length ? item.word?.length : 0;
+            state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
+          }
+        });
       }
-    });
+    }
+  } else {
+    const lastRecord: TypingRecordItemType[] = props.typingRecord
+      ? props.typingRecord[keys.value[keys.value.length - 1]]
+      : [];
+    if (lastRecord.length > 0) {
+      lastRecord.forEach((item) => {
+        if (item.isInput) {
+          state.totalWord += item.word?.length ? item.word?.length : 0;
+          state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
+        }
+      });
+    }
   }
   state.accuracy = (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
   state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
@@ -67,9 +93,14 @@ onUnmounted(() => {
     clearInterval(state.intervalId);
     state.intervalId = null;
   }
+  state.timeoutArray.forEach((timeout) => {
+    clearTimeout(timeout);
+  });
+  state.timeoutArray = [];
 });
 
 function replay() {
+  // 查看回放
   if (state.intervalId !== null) {
     clearInterval(state.intervalId);
     state.intervalId = null;
@@ -78,6 +109,7 @@ function replay() {
   state.timeoutArray.forEach((timeout) => {
     clearTimeout(timeout);
   });
+  state.timeoutArray = [];
   state.currentTime = new Date().getTime();
   executeTimeline();
   if (props.isPositive) {
@@ -87,6 +119,7 @@ function replay() {
   }
 }
 function executeTimeline() {
+  // 执行记录的时间轴
   if (!props.typingRecord) {
     return;
   }
@@ -127,7 +160,7 @@ function countDown(refresh = false) {
       if (state.currentRecordTime < 0.1 * state.playRatio) {
         if (state.intervalId !== null) {
           state.currentRecordTime = 0;
-          clearInterval(state.currentRecordTime);
+          clearInterval(state.intervalId);
           state.intervalId = null;
         }
       }
@@ -193,9 +226,12 @@ function restart() {
   <Tooltip class="result-content cursor-pointer" :content="state.accuracyInfo">
     正确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
   </Tooltip>
-  <div class="result-content">
+  <Tooltip
+    class="result-content cursor-pointer"
+    content="这里的速度的计算规则中是包含了标点符号的。"
+  >
     速度：<span class="result-content--main-color">{{ state.speed }}</span>
-  </div>
+  </Tooltip>
   <div class="result-content">
     时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
   </div>
@@ -203,7 +239,7 @@ function restart() {
     <Tooltip class="result-content__svg" content="重新开始">
       <IcoChange @click="restart"></IcoChange>
     </Tooltip>
-    <Tooltip class="result-content__svg" content="查看回放">
+    <Tooltip v-if="!isShort" class="result-content__svg" content="查看回放">
       <IcoReplay @click="replay"></IcoReplay>
     </Tooltip>
   </div>

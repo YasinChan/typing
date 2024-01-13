@@ -6,11 +6,15 @@ export const useConfigStore = defineStore('config', {
     currentFont: 'default' as string,
     printContent: '' as string,
     currentCode: [] as any[],
-    isEscape: false as boolean
+    isEscape: false as boolean,
+    capsLockOn: false
   }),
   actions: {
     setIsEscape(val: boolean) {
       this.isEscape = val;
+    },
+    setCapsLockOn(val: boolean) {
+      this.capsLockOn = val;
     },
     setOnlyShowMain(val: boolean) {
       this.onlyShowMain = val;

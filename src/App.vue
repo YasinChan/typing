@@ -21,6 +21,7 @@ import { storeToRefs } from 'pinia';
 // svg
 import IcoMessage from '@/assets/svg/message.svg';
 import { KEY_CODE_ENUM } from '@/config/key';
+import IcoCapsLock from '@/assets/svg/caps-lock.svg';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const userStore = useUserStore();
@@ -29,7 +30,7 @@ userStore.setConfig();
 const useConfig = useConfigStore();
 
 const { config } = storeToRefs(userStore);
-const { onlyShowMain } = storeToRefs(useConfig);
+const { onlyShowMain, capsLockOn } = storeToRefs(useConfig);
 
 setTheme(getTheme());
 
@@ -62,6 +63,7 @@ provide('confirm', (obj: any) => {
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeyDown);
+  document.addEventListener('keyup', handleKeyUp);
   document.addEventListener('wheel', handleWheel);
   document.addEventListener('mousemove', handleMouseMove);
 });
@@ -69,11 +71,20 @@ onMounted(() => {
 function handleKeyDown(e: KeyboardEvent) {
   if (e.code === KEY_CODE_ENUM['ESCAPE']) {
     useConfig.setIsEscape(true);
-    setTimeout(() => {
-      useConfig.setIsEscape(false);
-    }, 100);
+  }
+  if (e.code === KEY_CODE_ENUM['CAPS_LOCK']) {
+    useConfig.setCapsLockOn(true);
   }
   useConfig.setOnlyShowMain(true);
+}
+
+function handleKeyUp(e: KeyboardEvent) {
+  if (e.code === KEY_CODE_ENUM['ESCAPE']) {
+    useConfig.setIsEscape(false);
+  }
+  if (e.code === KEY_CODE_ENUM['CAPS_LOCK']) {
+    useConfig.setCapsLockOn(false);
+  }
 }
 
 let scrolled = 0;
@@ -195,6 +206,13 @@ async function suggestClick() {
     </Transition>
   </header>
 
+  <Transition name="menu">
+    <div v-if="capsLockOn" class="y-app__caps-lock flex-center--y">
+      <IcoCapsLock></IcoCapsLock>
+      <span>大写开启</span>
+    </div>
+  </Transition>
+
   <router-view></router-view>
 
   <Transition name="menu">
@@ -264,6 +282,25 @@ header {
   align-items: center;
   justify-content: space-between;
   height: 38px;
+}
+.y-app__caps-lock {
+  position: fixed;
+  z-index: 1;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: $gray-08;
+  font-size: 14px;
+  font-weight: bold;
+  background: $main-color-gradient;
+  border-radius: 2px;
+  cursor: pointer;
+  padding: 0 8px;
+  svg {
+    margin-right: 4px;
+    fill: $gray-08;
+    width: 20px;
+  }
 }
 .y-info {
   display: flex;

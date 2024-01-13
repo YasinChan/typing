@@ -12,7 +12,6 @@ const state = reactive({
 onMounted(async () => {
   const todoRes = await getTodo();
   const todo = todoRes.data?.result;
-  console.log('----------', 'getTodo', todoRes, '----------cyy log');
   const md = MarkdownIt({
     html: false,
     linkify: true,

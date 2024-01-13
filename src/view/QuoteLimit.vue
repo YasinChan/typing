@@ -44,7 +44,7 @@ const typeList = [
 ];
 
 const state = reactive({
-  quotes: null as any,
+  quotes: null as any, // [] 或 {}
   isTyping: false,
   intervalId: null as null | number,
   lastIndex: -1,
@@ -53,6 +53,7 @@ const state = reactive({
   time: 0 as number,
   showResult: false,
   typingRecord: {} as TypingRecordType,
+  typingRecordArr: [] as TypingRecordType[],
   currentIndex: 0 // 当前显示的句子的索引
 });
 
@@ -104,6 +105,7 @@ async function refresh() {
   state.isTyping = false;
   state.time = 0;
   state.quotes = null;
+  state.currentIndex = 0;
   await nextTick();
   state.quotes = getRandom();
 }
@@ -157,15 +159,13 @@ function selectType(type: any) {
 }
 function keyDownEvent(e: any) {
   if (e.code === KEY_CODE_ENUM['ENTER']) {
-    if (state.currentIndex < state.quotes.length - 1) {
-      state.currentIndex += 1;
-    }
+    next();
   }
-  if (e.code === KEY_CODE_ENUM['BACKSPACE']) {
-    if (state.currentIndex > 0) {
-      state.currentIndex -= 1;
-    }
-  }
+  // if (e.code === KEY_CODE_ENUM['BACKSPACE']) {
+  //   if (state.currentIndex > 0) {
+  //     state.currentIndex -= 1;
+  //   }
+  // }
 }
 function finished() {
   state.isTyping = false;
@@ -174,13 +174,29 @@ function finished() {
     state.intervalId = null;
   }
   state.showResult = true;
-  state.typingRecord = wordInputRef.value?.getTypingRecord();
+  if (state.type === 'short') {
+    state.typingRecordArr.push(wordInputShortRef.value?.getTypingRecord());
+  } else {
+    state.typingRecord = wordInputRef.value?.getTypingRecord();
+  }
+}
+
+function next() {
+  if (state.currentIndex >= state.len - 1) {
+    finished();
+    return;
+  }
+  state.typingRecordArr.push(wordInputShortRef.value?.getTypingRecord());
+  if (state.currentIndex < state.quotes.length - 1) {
+    state.currentIndex += 1;
+  }
 }
 
 function restart() {
   state.isTyping = false;
   state.time = 0;
   state.showResult = false;
+  state.currentIndex = 0;
 }
 </script>
 <template>
@@ -194,16 +210,6 @@ function restart() {
           class="y-quote-limit__setting"
           :class="state.type !== 'short' ? 'y-quote-limit__setting--disabled' : ''"
         >
-          <Transition name="menu">
-            <div v-show="!onlyShowMain" class="y-quote-limit__setting-item">
-              <Tooltip
-                class="y-quote-limit__time-svg"
-                content="*键入过程中，按下键盘左上角 Esc 键可随时结束打字进度。"
-              >
-                <IcoTips></IcoTips>
-              </Tooltip>
-            </div>
-          </Transition>
           <Transition name="menu">
             <div
               v-show="!onlyShowMain"
@@ -251,6 +257,8 @@ function restart() {
           :quote="state.quotes[state.currentIndex]?.content"
           :show-mask="false"
           ref="wordInputShortRef"
+          @is-typing="isTypingFunc"
+          @is-finished="next"
           @keydown-event="keyDownEvent"
         ></WordInput>
         <div class="y-quote-limit__content gray-04">
@@ -293,10 +301,17 @@ function restart() {
         </Transition>
         <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       </template>
+      <Transition name="menu">
+        <div v-show="!onlyShowMain" class="y-quote-limit__tips">
+          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束打字进度。</p>
+          <p v-if="state.type === 'short'">*短句模式下回车则会切换到下一条。</p>
+        </div>
+      </Transition>
     </template>
     <template v-else>
       <ResultContent
         :typing-record="state.typingRecord"
+        :typing-record-arr="state.typingRecordArr"
         @restart="restart"
         :total-time="state.time"
         :is-positive="true"
@@ -409,5 +424,13 @@ function restart() {
   font-weight: normal;
   margin-top: 20px;
   cursor: pointer;
+}
+.y-quote-limit__tips {
+  margin-top: 60px;
+  color: $gray-02;
+  font-size: 16px;
+  line-height: 30px;
+  height: 24px;
+  text-align: center;
 }
 </style>

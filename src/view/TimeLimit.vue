@@ -197,7 +197,12 @@ function restart() {
               >
             </Tooltip>
             <Tooltip class="y-time-limit__time-svg" content="自定义倒计时">
-              <IcoSetting @click="state.showSetTime = true"></IcoSetting>
+              <IcoSetting
+                :class="{
+                  'y-time-limit__time-item--active': !customTime.includes(state.selectTime)
+                }"
+                @click="state.showSetTime = true"
+              ></IcoSetting>
             </Tooltip>
           </div>
         </Transition>
@@ -313,6 +318,7 @@ function restart() {
 }
 .y-time-limit__time-item--active {
   color: $main-color;
+  fill: $main-color !important;
 }
 .y-time-limit__time-svg {
   width: 30px;
