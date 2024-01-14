@@ -184,7 +184,7 @@ async function suggestClick() {
         >
         <y-drop-down>
           <template #title>
-            <div class="y-menu__item">设置</div>
+            <div class="y-menu__item">其他</div>
           </template>
           <template #menu>
             <div class="y-auth__menu">
@@ -199,6 +199,7 @@ async function suggestClick() {
                 切换字体
               </div>
               <div class="y-menu__change" @click="changeTheme">切换主题</div>
+              <router-link to="/statement" class="y-menu__change">声明</router-link>
               <router-link to="/log" class="y-menu__change">更新日志</router-link>
             </div>
           </template>

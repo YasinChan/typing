@@ -5,6 +5,7 @@ import TypingKeyboard from '@/view/TypingKeyboard.vue';
 import CustomPage from '@/view/CustomPage.vue';
 import User from '@/view/User.vue';
 import Log from '@/view/Log.vue';
+import StatementLog from '@/view/StatementLog.vue';
 
 export default [
   { path: '/', name: 'TimeLimit', component: TimeLimit },
@@ -13,5 +14,6 @@ export default [
   { path: '/keyboard', name: 'TypingKeyboard', component: TypingKeyboard },
   { path: '/custom', name: 'Custom', component: CustomPage },
   { path: '/user/:id', name: 'User', component: User },
-  { path: '/log', name: 'Log', component: Log }
+  { path: '/log', name: 'Log', component: Log },
+  { path: '/statement', name: 'statement', component: StatementLog }
 ];
