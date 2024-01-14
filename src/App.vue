@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, provide, onMounted, ref, nextTick } from 'vue';
+import { KEY_CODE_ENUM } from '@/config/key';
 
 // components
 import Message from '@/components/ui/Message.vue';
@@ -20,8 +21,8 @@ import { storeToRefs } from 'pinia';
 
 // svg
 import IcoMessage from '@/assets/svg/message.svg';
-import { KEY_CODE_ENUM } from '@/config/key';
 import IcoCapsLock from '@/assets/svg/caps-lock.svg';
+import IcoClose from '@/assets/svg/close.svg';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const userStore = useUserStore();
@@ -160,9 +161,12 @@ async function suggestClick() {
   <div
     v-if="'showRemind' in config && config.showRemind && obj.showRemind"
     @click="obj.showRemind = false"
-    class="y-remind"
+    class="y-remind flex-center--y-center"
   >
-    {{ config.remind }}
+    <span>
+      {{ config.remind }}
+    </span>
+    <IcoClose></IcoClose>
   </div>
   <header>
     <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
@@ -272,10 +276,15 @@ async function suggestClick() {
   height: 30px;
   line-height: 30px;
   text-align: center;
-  color: $main-orange;
+  color: $gray-08;
   font-weight: bold;
   background: $main-color-gradient;
   cursor: pointer;
+  svg {
+    fill: $gray-08;
+    width: 16px;
+    margin-left: 20px;
+  }
 }
 header {
   display: flex;

@@ -51,6 +51,7 @@ const state = reactive({
   len: 5,
   type: 'medium' as 'short' | 'long' | 'medium',
   time: 0 as number,
+  showTime: true,
   showResult: false,
   typingRecord: {} as TypingRecordType,
   typingRecordArr: [] as TypingRecordType[],
@@ -203,13 +204,23 @@ function restart() {
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
     <template v-if="!state.showResult">
       <div class="y-quote-limit__setting-wrap">
-        <div v-if="timeFormat" class="y-quote-limit__start">
+        <div v-if="timeFormat && state.showTime" class="y-quote-limit__start">
           {{ timeFormat }}
         </div>
         <div
           class="y-quote-limit__setting"
           :class="state.type !== 'short' ? 'y-quote-limit__setting--disabled' : ''"
         >
+          <Transition name="menu">
+            <div
+              v-show="!onlyShowMain"
+              class="y-quote-limit__setting-item y-quote-limit__set-time"
+              :class="[state.showTime ? 'y-quote-limit__time--active' : '']"
+              @click="state.showTime = !state.showTime"
+            >
+              显示计时
+            </div>
+          </Transition>
           <Transition name="menu">
             <div
               v-show="!onlyShowMain"
@@ -323,6 +334,18 @@ function restart() {
 .y-quote-limit {
   .y-word-input {
     width: 100%;
+  }
+}
+.y-quote-limit__set-time {
+  display: inline-flex;
+  align-items: center;
+  color: $gray-04;
+  font-size: 16px;
+  line-height: 24px;
+  height: 24px;
+  cursor: pointer;
+  &.y-quote-limit__time--active {
+    color: $main-color;
   }
 }
 .y-quote-limit__refresh {

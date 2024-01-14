@@ -48,7 +48,7 @@ const handlerClick = () => {
   cursor: pointer;
   user-select: none;
   touch-action: manipulation;
-  padding: 6px 15px;
+  padding: 6px 12px;
   font-size: 14px;
   border-radius: 2px;
   color: #fff;

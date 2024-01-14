@@ -37,6 +37,7 @@ const state = reactive({
   quote: {} as any,
   lastIndex: -1,
   selectTime: 15 as number, // 设置的倒计时
+  showCountDown: true,
   countDown: null as null | number, // 实时倒计时
   errorText: '',
   setCountDown: '' as any, // 自定义的倒计时
@@ -170,9 +171,22 @@ function restart() {
   <main class="y-time-limit" :class="'y-font--' + currentFont">
     <template v-if="!state.showResult">
       <div class="y-time-limit__setting">
-        <div v-if="state.countDown !== null" class="y-time-limit__count-down">
+        <div
+          v-if="state.countDown !== null && state.showCountDown"
+          class="y-time-limit__count-down"
+        >
           {{ state.countDown }}
         </div>
+        <Transition name="menu">
+          <div
+            v-show="!onlyShowMain"
+            class="y-time-limit__setting-item y-time-limit__set-time"
+            :class="[state.showCountDown ? 'y-time-limit__time--active' : '']"
+            @click="state.showCountDown = !state.showCountDown"
+          >
+            显示倒计时
+          </div>
+        </Transition>
         <Transition name="menu">
           <div
             v-show="!onlyShowMain"
@@ -295,6 +309,18 @@ function restart() {
   color: $main-color;
   font-size: 22px;
   font-weight: bold;
+}
+.y-time-limit__set-time {
+  display: inline-flex;
+  align-items: center;
+  color: $gray-04;
+  font-size: 16px;
+  line-height: 24px;
+  height: 24px;
+  cursor: pointer;
+  &.y-time-limit__time--active {
+    color: $main-color;
+  }
 }
 .y-time-limit__time {
   display: inline-flex;
