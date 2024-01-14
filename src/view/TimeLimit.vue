@@ -314,7 +314,7 @@ function restart() {
   display: inline-flex;
   align-items: center;
   color: $gray-04;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 24px;
   height: 24px;
   cursor: pointer;
