@@ -7,18 +7,31 @@ import Tooltip from '@/components/ui/Tooltip.vue';
 // types
 import type { TypingRecordType, TypingRecordItemType } from '@/types';
 
+// apis
+import { saveLeaderBoard } from '@/request';
+
 // svg
 import IcoReplay from '@/assets/svg/replay.svg';
 import IcoChange from '@/assets/svg/change.svg';
 import IcoSpeedUp from '@/assets/svg/speed-up.svg';
 import IcoRecord from '@/assets/svg/record.svg';
 
+// stores
+import { useUserStore } from '@/store/user';
+import { storeToRefs } from 'pinia';
+
+const userStore = useUserStore();
+const { profile, getProvinceUser } = storeToRefs(userStore);
+
 const confirm: any = inject('confirm');
+const message: any = inject('message');
 const props = defineProps<{
   typingRecord?: TypingRecordType;
   typingRecordArr?: TypingRecordType[];
   totalTime: number;
   isPositive?: boolean; // 是否是正向计时
+  type?: string;
+  showSaveRecord?: boolean;
 }>();
 const emit = defineEmits(['restart']);
 const state = reactive({
@@ -85,9 +98,10 @@ onMounted(() => {
   }
   state.accuracy = (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
   state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
-  state.speed = props.totalTime
-    ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0) + ' 字/分钟'
+  state.speedInfo = props.totalTime
+    ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0)
     : '';
+  state.speed = state.speedInfo ? state.speedInfo + ' 字/分钟' : '';
 });
 
 onUnmounted(() => {
@@ -99,6 +113,15 @@ onUnmounted(() => {
     clearTimeout(timeout);
   });
   state.timeoutArray = [];
+});
+
+const replyName = computed(() => {
+  if (profile.value?.userName) {
+    return profile.value.userName;
+  } else if (getProvinceUser.value) {
+    return getProvinceUser.value;
+  }
+  return '';
 });
 
 function replay() {
@@ -224,8 +247,33 @@ function restart() {
   emit('restart');
 }
 
-function record() {
+async function record() {
   if (Number(state.accuracy.replace('%', '')) >= 80 && props.totalTime >= 15) {
+    confirm({
+      title: '确认保存',
+      content: '确认将会将该条记录保存到排行榜中。',
+      confirmClose: () => {
+        return true;
+      },
+      confirm: async () => {
+        try {
+          const res = await saveLeaderBoard({
+            accuracy: state.accuracy,
+            duration: Math.round(props.totalTime),
+            type: props.type,
+            userId: profile.value?.userId,
+            userName: replyName.value,
+            wpm: Number(state.speedInfo)
+          });
+          message({ message: res.data?.message });
+          emit('restart');
+        } catch (error: any) {
+          const msg = error.response?.data?.message;
+          message({ message: msg, type: 'error' });
+        }
+        return true;
+      }
+    });
     return;
   }
   confirm({
@@ -260,7 +308,11 @@ function record() {
     <Tooltip v-if="!isShort" class="result-content__svg" content="查看回放">
       <IcoReplay @click="replay"></IcoReplay>
     </Tooltip>
-    <Tooltip class="result-content__svg" content="保存本次记录，将会在排行榜中展示。">
+    <Tooltip
+      v-if="showSaveRecord"
+      class="result-content__svg"
+      content="保存本次记录，将会在排行榜中展示。"
+    >
       <IcoRecord @click="record"></IcoRecord>
     </Tooltip>
   </div>

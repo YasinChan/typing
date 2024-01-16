@@ -249,6 +249,8 @@ function restart() {
     </template>
     <template v-else>
       <ResultContent
+        type="time"
+        :show-save-record="true"
         :typing-record="state.typingRecord"
         @restart="restart"
         :total-time="state.selectTime"

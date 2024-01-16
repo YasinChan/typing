@@ -22,7 +22,7 @@ import IcoUp from '@/assets/svg/up.svg';
 import IcoFilter from '@/assets/svg/filter.svg';
 
 const userStore = useUserStore();
-const { profile, getProvince } = storeToRefs(userStore);
+const { profile, getProvinceUser } = storeToRefs(userStore);
 
 type SuggestItem = {
   id: string;
@@ -54,8 +54,8 @@ onMounted(() => {
 const replyName = computed(() => {
   if (profile.value?.userName) {
     return profile.value.userName;
-  } else if (getProvince.value) {
-    return `来自${getProvince.value}的用户 - ${nanoid(4)}`;
+  } else if (getProvinceUser.value) {
+    return getProvinceUser.value;
   }
   return '';
 });

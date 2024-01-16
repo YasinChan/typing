@@ -233,6 +233,7 @@ function uploadFileFunc() {
     <template v-else>
       <ResultContent
         :typing-record="state.typingRecord"
+        :show-save-record="false"
         @restart="restart"
         :total-time="state.time"
         :is-positive="true"

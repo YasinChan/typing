@@ -70,7 +70,7 @@ export const getTodo = () => {
 export const getLeaderBoard = () => {
   return axios.get('/api/leaderboard');
 };
-// // 保存记录
-// export const saveLeaderBoard = (params) => {
-//   return axios.post('/api/leaderboard/save', params);
-// };
+// 保存记录
+export const saveLeaderBoard = (params) => {
+  return axios.post('/api/leaderboard/save', params);
+};

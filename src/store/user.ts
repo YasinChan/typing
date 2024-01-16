@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getMe, getConfig } from '@/request/index';
+import { nanoid } from 'nanoid';
 
 export type profileType = {
   isAdmin: boolean;
@@ -15,6 +16,7 @@ export type profileType = {
 
 export type configType = {
   showRemind: boolean;
+  ipId: string;
   latestUserId: string;
   region: Record<string, any>;
   remind: string;
@@ -44,6 +46,18 @@ export const useUserStore = defineStore('user', {
     getProvince(): string {
       if (this.regionFormat.length) {
         return this.regionFormat[2];
+      }
+      return '';
+    },
+    getProvinceUser(): string {
+      if (this.regionFormat.length) {
+        let id = '';
+        if (this.config?.ipId) {
+          id = this.config?.ipId;
+        } else {
+          id = nanoid(4);
+        }
+        return `来自${this.regionFormat[2]}的网友 - ${id}`;
       }
       return '';
     }

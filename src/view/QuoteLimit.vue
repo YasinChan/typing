@@ -325,6 +325,8 @@ function restart() {
     </template>
     <template v-else>
       <ResultContent
+        type="countdown"
+        :show-save-record="true"
         :typing-record="state.typingRecord"
         :typing-record-arr="state.typingRecordArr"
         @restart="restart"
