@@ -32,6 +32,7 @@ nextTick().then(() => {
   position: relative;
 }
 .y-drop-down__menu {
+  z-index: 1;
   position: absolute;
   right: 0;
   top: 28px;

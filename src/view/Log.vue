@@ -1,12 +1,16 @@
 <script lang="ts" setup>
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, nextTick } from 'vue';
 import MarkdownIt from 'markdown-it';
+
+// components
+import YLoading from '@/components/ui/Loading.vue';
 
 // apis
 import { getTodo } from '@/request';
 
 const state = reactive({
-  markdown: ''
+  markdown: '',
+  isLoading: true
 });
 
 onMounted(async () => {
@@ -18,15 +22,25 @@ onMounted(async () => {
     typographer: true
   });
   state.markdown = md.render(todo.todo?.markdown);
+  await nextTick();
+  state.isLoading = false;
 });
 </script>
 <template>
-  <div class="log">
+  <div class="y-log">
+    <YLoading class="y-log__loading" v-if="state.isLoading"></YLoading>
     <div class="log__content gray-08" v-html="state.markdown"></div>
   </div>
 </template>
 <style lang="scss">
-.log {
+.y-log__loading {
+  position: fixed;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+.y-log {
   width: 880px;
   margin: 50px auto;
   line-height: 1.4;

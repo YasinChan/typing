@@ -51,7 +51,7 @@ const handlerClick = () => {
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 2px;
-  color: #fff;
+  color: $label-white;
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   background: $main-color;
   &:hover {

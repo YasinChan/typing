@@ -204,8 +204,12 @@ function restart() {
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
     <template v-if="!state.showResult">
       <div class="y-quote-limit__setting-wrap">
-        <div v-if="timeFormat && state.showTime" class="y-quote-limit__start">
-          {{ timeFormat }}
+        <div
+          v-if="state.showTime"
+          class="y-quote-limit__start"
+          :class="[timeFormat ? 'y-quote-limit__start--active' : '']"
+        >
+          {{ timeFormat || 0 }}
         </div>
         <div
           class="y-quote-limit__setting"
@@ -391,9 +395,12 @@ function restart() {
   position: absolute;
   top: 50px;
   left: 0;
-  color: $main-color;
+  color: $gray-04;
   font-size: 22px;
   font-weight: bold;
+  &.y-quote-limit__start--active {
+    color: $main-color;
+  }
 }
 .y-quote-limit__time-svg {
   width: 30px;

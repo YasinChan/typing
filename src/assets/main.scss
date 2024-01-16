@@ -26,6 +26,11 @@ a {
 }
 
 @font-face {
+  font-family: 'zpix-min';
+  src: url('@/assets/font/zpix-min.ttf');
+}
+
+@font-face {
   font-family: 'zpix';
   src: url('@/assets/font/zpix.ttf');
 }
@@ -36,8 +41,12 @@ a {
 }
 
 @font-face {
-  font-family: 'AlibabaPuHuiTi';
-  src: url('@/assets/font/AlibabaPuHuiTi.ttf');
+  font-family: 'zhankugaoduanhei-min';
+  src: url('@/assets/font/zhankugaoduanhei-min.ttf');
+}
+
+.y-font--zpix-min {
+  font-family: zpix-min;
 }
 
 .y-font--zpix {
@@ -46,6 +55,10 @@ a {
 
 .y-font--zhankugaoduanhei {
   font-family: zhankugaoduanhei;
+}
+
+.y-font--zhankugaoduanhei-min {
+  font-family: zhankugaoduanhei-min;
 }
 
 .y-font--AlibabaPuHuiTi {

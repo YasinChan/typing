@@ -174,8 +174,12 @@ function uploadFileFunc() {
   <main :class="'y-font--' + currentFont" class="y-custom-page">
     <template v-if="!state.showResult">
       <div class="y-custom-page__setting-wrap">
-        <div v-if="timeFormat && state.showTime" class="y-custom-page__start">
-          {{ timeFormat }}
+        <div
+          v-if="state.showTime"
+          class="y-custom-page__start"
+          :class="[timeFormat ? 'y-custom-page__start--active' : '']"
+        >
+          {{ timeFormat || 0 }}
         </div>
         <div class="y-custom-page__setting">
           <Transition name="menu">
@@ -311,9 +315,12 @@ function uploadFileFunc() {
   position: absolute;
   top: 50px;
   left: 0;
-  color: $main-color;
+  color: $gray-04;
   font-size: 22px;
   font-weight: bold;
+  &.y-custom-page__start--active {
+    color: $main-color;
+  }
 }
 .y-custom-page__time-svg {
   width: 30px;
@@ -406,7 +413,7 @@ function uploadFileFunc() {
   svg {
     width: 16px;
     height: 16px;
-    fill: $gray-06;
+    fill: $label-white;
   }
 }
 </style>

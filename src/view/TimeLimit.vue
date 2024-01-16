@@ -172,10 +172,11 @@ function restart() {
     <template v-if="!state.showResult">
       <div class="y-time-limit__setting">
         <div
-          v-if="state.countDown !== null && state.showCountDown"
+          v-if="(state.countDown || state.selectTime) && state.showCountDown"
           class="y-time-limit__count-down"
+          :class="[state.countDown ? 'y-time-limit__count-down--active' : '']"
         >
-          {{ state.countDown }}
+          {{ state.countDown || state.selectTime }}
         </div>
         <Transition name="menu">
           <div
@@ -306,9 +307,12 @@ function restart() {
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  color: $main-color;
+  color: $gray-04;
   font-size: 22px;
   font-weight: bold;
+  &.y-time-limit__count-down--active {
+    color: $main-color;
+  }
 }
 .y-time-limit__set-time {
   display: inline-flex;
@@ -371,11 +375,11 @@ function restart() {
 .y-time-limit__info {
   margin-top: 30px;
   text-align: right;
-  color: $gray-02;
+  color: $gray-03;
 }
 .y-time-limit__detail {
   text-align: right;
-  color: $gray-02;
+  color: $gray-03;
   font-size: 14px;
   font-weight: normal;
   margin-top: 20px;

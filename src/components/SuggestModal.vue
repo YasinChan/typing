@@ -8,6 +8,7 @@ import YTextarea from '@/components/ui/Textarea.vue';
 import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
 import YTag from '@/components/ui/Tag.vue';
+import YLoading from '@/components/ui/Loading.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -60,10 +61,10 @@ const replyName = computed(() => {
 
 async function getSuggestList(sort?: 'time' | 'hot') {
   const suggest = await getSuggest({ sort });
-  const suggetList: SuggestItem[] = suggest.data?.result?.suggest || [];
-  const done = suggetList.filter((item) => item.done);
-  const accept = suggetList.filter((item) => !item.done).filter((item) => item.accept);
-  const left = suggetList.filter((item) => !item.accept && !item.done);
+  const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
+  const done = suggestList.filter((item) => item.done);
+  const accept = suggestList.filter((item) => !item.done).filter((item) => item.accept);
+  const left = suggestList.filter((item) => !item.accept && !item.done);
   state.suggestList = [...done, ...accept, ...left];
 }
 
@@ -251,6 +252,7 @@ defineExpose({
           ><IcoFilter></IcoFilter>{{ state.currentSort === 'time' ? '最新' : '最热' }}</span
         >
       </div>
+      <YLoading class="y-submit-suggest__loading" v-if="!state.suggestList?.length"></YLoading>
       <div
         class="y-submit-suggest__list gray-08"
         :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
@@ -358,6 +360,12 @@ defineExpose({
   }
 }
 
+.y-submit-suggest__loading {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
 .y-submit-suggest__list {
   padding: 16px 8px;
   font-size: 14px;

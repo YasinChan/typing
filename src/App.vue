@@ -240,16 +240,13 @@ async function suggestClick() {
         <ListItem @click="useConfig.setCurrentFont('default')" class="y-font--default"
           >默认 字体 测试 TEST test</ListItem
         >
-        <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix"
+        <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix-min"
           >zpix 字体 测试 TEST test</ListItem
         >
         <ListItem
           @click="useConfig.setCurrentFont('zhankugaoduanhei')"
-          class="y-font--zhankugaoduanhei"
+          class="y-font--zhankugaoduanhei-min"
           >zhankugaoduanhei 字体 测试 TEST test</ListItem
-        >
-        <ListItem @click="useConfig.setCurrentFont('AlibabaPuHuiTi')" class="y-font--AlibabaPuHuiTi"
-          >AlibabaPuHuiTi 字体 测试 TEST test</ListItem
         >
       </div>
     </template>
@@ -277,12 +274,12 @@ async function suggestClick() {
   height: 30px;
   line-height: 30px;
   text-align: center;
-  color: $gray-08;
+  color: $label-white;
   font-weight: bold;
   background: $main-color-gradient;
   cursor: pointer;
   svg {
-    fill: $gray-08;
+    fill: $label-white;
     width: 16px;
     margin-left: 20px;
   }
@@ -299,7 +296,7 @@ header {
   top: 100px;
   left: 50%;
   transform: translateX(-50%);
-  color: $gray-08;
+  color: $label-white;
   font-size: 14px;
   font-weight: bold;
   background: $main-color-gradient;
@@ -308,7 +305,7 @@ header {
   padding: 0 8px;
   svg {
     margin-right: 4px;
-    fill: $gray-08;
+    fill: $label-white;
     width: 20px;
   }
 }
@@ -325,7 +322,7 @@ header {
   height: 30px;
 }
 .y-info__title {
-  font-family: zhankugaoduanhei;
+  font-family: zhankugaoduanhei-min;
   margin-left: 6px;
   display: inline-block;
   font-weight: bold;
