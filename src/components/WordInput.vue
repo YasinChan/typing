@@ -207,10 +207,6 @@ watch(
       });
       return;
     }
-    if (newVal.length >= state.quoteLength) {
-      // 输入完成
-      emit('is-finished');
-    }
     const inputTextArr = newVal.split('');
     const wrongPos: number[] = [];
     state.quoteArr.forEach((item, index) => {
@@ -235,6 +231,12 @@ watch(
         wrongPos
       }
     ];
+    setTimeout(() => {
+      if (newVal.length >= state.quoteLength) {
+        // 输入完成
+        emit('is-finished');
+      }
+    });
   }
 );
 

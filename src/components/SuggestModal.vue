@@ -43,7 +43,8 @@ const state = reactive({
   isAnonymity: false,
   suggestList: [] as SuggestItem[],
   currentSort: 'time' as 'time' | 'hot',
-  suggestContent: ''
+  suggestContent: '',
+  isLoading: true
 });
 
 onMounted(() => {
@@ -60,12 +61,14 @@ const replyName = computed(() => {
 });
 
 async function getSuggestList(sort?: 'time' | 'hot') {
+  state.isLoading = true;
   const suggest = await getSuggest({ sort });
   const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
   const done = suggestList.filter((item) => item.done);
   const accept = suggestList.filter((item) => !item.done).filter((item) => item.accept);
   const left = suggestList.filter((item) => !item.accept && !item.done);
   state.suggestList = [...done, ...accept, ...left];
+  state.isLoading = false;
 }
 
 function showSuggest() {
@@ -252,8 +255,9 @@ defineExpose({
           ><IcoFilter></IcoFilter>{{ state.currentSort === 'time' ? '最新' : '最热' }}</span
         >
       </div>
-      <YLoading class="y-submit-suggest__loading" v-if="!state.suggestList?.length"></YLoading>
+      <YLoading class="y-submit-suggest__loading" v-if="state.isLoading"></YLoading>
       <div
+        v-else
         class="y-submit-suggest__list gray-08"
         :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
         v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"

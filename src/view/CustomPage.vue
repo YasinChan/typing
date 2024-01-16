@@ -226,7 +226,7 @@ function uploadFileFunc() {
       <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       <Transition name="menu">
         <div v-show="!onlyShowMain" class="y-custom-page__tips">
-          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束打字进度。</p>
+          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
         </div>
       </Transition>
     </template>
@@ -261,11 +261,11 @@ function uploadFileFunc() {
     </template>
     <template #body>
       <div class="y-custom-page__modal-body">
-        <YTextarea v-model="state.customInfo" :max-length="1000"></YTextarea>
+        <YTextarea v-model="state.customInfo" :max-length="888"></YTextarea>
       </div>
     </template>
     <template #footer>
-      <YButton size="small" @click="confirmSet">确定</YButton>
+      <YButton :disable="!state.customInfo?.length" size="small" @click="confirmSet">确定</YButton>
     </template>
   </YModal>
 </template>

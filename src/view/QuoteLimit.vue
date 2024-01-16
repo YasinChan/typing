@@ -318,7 +318,7 @@ function restart() {
       </template>
       <Transition name="menu">
         <div v-show="!onlyShowMain" class="y-quote-limit__tips">
-          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束打字进度。</p>
+          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
           <p v-if="state.type === 'short'">*短句模式下回车则会切换到下一条。</p>
         </div>
       </Transition>
