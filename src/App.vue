@@ -23,6 +23,7 @@ import { storeToRefs } from 'pinia';
 import IcoMessage from '@/assets/svg/message.svg';
 import IcoCapsLock from '@/assets/svg/caps-lock.svg';
 import IcoClose from '@/assets/svg/close.svg';
+import IcoRanking from '@/assets/svg/ranking.svg';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const userStore = useUserStore();
@@ -138,14 +139,24 @@ function showMessage({ message = '', type = 'success', timeout = 3000 }) {
 function showConfirmModal({
   title = '',
   content = '',
-  confirmClose = () => {},
-  confirm = () => {}
+  confirmClose = () => true,
+  confirm = () => true
 }) {
   obj.confirmTitle = title;
   obj.confirmContent = content;
   obj.showConfirm = true;
-  obj.confirmClose = confirmClose;
-  obj.confirm = confirm;
+  obj.confirmClose = () => {
+    const close = confirmClose();
+    if (close) {
+      obj.showConfirm = false;
+    }
+  };
+  obj.confirm = () => {
+    const close = confirm();
+    if (close) {
+      obj.showConfirm = false;
+    }
+  };
 }
 
 async function suggestClick() {
@@ -175,6 +186,9 @@ async function suggestClick() {
 
     <Transition name="menu">
       <div class="y-menu" v-show="!onlyShowMain">
+        <router-link to="/leaderboard" class="y-menu__item y-menu__item--no-line flex-center--y">
+          <IcoRanking></IcoRanking>
+        </router-link>
         <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
         <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
         <router-link to="/quote" class="y-menu__item">计时模式</router-link>
@@ -340,7 +354,12 @@ header {
   cursor: pointer;
   letter-spacing: 1px;
   transition: color 0.5s;
-  &::after {
+  svg {
+    fill: $gray-08;
+    width: 18px;
+    height: 18px;
+  }
+  &:not(.y-menu__item--no-line)::after {
     transition: all 0.1s;
     position: absolute;
     content: '';
@@ -355,6 +374,9 @@ header {
   &.router-link-active {
     color: $main-color;
     position: relative;
+    svg {
+      fill: $main-color;
+    }
     &::after {
       width: 30px;
     }

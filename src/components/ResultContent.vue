@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, computed, onMounted, onUnmounted } from 'vue';
+import { reactive, computed, onMounted, onUnmounted, inject } from 'vue';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -11,7 +11,9 @@ import type { TypingRecordType, TypingRecordItemType } from '@/types';
 import IcoReplay from '@/assets/svg/replay.svg';
 import IcoChange from '@/assets/svg/change.svg';
 import IcoSpeedUp from '@/assets/svg/speed-up.svg';
+import IcoRecord from '@/assets/svg/record.svg';
 
+const confirm: any = inject('confirm');
 const props = defineProps<{
   typingRecord?: TypingRecordType;
   typingRecordArr?: TypingRecordType[];
@@ -221,14 +223,30 @@ function restart() {
   }
   emit('restart');
 }
+
+function record() {
+  if (Number(state.accuracy.replace('%', '')) >= 80 && props.totalTime >= 15) {
+    return;
+  }
+  confirm({
+    title: '提示',
+    content: '可以记录的条件为时长大于 15s，同时准确率大于 80%。',
+    confirmClose: () => {
+      return true;
+    },
+    confirm: () => {
+      return true;
+    }
+  });
+}
 </script>
 <template>
   <Tooltip class="result-content cursor-pointer" :content="state.accuracyInfo">
-    正确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
+    准确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
   </Tooltip>
   <Tooltip
     class="result-content cursor-pointer"
-    content="这里的速度的计算规则中是包含了标点符号的。"
+    content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。"
   >
     速度：<span class="result-content--main-color">{{ state.speed }}</span>
   </Tooltip>
@@ -241,6 +259,9 @@ function restart() {
     </Tooltip>
     <Tooltip v-if="!isShort" class="result-content__svg" content="查看回放">
       <IcoReplay @click="replay"></IcoReplay>
+    </Tooltip>
+    <Tooltip class="result-content__svg" content="保存本次记录，将会在排行榜中展示。">
+      <IcoRecord @click="record"></IcoRecord>
     </Tooltip>
   </div>
   <div class="result-content__replay" v-if="state.currentOperation">

@@ -65,3 +65,12 @@ export const voteSuggest = (params: { id: string; value: string }) => {
 export const getTodo = () => {
   return axios.get('/api/todo');
 };
+
+// 获取排行榜
+export const getLeaderBoard = () => {
+  return axios.get('/api/leaderboard');
+};
+// // 保存记录
+// export const saveLeaderBoard = (params) => {
+//   return axios.post('/api/leaderboard/save', params);
+// };

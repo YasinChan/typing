@@ -20,3 +20,14 @@ export type TypingRecordItemType = {
 export type TypingRecordType = {
   [key: number]: TypingRecordItemType[];
 };
+
+export type LeaderBoardType = {
+  accuracy: string;
+  duration: number;
+  type: string;
+  userId: string;
+  userName: string;
+  wpm: string;
+  objectId: string;
+  createdAt: string;
+};

@@ -6,6 +6,7 @@ import CustomPage from '@/view/CustomPage.vue';
 import User from '@/view/User.vue';
 import Log from '@/view/Log.vue';
 import StatementLog from '@/view/StatementLog.vue';
+import LeaderBoard from '@/view/LeaderBoard.vue';
 
 export default [
   { path: '/', name: 'TimeLimit', component: TimeLimit },
@@ -15,5 +16,6 @@ export default [
   { path: '/custom', name: 'Custom', component: CustomPage },
   { path: '/user/:id', name: 'User', component: User },
   { path: '/log', name: 'Log', component: Log },
-  { path: '/statement', name: 'statement', component: StatementLog }
+  { path: '/statement', name: 'statement', component: StatementLog },
+  { path: '/leaderboard', name: 'LeaderBoard', component: LeaderBoard }
 ];
