@@ -520,7 +520,7 @@ defineExpose({
   align-items: center;
   padding: 0 10px;
   svg {
-    fill: $label-white;
+    fill: #fff;
   }
 }
 .header-control__line-left {
