@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, onMounted, inject } from 'vue';
+import { computed, reactive, onMounted, watch } from 'vue';
 import { ColorPicker } from 'vue3-colorpicker';
 import 'vue3-colorpicker/style.css';
 
@@ -11,8 +11,9 @@ import YButton from '@/components/ui/Button.vue';
 // config
 import type { ThemeType } from '@/config/theme';
 
-// utils
+// common
 import { setTheme } from '@/common/theme';
+import { darkenHexColor, lightenHexColor } from '@/common/color';
 
 // png
 import favicon from '@/assets/favicon.png';
@@ -26,8 +27,87 @@ import IcoSetting from '@/assets/svg/setting.svg';
 const state = reactive({
   show: false,
   pureColor: 'red',
-  selectThemeType: '自定义'
+  selectThemeType: '自定义',
+  mainColor: '',
+  mainRedColor: '',
+  backgroundGrayColor: '',
+  layoutBackgroundGrayColor: '',
+  gray08Color: '',
+  gray06Color: '',
+  gray04Color: '',
+  gray02Color: ''
 });
+
+onMounted(() => {
+  state.mainColor = getCustomCssValue('--main-color');
+  state.mainRedColor = getCustomCssValue('--main-red');
+  state.backgroundGrayColor = getCustomCssValue('--background-gray');
+  state.layoutBackgroundGrayColor = getCustomCssValue('--layout-background-gray');
+
+  state.gray08Color = getCustomCssValue('--gray-08');
+  state.gray06Color = getCustomCssValue('--gray-06');
+  state.gray04Color = getCustomCssValue('--gray-04');
+  state.gray02Color = getCustomCssValue('--gray-02');
+});
+
+watch(
+  () => state.mainColor,
+  (val) => {
+    setCustomCssValue('--main-color', val);
+  }
+);
+watch(
+  () => state.mainRedColor,
+  (val) => {
+    setCustomCssValue('--main-red', val);
+  }
+);
+watch(
+  () => state.backgroundGrayColor,
+  (val) => {
+    setCustomCssValue('--background-gray', val);
+  }
+);
+watch(
+  () => state.layoutBackgroundGrayColor,
+  (val) => {
+    setCustomCssValue('--layout-background-gray', val);
+  }
+);
+watch(
+  () => state.gray08Color,
+  (val) => {
+    setCustomCssValue('--gray-08', val);
+  }
+);
+watch(
+  () => state.gray06Color,
+  (val) => {
+    setCustomCssValue('--gray-06', val);
+  }
+);
+watch(
+  () => state.gray04Color,
+  (val) => {
+    setCustomCssValue('--gray-04', val);
+  }
+);
+watch(
+  () => state.gray02Color,
+  (val) => {
+    setCustomCssValue('--gray-02', val);
+  }
+);
+
+function getCustomCssValue(value: string) {
+  const rootElement = document.documentElement;
+  const computedStyle = window.getComputedStyle(rootElement);
+  const customColorValue = computedStyle.getPropertyValue(value);
+  return customColorValue;
+}
+function setCustomCssValue(css: string, value: string) {
+  document.documentElement.style.setProperty(css, value);
+}
 
 function showModal() {
   state.show = true;
@@ -46,6 +126,17 @@ function themeSet(type: ThemeType) {
   }
 }
 
+function toDark() {
+  state.gray06Color = darkenHexColor(state.gray08Color, 0.4);
+  state.gray04Color = darkenHexColor(state.gray08Color, 0.6);
+  state.gray02Color = darkenHexColor(state.gray08Color, 0.75);
+}
+function toLight() {
+  state.gray06Color = lightenHexColor(state.gray08Color, 0.4);
+  state.gray04Color = lightenHexColor(state.gray08Color, 0.6);
+  state.gray02Color = lightenHexColor(state.gray08Color, 0.75);
+}
+
 defineExpose({
   showModal
 });
@@ -62,36 +153,100 @@ defineExpose({
     </template>
     <template #body>
       <div class="y-modal__theme-setting gray-08" v-if="state.selectThemeType !== '自定义'">
-        <div class="">
-          <div>
-            <span>背景色</span>
+        <div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">背景色</span>
             <color-picker
-              v-model:pureColor="state.pureColor"
+              v-model:pureColor="state.backgroundGrayColor"
               shape="circle"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div>
-            <span>主题色</span>
-            <color-picker
-              v-model:pureColor="state.pureColor"
-              shape="circle"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div>
-            <span>字体颜色</span>
-            <color-picker
-              v-model:pureColor="state.pureColor"
-              shape="circle"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
               format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">布局色</span>
+            <color-picker
+              v-model:pureColor="state.layoutBackgroundGrayColor"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">主题色</span>
+            <color-picker
+              v-model:pureColor="state.mainColor"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">错误颜色</span>
+            <color-picker
+              v-model:pureColor="state.mainRedColor"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">主字体颜色</span>
+            <color-picker
+              v-model:pureColor="state.gray08Color"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="theme-setting__second">
+            <span class="theme-setting__title main-color">自动生成</span>
+            <div>
+              <YButton size="small" @click="toDark">变暗</YButton>
+              <YButton size="small" @click="toLight">变亮</YButton>
+            </div>
+          </div>
+          <div class="theme-setting__second flex-center--y">
+            <span class="theme-setting__title">字体颜色1</span>
+            <color-picker
+              v-model:pureColor="state.gray06Color"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="theme-setting__second flex-center--y">
+            <span class="theme-setting__title">字体颜色2</span>
+            <color-picker
+              v-model:pureColor="state.gray04Color"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
+          <div class="theme-setting__second flex-center--y">
+            <span class="theme-setting__title">字体颜色3</span>
+            <color-picker
+              v-model:pureColor="state.gray02Color"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
             />
           </div>
         </div>
@@ -118,40 +273,43 @@ defineExpose({
               <IcoMore></IcoMore>
             </div>
           </div>
-          <div class="y-modal__theme-chrome-content">
-            <div class="flex-center--y-between">
-              <div class="y-info__title main-color">Typing</div>
-              <div class="y-menu">
-                <div class="y-menu__item y-menu__item--active">限时模式</div>
-                <div class="y-menu__item">计时模式</div>
-                <div class="y-menu__item">自定义模式</div>
-                <div class="y-menu__item flex-center--y">
-                  <IcoSetting></IcoSetting>
-                  <div class="y-drop-down__menu">
-                    <div class="y-auth__menu">
-                      <div class="y-menu__change y-menu__change-font">切换字体</div>
-                      <div class="y-menu__change">切换主题</div>
-                      <div class="y-menu__change">声明</div>
-                      <div class="y-menu__change">更新日志</div>
+          <div class="y-modal__theme-chrome-content-wrap">
+            <div class="y-modal__theme-chrome-content">
+              <div class="flex-center--y-between">
+                <div class="y-info__title main-color">Typing</div>
+                <div class="y-menu">
+                  <div class="y-menu__item y-menu__item--active">限时模式</div>
+                  <div class="y-menu__item">计时模式</div>
+                  <div class="y-menu__item">自定义模式</div>
+                  <div class="y-menu__item flex-center--y">
+                    <IcoSetting></IcoSetting>
+                    <div class="y-drop-down__menu">
+                      <div class="y-auth__menu">
+                        <div class="y-menu__change y-menu__change-font">切换字体</div>
+                        <div class="y-menu__change">切换主题</div>
+                        <div class="y-menu__change">声明</div>
+                        <div class="y-menu__change">更新日志</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="theme-content__word">
-              <div>
-                <span class="is-input">世界上有两条路，一条</span><span class="is-wrong">有形</span
-                ><span class="is-input">的横着</span
-                >供人前行徘徊或倒退，一条无形的竖着供灵魂升入天堂或下地狱。只有在横着的路上踏遍荆棘而无悔，方可在竖着的路上与云霞为伍。
+              <div class="theme-content__word">
+                <div>
+                  <span class="is-input">世界上有两条路，一条</span
+                  ><span class="is-wrong">有形</span
+                  ><span class="is-input">的横着</span
+                  >供人前行徘徊或倒退，一条无形的竖着供灵魂升入天堂或下地狱。只有在横着的路上踏遍荆棘而无悔，方可在竖着的路上与云霞为伍。
+                </div>
+                <div class="theme-content__word-input">世界上有两条路，一条油性的横着</div>
               </div>
-              <div class="theme-content__word-input">世界上有两条路，一条油性的横着</div>
-            </div>
-            <div class="theme-content__word-info">
-              —— <span>《额尔古纳河右岸》节选</span> -
-              <span>迟子建</span>
-            </div>
-            <div class="theme-content__word-tips">
-              <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
+              <div class="theme-content__word-info">
+                —— <span>《额尔古纳河右岸》节选</span> -
+                <span>迟子建</span>
+              </div>
+              <div class="theme-content__word-tips">
+                <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
+              </div>
             </div>
           </div>
         </div>
@@ -237,11 +395,23 @@ defineExpose({
   display: flex;
   justify-content: space-between;
 }
+.theme-setting__title {
+  width: 80px;
+  font-size: 14px;
+  line-height: 30px;
+}
+.theme-setting__second {
+  margin-left: 20px;
+  button {
+    margin-right: 10px;
+  }
+}
 
 .y-modal__theme-custom {
   width: 720px;
   border-radius: 6px;
   background: rgb(43, 43, 43);
+  overflow: hidden;
 }
 .y-modal__theme-chrome-header {
   height: 60px;
@@ -326,9 +496,14 @@ defineExpose({
   font-size: 12px;
   padding: 0 10px;
 }
+
+.y-modal__theme-chrome-content-wrap {
+  display: flex;
+  background: $background-gray;
+}
 .y-modal__theme-chrome-content {
   transform: scale(0.9);
-  padding: 10px;
+  padding: 0 10px;
 }
 .theme-content__word {
   position: relative;

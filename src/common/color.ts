@@ -61,3 +61,43 @@ export function isRgbColor(color: string): boolean {
 
   return rgbRegex.test(color) || rgbaRegex.test(color);
 }
+
+/**
+ * 将 16 进制颜色色值增加（即增加亮度）
+ * @param hex
+ * @param percent
+ */
+export function lightenHexColor(hex: string, percent: number) {
+  // 将16进制颜色转换为RGB
+  let r = parseInt(hex.slice(1, 3), 16),
+    g = parseInt(hex.slice(3, 5), 16),
+    b = parseInt(hex.slice(5, 7), 16);
+
+  // 计算新的亮度值
+  r = Math.min(255, Math.round(r + (255 - r) * percent));
+  g = Math.min(255, Math.round(g + (255 - g) * percent));
+  b = Math.min(255, Math.round(b + (255 - b) * percent));
+
+  // 将RGB值转换回16进制颜色
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+/**
+ * 将 16 进制颜色色值减少（即减少亮度）
+ * @param hex
+ * @param percent
+ */
+export function darkenHexColor(hex: string, percent: number) {
+  // 将16进制颜色转换为RGB
+  let r = parseInt(hex.slice(1, 3), 16),
+    g = parseInt(hex.slice(3, 5), 16),
+    b = parseInt(hex.slice(5, 7), 16);
+
+  // 计算新的暗度值
+  r = Math.max(0, Math.round(r - r * percent));
+  g = Math.max(0, Math.round(g - g * percent));
+  b = Math.max(0, Math.round(b - b * percent));
+
+  // 将RGB值转换回16进制颜色
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
