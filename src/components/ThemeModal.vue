@@ -35,7 +35,8 @@ const state = reactive({
   gray08Color: '',
   gray06Color: '',
   gray04Color: '',
-  gray02Color: ''
+  gray02Color: '',
+  labelWhiteColor: ''
 });
 
 onMounted(() => {
@@ -48,6 +49,8 @@ onMounted(() => {
   state.gray06Color = getCustomCssValue('--gray-06');
   state.gray04Color = getCustomCssValue('--gray-04');
   state.gray02Color = getCustomCssValue('--gray-02');
+
+  state.labelWhiteColor = getCustomCssValue('--label-white');
 });
 
 watch(
@@ -96,6 +99,12 @@ watch(
   () => state.gray02Color,
   (val) => {
     setCustomCssValue('--gray-02', val);
+  }
+);
+watch(
+  () => state.labelWhiteColor,
+  (val) => {
+    setCustomCssValue('--label-white', val);
   }
 );
 
@@ -152,8 +161,8 @@ defineExpose({
       <h3>主题选择</h3>
     </template>
     <template #body>
-      <div class="y-modal__theme-setting gray-08" v-if="state.selectThemeType !== '自定义'">
-        <div>
+      <div class="y-modal__theme-setting" v-if="state.selectThemeType !== '自定义'">
+        <div class="gray-08">
           <div class="flex-center--y">
             <span class="theme-setting__title">背景色</span>
             <color-picker
@@ -249,6 +258,17 @@ defineExpose({
               :debounce="100"
             />
           </div>
+          <div class="flex-center--y">
+            <span class="theme-setting__title">标签字体颜色</span>
+            <color-picker
+              v-model:pureColor="state.labelWhiteColor"
+              shape="circle"
+              format="hex"
+              :disable-history="true"
+              :disable-alpha="true"
+              :debounce="100"
+            />
+          </div>
         </div>
         <div class="y-modal__theme-custom">
           <div class="y-modal__theme-chrome-header">
@@ -274,11 +294,12 @@ defineExpose({
             </div>
           </div>
           <div class="y-modal__theme-chrome-content-wrap">
+            <div class="content-top">这里是样式模板</div>
             <div class="y-modal__theme-chrome-content">
               <div class="flex-center--y-between">
                 <div class="y-info__title main-color">Typing</div>
                 <div class="y-menu">
-                  <div class="y-menu__item y-menu__item--active">限时模式</div>
+                  <div class="y-menu__item y-menu__item--active router-link-active">限时模式</div>
                   <div class="y-menu__item">计时模式</div>
                   <div class="y-menu__item">自定义模式</div>
                   <div class="y-menu__item flex-center--y">
@@ -394,9 +415,10 @@ defineExpose({
 .y-modal__theme-setting {
   display: flex;
   justify-content: space-between;
+  color: #fff;
 }
 .theme-setting__title {
-  width: 80px;
+  width: 100px;
   font-size: 14px;
   line-height: 30px;
 }
@@ -499,7 +521,27 @@ defineExpose({
 
 .y-modal__theme-chrome-content-wrap {
   display: flex;
+  position: relative;
   background: $background-gray;
+}
+.content-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  text-align: center;
+  color: $label-white;
+  font-weight: bold;
+  background: $main-color;
+  cursor: pointer;
+  svg {
+    fill: $label-white;
+    width: 16px;
+    margin-left: 20px;
+  }
 }
 .y-modal__theme-chrome-content {
   transform: scale(0.9);
