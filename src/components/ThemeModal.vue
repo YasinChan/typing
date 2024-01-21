@@ -39,19 +39,26 @@ const state = reactive({
   labelWhiteColor: ''
 });
 
-onMounted(() => {
-  state.mainColor = getCustomCssValue('--main-color');
-  state.mainRedColor = getCustomCssValue('--main-red');
-  state.backgroundGrayColor = getCustomCssValue('--background-gray');
-  state.layoutBackgroundGrayColor = getCustomCssValue('--layout-background-gray');
+onMounted(() => {});
 
-  state.gray08Color = getCustomCssValue('--gray-08');
-  state.gray06Color = getCustomCssValue('--gray-06');
-  state.gray04Color = getCustomCssValue('--gray-04');
-  state.gray02Color = getCustomCssValue('--gray-02');
+watch(
+  () => state.selectThemeType,
+  (val) => {
+    if (val !== '自定义') {
+      state.mainColor = getCustomCssValue('--main-color');
+      state.mainRedColor = getCustomCssValue('--main-red');
+      state.backgroundGrayColor = getCustomCssValue('--background-gray');
+      state.layoutBackgroundGrayColor = getCustomCssValue('--layout-background-gray');
 
-  state.labelWhiteColor = getCustomCssValue('--label-white');
-});
+      state.gray08Color = getCustomCssValue('--gray-08');
+      state.gray06Color = getCustomCssValue('--gray-06');
+      state.gray04Color = getCustomCssValue('--gray-04');
+      state.gray02Color = getCustomCssValue('--gray-02');
+
+      state.labelWhiteColor = getCustomCssValue('--label-white');
+    }
+  }
+);
 
 watch(
   () => state.mainColor,
@@ -115,7 +122,23 @@ function getCustomCssValue(value: string) {
   return customColorValue;
 }
 function setCustomCssValue(css: string, value: string) {
-  document.documentElement.style.setProperty(css, value);
+  const body = document.body;
+  body.style.setProperty(css, value);
+}
+function removeCustomCssValue(value: string) {
+  const body = document.body;
+  body.style.removeProperty(value);
+}
+function removeAllCustomCssValue() {
+  removeCustomCssValue('--main-color');
+  removeCustomCssValue('--main-red');
+  removeCustomCssValue('--background-gray');
+  removeCustomCssValue('--layout-background-gray');
+  removeCustomCssValue('--gray-08');
+  removeCustomCssValue('--gray-06');
+  removeCustomCssValue('--gray-04');
+  removeCustomCssValue('--gray-02');
+  removeCustomCssValue('--label-white');
 }
 
 function showModal() {
@@ -125,9 +148,11 @@ function showModal() {
 function themeSet(type: ThemeType) {
   switch (type) {
     case 'light':
+      removeAllCustomCssValue();
       setTheme('light');
       break;
     case 'dark':
+      removeAllCustomCssValue();
       setTheme('dark');
       break;
     default:
