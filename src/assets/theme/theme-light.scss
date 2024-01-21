@@ -1,49 +1,20 @@
-/* v2.5 颜色变量 light 模式 */
+/* 颜色变量 light 模式 */
 :root {
   /*灰阶颜色 */
   --gray-08: #1d2127;
-  --gray-07: #52575d;
-  --gray-06: #868c92;
-  --gray-05: #a0a5aa;
-  --gray-04: #b9bec1;
-  --gray-03: #d2d7d9;
-  --gray-02: #ebeff0;
-  --gray-01: #f5f7f8;
-  /* 基础色 */
-  --main-white: #ffffff;
-  --main-white-gradient: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
-  --main-black: #000000;
-  --main-red: #f64c4c;
-  --main-red-light: rgba(246, 76, 76, 0.1);
-  --main-color: #15c5ce;
-  --main-color-gradient: linear-gradient(180deg, #18d6e0 0%, #14c2cb 67.19%, #17d6e1 100%);
-  --main-color-light: #ecfafb;
-  --main-orange: #ff8156;
-  --main-orange-gradient: linear-gradient(180deg, #ff9c6b 0%, #ff7752 100%);
-  --main-orange-light: #fff5f1;
-  --label-white: #fff;
+  --gray-06: #52575d;
+  --gray-04: #a0a5aa;
+  --gray-02: #d2d7d9;
 
   --background-gray: #f5f7f8;
   --layout-background-gray: #ffffff;
-  --background-gray-hover: #e6e8e9;
-  --layout-background-gray-hover: #f0f0f0;
 
   --key-box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
   --box-shadow-color: rgba(0, 0, 0, 0.4);
 
-  /* hover 色 */
-  --gray-01-hover: #e6e8e9;
-  --gray-02-hover: #dde1e2;
-  --gray-03-hover: #c5cacc;
-  --gray-04-hover: #aeb3b5;
-  --gray-06-hover: #7e8489;
-  --gray-08-hover: #1b1f25;
-  --main-white-hover: #f0f0f0;
-  --main-color-hover: #14b9c2;
-  --main-color-light-hover: #deebec;
-  --main-orange-hover: #f07951;
-  --main-orange-light-hover: #f0e6e3;
-  --main-red-hover: #e74747;
-  --extension-overlay-black-hover: rgba(0, 0, 0, 0.12);
-  --extension-components-black-hover: rgba(0, 0, 0, 0.46);
+  /* 基础色 */
+  --label-white: #fff;
+  --main-red: #f64c4c;
+  --main-color: #15c5ce;
+  --main-orange: #ff8156;
 }

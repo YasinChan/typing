@@ -513,9 +513,9 @@ const updatePassword = () => {
   border-radius: 2px;
   padding: 10px 15px;
   display: block;
-  transition: background 0.2s;
+  transition: color 0.2s;
   &:hover {
-    background: $layout-background-gray-hover;
+    color: $main-color;
   }
 }
 .y-auth__footer-change {

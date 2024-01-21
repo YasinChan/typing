@@ -14,7 +14,7 @@ const emit = defineEmits(['click']);
   margin: 8px 0;
   transition: color 0.3s;
   &:hover {
-    color: $main-color-hover;
+    color: $main-color;
   }
 }
 </style>

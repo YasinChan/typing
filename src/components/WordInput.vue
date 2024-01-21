@@ -497,7 +497,7 @@ defineExpose({
   &:hover,
   &:focus {
     &:after {
-      background: $main-color-hover;
+      background: $main-color;
     }
   }
 }

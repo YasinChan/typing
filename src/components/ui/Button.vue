@@ -11,6 +11,10 @@ const props = defineProps({
   size: {
     type: String,
     default: 'medium'
+  },
+  theme: {
+    type: String,
+    default: 'default'
   }
 });
 const emitter = defineEmits(['click']);
@@ -32,7 +36,8 @@ const handlerClick = () => {
     :class="[
       disable ? 'y-button--disabled' : '',
       size === 'small' ? 'y-button--small' : '',
-      size === 'large' ? 'y-button--large' : ''
+      size === 'large' ? 'y-button--large' : '',
+      theme === 'default' ? '' : 'y-button--' + theme
     ]"
   >
     <slot>按钮</slot>
@@ -55,7 +60,7 @@ const handlerClick = () => {
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   background: $main-color;
   &:hover {
-    background: $main-color-hover;
+    background: $main-color;
   }
 }
 .y-button--small {
@@ -64,9 +69,17 @@ const handlerClick = () => {
 }
 .y-button--disabled {
   cursor: not-allowed;
-  background: $main-color-light;
+  opacity: 0.3;
   &:hover {
-    background: $main-color-light;
+    opacity: 0.3;
+  }
+}
+.y-button--secondary {
+  background: $label-white;
+  color: $main-color;
+  &:hover {
+    background: $label-white;
+    color: $main-color;
   }
 }
 </style>

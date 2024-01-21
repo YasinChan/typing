@@ -66,7 +66,7 @@ const blurHandler = (event: any): any => {
     outline: 0;
     &:hover,
     &:focus {
-      border-color: $main-color-hover;
+      border-color: $main-color;
       border-right-width: 1px;
       outline: 0;
     }
@@ -77,7 +77,7 @@ const blurHandler = (event: any): any => {
     border: 1px solid $main-red;
     &:hover,
     &:focus {
-      border-color: $main-red-hover;
+      border-color: $main-red;
       border-right-width: 1px;
     }
   }

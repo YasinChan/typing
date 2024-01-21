@@ -41,7 +41,7 @@ const props = withDefaults(
   transform: translateX(-50%);
   padding: 4px 8px;
   background-color: $gray-08;
-  color: $gray-01;
+  color: $gray-02;
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;

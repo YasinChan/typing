@@ -1,43 +1,28 @@
-$gray-01: var(--gray-01);
-$gray-01-hover: var(--gray-01-hover);
-$gray-02: var(--gray-02);
-$gray-02-hover: var(--gray-02-hover);
-$gray-03: var(--gray-03);
-$gray-03-hover: var(--gray-03-hover);
-$gray-04: var(--gray-04);
-$gray-04-hover: var(--gray-04-hover);
-$gray-05: var(--gray-05);
-$gray-06: var(--gray-06);
-$gray-06-hover: var(--gray-06-hover);
-$gray-07: var(--gray-07);
 $gray-08: var(--gray-08);
-$gray-08-hover: var(--gray-08-hover);
+$gray-06: var(--gray-06);
+$gray-04: var(--gray-04);
+$gray-02: var(--gray-02);
 
 $background-gray: var(--background-gray);
 $layout-background-gray: var(--layout-background-gray);
-$layout-background-gray-hover: var(--layout-background-gray-hover);
+
+$main-red: var(--main-red);
+$main-color: var(--main-color);
+$main-orange: var(--main-orange);
 
 $key-box-shadow: var(--key-box-shadow);
 $box-shadow-color: var(--box-shadow-color);
 
 $label-white: var(--label-white);
 
-$main-black: var(--main-black);
-$main-red: var(--main-red);
-$main-red-hover: var(--main-red-hover);
-$main-red-light: var(--main-red-light);
-$main-color: var(--main-color);
-$main-color-gradient: var(--main-color-gradient);
-$main-color-hover: var(--main-color-hover);
-$main-color-light: var(--main-color-light);
-$main-color-light-hover: var(--main-color-light-hover);
-$main-orange: var(--main-orange);
-$main-orange-gradient: var(--main-orange-gradient);
-$main-orange-hover: var(--main-orange-hover);
-$main-orange-light: var(--main-orange-light);
-$main-orange-light-hover: var(--main-orange-light-hover);
-$main-white: var(--main-white);
-$main-white-gradient: var(--main-white-gradient);
-$main-white-hover: var(--main-white-hover);
-
 $font-en: Verdana, sans-serif;
+
+@mixin limit-line($line) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $line;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  word-break: break-word;
+}

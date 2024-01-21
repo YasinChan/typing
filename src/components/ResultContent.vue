@@ -278,7 +278,7 @@ async function record() {
   }
   confirm({
     title: '提示',
-    content: '可以记录的条件为时长大于 15s，同时准确率大于 80%。',
+    content: '可以记录的条件为时长大于 15 秒，同时准确率大于 80%。',
     confirmClose: () => {
       return true;
     },

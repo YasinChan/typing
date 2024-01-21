@@ -345,7 +345,7 @@ function restart() {
   align-items: center;
   justify-content: center;
   &:hover {
-    color: $main-color-hover;
+    color: $main-color;
   }
 }
 .y-time-limit__time-item--active {
@@ -377,11 +377,11 @@ function restart() {
 .y-time-limit__info {
   margin-top: 30px;
   text-align: right;
-  color: $gray-03;
+  color: $gray-04;
 }
 .y-time-limit__detail {
   text-align: right;
-  color: $gray-03;
+  color: $gray-04;
   font-size: 14px;
   font-weight: normal;
   margin-top: 20px;

@@ -357,11 +357,6 @@ function restart() {
 .y-quote-limit__refresh {
   cursor: pointer;
 }
-.y-quote-limit__info {
-  margin-top: 30px;
-  text-align: right;
-  color: $gray-02;
-}
 .y-quote-limit__setting-wrap {
   position: relative;
   overflow: hidden;
@@ -447,11 +442,11 @@ function restart() {
 .y-quote-limit__info {
   margin-top: 30px;
   text-align: right;
-  color: $gray-02;
+  color: $gray-04;
 }
 .y-quote-limit__detail {
   text-align: right;
-  color: $gray-02;
+  color: $gray-04;
   font-size: 14px;
   font-weight: normal;
   margin-top: 20px;

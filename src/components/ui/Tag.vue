@@ -20,7 +20,7 @@ defineProps<{
   font-weight: 500;
   color: #fff;
   transform: scale(0.8) translate(-4px, 0);
-  background-color: $main-color-hover;
+  background-color: $main-color;
   margin-right: 2px;
 }
 </style>

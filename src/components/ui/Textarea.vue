@@ -62,7 +62,7 @@ watch(
     font-size: 14px;
     line-height: 1.5;
     height: 60px;
-    background-color: $gray-01;
+    background-color: $background-gray;
     border: 1px solid $gray-02;
     border-radius: 4px;
     transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);

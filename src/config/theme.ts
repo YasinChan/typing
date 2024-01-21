@@ -1,4 +1,4 @@
-export type ThemeType = 'dark' | 'light';
+export type ThemeType = 'dark' | 'light' | 'custom';
 
 export const DARK_THEME: ThemeType = 'dark';
 export const LIGHT_THEME: ThemeType = 'light';

@@ -10,6 +10,7 @@ import ListItem from '@/components/ui/ListItem.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import SuggestModal from '@/components/SuggestModal.vue';
+import ThemeModal from '@/components/ThemeModal.vue';
 
 // utils
 import { setTheme, getTheme } from '@/common/theme';
@@ -24,8 +25,13 @@ import IcoMessage from '@/assets/svg/message.svg';
 import IcoCapsLock from '@/assets/svg/caps-lock.svg';
 import IcoClose from '@/assets/svg/close.svg';
 import IcoRanking from '@/assets/svg/ranking.svg';
+import IcoSetting from '@/assets/svg/setting.svg';
+
+// config
+import type { ThemeType } from '@/config/theme';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
+const themeModalRef = ref<InstanceType<typeof ThemeModal>>();
 const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
@@ -39,6 +45,7 @@ setTheme(getTheme());
 const obj = reactive({
   showRemind: true,
   showSuggest: false,
+  showThemeSelect: false,
   showChangeFontModal: false,
   userName: '',
   password: '',
@@ -117,9 +124,12 @@ function handleMouseMove(event: any) {
   }
 }
 
-function changeTheme() {
-  const currentTheme = getTheme();
-  currentTheme === 'light' ? setTheme('dark') : setTheme('light');
+async function changeTheme() {
+  obj.showThemeSelect = true;
+  await nextTick();
+  if (themeModalRef.value) {
+    themeModalRef.value.showModal();
+  }
 }
 
 function showMessage({ message = '', type = 'success', timeout = 3000 }) {
@@ -198,7 +208,9 @@ async function suggestClick() {
         >
         <y-drop-down>
           <template #title>
-            <div class="y-menu__item">其他</div>
+            <div class="y-menu__item flex-center--y">
+              <IcoSetting></IcoSetting>
+            </div>
           </template>
           <template #menu>
             <div class="y-auth__menu">
@@ -218,7 +230,7 @@ async function suggestClick() {
             </div>
           </template>
         </y-drop-down>
-        <div class="y-menu__item y-menu__item-auth y-menu__change">
+        <div class="y-menu__item y-menu__item-auth">
           <auth></auth>
         </div>
       </div>
@@ -240,6 +252,7 @@ async function suggestClick() {
     </Tooltip>
   </Transition>
   <SuggestModal ref="suggestModalRef" v-if="obj.showSuggest"></SuggestModal>
+  <ThemeModal ref="themeModalRef" v-if="obj.showThemeSelect"></ThemeModal>
 
   <YModal
     :show="obj.showChangeFontModal"
@@ -290,7 +303,7 @@ async function suggestClick() {
   text-align: center;
   color: $label-white;
   font-weight: bold;
-  background: $main-color-gradient;
+  background: $main-color;
   cursor: pointer;
   svg {
     fill: $label-white;
@@ -313,7 +326,7 @@ header {
   color: $label-white;
   font-size: 14px;
   font-weight: bold;
-  background: $main-color-gradient;
+  background: $main-color;
   border-radius: 2px;
   cursor: pointer;
   padding: 0 8px;
@@ -354,6 +367,9 @@ header {
   cursor: pointer;
   letter-spacing: 1px;
   transition: color 0.5s;
+  &:hover {
+    color: $main-color;
+  }
   svg {
     fill: $gray-08;
     width: 18px;
@@ -390,10 +406,11 @@ header {
   border-radius: 2px;
   padding: 10px 15px;
   display: block;
-  transition: background 0.2s;
+  transition: all 0.2s;
   color: inherit;
   &:hover {
-    background: $layout-background-gray-hover;
+    background-color: $main-color;
+    color: $label-white;
   }
 }
 
