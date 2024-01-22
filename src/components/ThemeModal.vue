@@ -338,7 +338,9 @@ defineExpose({
           <div class="flex-center--y">
             <div class="theme-setting__title">
               <span>主字体颜色</span>
-              <Tooltip html="字体颜色一共有四种，<br>对应右侧输入中、已输入、未输入和底部提示。">
+              <Tooltip
+                html="字体颜色一共有四种，对应右侧预览界面中的<br>输入中、已输入、未输入和底部提示四种<br>逐渐变亮或变暗的字体颜色。"
+              >
                 <IcoTips></IcoTips>
               </Tooltip>
             </div>
@@ -355,7 +357,7 @@ defineExpose({
             <div class="theme-setting__title main-color">
               <span>自动生成</span>
               <Tooltip
-                :html="`<p>这里其他三种颜色可以自动生成，<br>根据主题色是深还是浅，选择变暗或者变深。<br>一般来说，深色主题选择变暗，浅色主题选择变亮。</p>`"
+                :html="`<p>这里其他三种颜色可以自动生成或者手动设置，<br>根据主题色是深还是浅，选择变暗或者变深。<br>一般来说，深色主题选择变暗，浅色主题选择变亮。</p>`"
               >
                 <IcoTips></IcoTips>
               </Tooltip>
@@ -401,7 +403,7 @@ defineExpose({
           <div class="flex-center--y">
             <div class="theme-setting__title">
               <span>标签字体颜色</span>
-              <Tooltip content="按钮、标签等浅色字体颜色。">
+              <Tooltip content="按钮、标签等字体颜色。">
                 <IcoTips></IcoTips>
               </Tooltip>
             </div>
@@ -451,8 +453,8 @@ defineExpose({
               <div class="flex-center--y-between">
                 <div class="y-info__title main-color">Typing</div>
                 <div class="y-menu">
-                  <div class="y-menu__item y-menu__item--active router-link-active">限时模式</div>
-                  <div class="y-menu__item">计时模式</div>
+                  <div class="y-menu__item">限时模式</div>
+                  <div class="y-menu__item y-menu__item--active router-link-active">计时模式</div>
                   <div class="y-menu__item">自定义模式</div>
                   <div class="y-menu__item flex-center--y">
                     <IcoSetting></IcoSetting>
