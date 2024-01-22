@@ -9,7 +9,7 @@ defineProps<{
     <span class="y-tag-text">{{ text }}</span>
   </div>
 </template>
-<style lang="scss" scoped>
+<style lang="scss">
 .y-tag {
   display: inline-flex;
   align-items: center;
@@ -19,8 +19,7 @@ defineProps<{
   font-size: 12px;
   font-weight: 500;
   color: #fff;
-  transform: scale(0.8) translate(-4px, 0);
   background-color: $main-color;
-  margin-right: 2px;
+  margin-right: 4px;
 }
 </style>

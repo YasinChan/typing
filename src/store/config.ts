@@ -7,9 +7,13 @@ export const useConfigStore = defineStore('config', {
     printContent: '' as string,
     currentCode: [] as any[],
     isEscape: false as boolean,
-    capsLockOn: false
+    capsLockOn: false,
+    customThemeConfig: ''
   }),
   actions: {
+    setCustomThemeConfig(val: string) {
+      this.customThemeConfig = val;
+    },
     setIsEscape(val: boolean) {
       this.isEscape = val;
     },

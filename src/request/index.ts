@@ -53,7 +53,13 @@ export const getSuggest = (params?: { sort?: 'time' | 'hot' }) => {
 };
 
 // 提出建议
-export const createSuggest = (params: { content: string; userId?: string; userName?: string }) => {
+export const createSuggest = (params: {
+  content: string;
+  userId?: string;
+  userName?: string;
+  isTheme?: boolean;
+  canShow?: boolean;
+}) => {
   return axios.post('/api/suggest/create', params);
 };
 

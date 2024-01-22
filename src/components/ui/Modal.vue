@@ -7,10 +7,12 @@ const props = withDefaults(
     Partial<{
       show: boolean;
       className: string;
+      zIndex: number;
     }>
   >(),
   {
-    show: false
+    show: false,
+    zIndex: 1
   }
 );
 
@@ -40,7 +42,7 @@ watch(
 <template>
   <Transition name="modal">
     <Teleport to="body">
-      <div v-if="show" class="y-modal__mask" @click="emit('close')">
+      <div v-if="show" class="y-modal__mask" :style="{ zIndex: zIndex }" @click="emit('close')">
         <div class="y-modal__container" :class="className" @click.stop>
           <div class="y-modal__header flex-center--y">
             <slot name="header">default header</slot>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, onMounted, inject } from 'vue';
+import { computed, reactive, onMounted, inject, watch } from 'vue';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
 
@@ -9,6 +9,8 @@ import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
 import YTag from '@/components/ui/Tag.vue';
 import YLoading from '@/components/ui/Loading.vue';
+import ThemeLabel from '@/components/ThemeLabel.vue';
+import Tooltip from '@/components/ui/Tooltip.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -20,28 +22,25 @@ import { getSuggest, createSuggest, voteSuggest } from '@/request';
 // svg
 import IcoUp from '@/assets/svg/up.svg';
 import IcoFilter from '@/assets/svg/filter.svg';
+import IcoTips from '@/assets/svg/tips.svg';
+
+// types
+import type { SuggestItem, COLOR_TYPE } from '@/types';
+import { COLOR_ENUM } from '@/types';
+
+// common
+import { removeAllCustomCssValue, setCustomCssValue } from '@/common/color';
 
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
-
-type SuggestItem = {
-  id: string;
-  content: string;
-  updatedAt: string;
-  userName: string;
-  userId: string;
-  up: number;
-  canShow: boolean;
-  down: number;
-  accept: boolean;
-  done: boolean;
-};
 
 const message: any = inject('message');
 const state = reactive({
   show: false,
   isAnonymity: false,
   suggestList: [] as SuggestItem[],
+  activeSuggest: {} as SuggestItem,
+  customObj: {} as COLOR_TYPE,
   currentSort: 'time' as 'time' | 'hot',
   suggestContent: '',
   isLoading: true
@@ -50,6 +49,16 @@ const state = reactive({
 onMounted(() => {
   getSuggestList();
 });
+
+watch(
+  () => state.show,
+  (show) => {
+    if (!show) {
+      // @ts-ignore
+      state.activeSuggest = {};
+    }
+  }
+);
 
 const replyName = computed(() => {
   if (profile.value?.userName) {
@@ -76,6 +85,8 @@ function showSuggest() {
 }
 
 function filter() {
+  // @ts-ignore
+  state.activeSuggest = {};
   if (state.currentSort === 'time') {
     state.currentSort = 'hot';
     getSuggestList('hot');
@@ -230,8 +241,52 @@ function downClick(id: string) {
   }
 }
 
+function getThemeName(ct: string) {
+  const reg = /%(.*?)%/;
+  const is = reg.test(ct);
+  if (is) {
+    const content = ct.match(reg)?.[1];
+    if (!content) return ct;
+    const obj = JSON.parse(content);
+
+    state.customObj = obj;
+    const themeName = obj['THEME_INPUT'];
+    return themeName;
+  }
+  return ct;
+}
+function activeSetFirstSuggest(info: SuggestItem) {
+  state.activeSuggest = info;
+}
+function setCustomTheme(info?: string) {
+  let customObj;
+  if (info) {
+    const reg = /%(.*?)%/;
+    const is = reg.test(info);
+    if (is) {
+      const content = info.match(reg)?.[1];
+      if (!content) return;
+      customObj = JSON.parse(content);
+    }
+  } else {
+    customObj = state.customObj;
+  }
+
+  removeAllCustomCssValue();
+  setCustomCssValue(COLOR_ENUM['LAYOUT_BACKGROUND_COLOR'], customObj['LAYOUT_BACKGROUND_COLOR']);
+  setCustomCssValue(COLOR_ENUM['MAIN_COLOR'], customObj['MAIN_COLOR']);
+  setCustomCssValue(COLOR_ENUM['MAIN_RED'], customObj['MAIN_RED']);
+  setCustomCssValue(COLOR_ENUM['LABEL_WHITE'], customObj['LABEL_WHITE']);
+  setCustomCssValue(COLOR_ENUM['BACKGROUND_COLOR'], customObj['BACKGROUND_COLOR']);
+  setCustomCssValue(COLOR_ENUM['LAYOUT_BACKGROUND_COLOR'], customObj['LAYOUT_BACKGROUND_COLOR']);
+  setCustomCssValue(COLOR_ENUM['GRAY_08'], customObj['GRAY_08']);
+  setCustomCssValue(COLOR_ENUM['GRAY_06'], customObj['GRAY_06']);
+  setCustomCssValue(COLOR_ENUM['GRAY_04'], customObj['GRAY_04']);
+  setCustomCssValue(COLOR_ENUM['GRAY_02'], customObj['GRAY_02']);
+}
 defineExpose({
-  showSuggest
+  showSuggest,
+  activeSetFirstSuggest
 });
 </script>
 <template>
@@ -256,44 +311,123 @@ defineExpose({
         >
       </div>
       <YLoading class="y-submit-suggest__loading" v-if="state.isLoading"></YLoading>
-      <div
-        v-else
-        class="y-submit-suggest__list gray-08"
-        :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
-        v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"
-        :key="item.id"
-      >
-        <div class="y-submit-suggest__list-content">
-          <YTag v-if="item.done" text="已完成"></YTag>
-          <YTag v-if="item.accept" text="已采纳"></YTag>
-          {{ item.content }}
-        </div>
-        <div class="y-submit-suggest__list-info">
-          <div class="y-submit-suggest__list-data">
+      <template v-else>
+        <div
+          v-if="state.activeSuggest.createdAt"
+          class="y-submit-suggest__list y-submit-suggest__list--active gray-08"
+        >
+          <div class="y-submit-suggest__list-content flex-center--y">
+            <YTag v-if="state.activeSuggest.done" text="已完成"></YTag>
+            <YTag v-if="state.activeSuggest.accept" text="已采纳"></YTag>
+            <YTag
+              v-if="state.activeSuggest.isTheme"
+              :text="`主题色：${getThemeName(state.activeSuggest.content)}`"
+            ></YTag>
+            <ThemeLabel
+              v-if="state.activeSuggest.isTheme"
+              style="margin-left: 4px"
+              :label-background-color="state.customObj['LAYOUT_BACKGROUND_COLOR']"
+              :background-color="state.customObj['BACKGROUND_COLOR']"
+              :red-color="state.customObj['MAIN_RED']"
+              :gray-color="state.customObj['GRAY_08']"
+              :main-color="state.customObj['MAIN_COLOR']"
+            ></ThemeLabel>
+            <template v-else>
+              {{ state.activeSuggest.content }}
+            </template>
             <span
-              v-throttle-click:2000="upClick.bind(null, item.id)"
-              class="y-submit-suggest__list-data-up"
-              :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1' }"
+              @click="setCustomTheme(undefined)"
+              class="gray-06"
+              style="margin-left: 4px; cursor: pointer"
             >
-              <IcoUp></IcoUp>
-              {{ item.up ? item.up : '' }}
-            </span>
-            <span
-              v-throttle-click:2000="downClick.bind(null, item.id)"
-              class="y-submit-suggest__list-data-down"
-              :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '-1' }"
-            >
-              <IcoUp></IcoUp>
-              {{ item.down ? item.down : '' }}
+              点击设置该主题
+              <Tooltip content="在设置中可以自定义主题">
+                <IcoTips></IcoTips>
+              </Tooltip>
             </span>
           </div>
-          <div>
-            <span v-if="item.userName" class="gray-08">{{ item.userName }}</span>
-            <span v-if="item.userName"> · </span>
-            <span class="gray-06">{{ dayjs(item.updatedAt).format('YY/MM/DD HH:mm') }}</span>
+          <div class="y-submit-suggest__list-info">
+            <div class="y-submit-suggest__list-data">
+              <span class="y-submit-suggest__list-data-up">
+                <IcoUp></IcoUp>
+              </span>
+              <span class="y-submit-suggest__list-data-down">
+                <IcoUp></IcoUp>
+              </span>
+            </div>
+            <div>
+              <span v-if="state.activeSuggest.userName" class="gray-08">{{
+                state.activeSuggest.userName
+              }}</span>
+              <span v-if="state.activeSuggest.userName"> · </span>
+              <span class="gray-06">{{
+                dayjs(state.activeSuggest.createdAt).format('YY/MM/DD HH:mm')
+              }}</span>
+            </div>
           </div>
         </div>
-      </div>
+        <div
+          class="y-submit-suggest__list gray-08"
+          :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
+          v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"
+          :key="item.id"
+        >
+          <div class="y-submit-suggest__list-content flex-center--y">
+            <YTag v-if="item.done" text="已完成"></YTag>
+            <YTag v-if="item.accept" text="已采纳"></YTag>
+            <YTag v-if="item.isTheme" :text="`主题色：${getThemeName(item.content)}`"></YTag>
+
+            <ThemeLabel
+              v-if="item.isTheme"
+              style="margin-left: 4px"
+              :label-background-color="state.customObj['LAYOUT_BACKGROUND_COLOR']"
+              :background-color="state.customObj['BACKGROUND_COLOR']"
+              :red-color="state.customObj['MAIN_RED']"
+              :gray-color="state.customObj['GRAY_08']"
+              :main-color="state.customObj['MAIN_COLOR']"
+            ></ThemeLabel>
+            <template v-else>
+              {{ item.content }}
+            </template>
+            <span
+              v-if="item.isTheme"
+              @click="setCustomTheme(item.content)"
+              class="gray-06 list-content__set flex-center--y"
+              style="margin-left: 4px; cursor: pointer"
+            >
+              点击设置该主题
+              <Tooltip content="在设置中可以自定义主题">
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </span>
+          </div>
+          <div class="y-submit-suggest__list-info">
+            <div class="y-submit-suggest__list-data">
+              <span
+                v-throttle-click:2000="upClick.bind(null, item.id)"
+                class="y-submit-suggest__list-data-up"
+                :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1' }"
+              >
+                <IcoUp></IcoUp>
+                {{ item.up ? item.up : '' }}
+              </span>
+              <span
+                v-throttle-click:2000="downClick.bind(null, item.id)"
+                class="y-submit-suggest__list-data-down"
+                :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '-1' }"
+              >
+                <IcoUp></IcoUp>
+                {{ item.down ? item.down : '' }}
+              </span>
+            </div>
+            <div>
+              <span v-if="item.userName" class="gray-08">{{ item.userName }}</span>
+              <span v-if="item.userName"> · </span>
+              <span class="gray-06">{{ dayjs(item.createdAt).format('YY/MM/DD HH:mm') }}</span>
+            </div>
+          </div>
+        </div>
+      </template>
     </template>
     <template #footer>
       <div class="y-submit-suggest__reply gray-08">
@@ -374,12 +508,35 @@ defineExpose({
   padding: 16px 8px;
   font-size: 14px;
 }
+.y-submit-suggest__list--active {
+  border: 1px solid $main-color;
+  box-shadow: 0 0 3px 0 $main-color;
+  animation: glow 0.4s ease-in-out infinite alternate;
+  margin: 5px;
+}
+@keyframes glow {
+  from {
+    box-shadow: 0 0 3px 0 $main-color;
+  }
+  to {
+    box-shadow: 0 0 3px 2px $main-color;
+  }
+}
 .y-submit-suggest__list-even {
   background: $background-gray;
 }
 .y-submit-suggest__list-content {
   margin-bottom: 4px;
   line-height: 20px;
+}
+.list-content__set {
+  svg {
+    margin-top: 1px;
+    margin-left: 4px;
+    width: 14px;
+    height: 14px;
+    fill: $gray-06;
+  }
 }
 .y-submit-suggest__list-info {
   display: flex;

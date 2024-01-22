@@ -1,3 +1,5 @@
+import { COLOR_ENUM } from '@/types';
+
 interface RGB {
   r: number;
   g: number;
@@ -100,4 +102,35 @@ export function darkenHexColor(hex: string, percent: number) {
 
   // 将RGB值转换回16进制颜色
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+export function getCustomCssValue(value: string, target: string = 'root') {
+  if (target === 'root') {
+    const rootElement = document.documentElement;
+    const computedStyle = window.getComputedStyle(rootElement);
+    return computedStyle.getPropertyValue(value);
+  } else if (target === 'body') {
+    const body = document.body;
+    return body.style.getPropertyValue(value);
+  }
+  return '';
+}
+export function setCustomCssValue(css: string, value: string) {
+  const body = document.body;
+  body.style.setProperty(css, value);
+}
+export function removeCustomCssValue(value: string) {
+  const body = document.body;
+  body.style.removeProperty(value);
+}
+export function removeAllCustomCssValue() {
+  removeCustomCssValue(COLOR_ENUM['MAIN_COLOR']);
+  removeCustomCssValue(COLOR_ENUM['MAIN_RED']);
+  removeCustomCssValue(COLOR_ENUM['BACKGROUND_COLOR']);
+  removeCustomCssValue(COLOR_ENUM['LAYOUT_BACKGROUND_COLOR']);
+  removeCustomCssValue(COLOR_ENUM['GRAY_08']);
+  removeCustomCssValue(COLOR_ENUM['GRAY_06']);
+  removeCustomCssValue(COLOR_ENUM['GRAY_04']);
+  removeCustomCssValue(COLOR_ENUM['GRAY_02']);
+  removeCustomCssValue(COLOR_ENUM['LABEL_WHITE']);
 }

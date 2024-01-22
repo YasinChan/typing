@@ -9,6 +9,7 @@ const props = withDefaults(
     placement?: string;
     trigger?: string;
     content?: string;
+    html?: string;
     delay?: number;
     offset?: number;
   }>(),
@@ -24,7 +25,10 @@ const props = withDefaults(
 <template>
   <span ref="tooltipRef" class="tooltip">
     <Transition name="menu">
-      <span v-if="isHovered" class="tooltip__content">{{ content }}</span>
+      <div v-if="isHovered">
+        <span v-if="content" class="tooltip__content">{{ content }}</span>
+        <span v-if="html" class="tooltip__content" v-html="html"></span>
+      </div>
     </Transition>
     <slot></slot>
   </span>
@@ -45,6 +49,7 @@ const props = withDefaults(
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
+  line-height: 20px;
   &:after {
     content: '';
     position: absolute;

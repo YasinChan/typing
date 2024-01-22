@@ -1,19 +1,29 @@
 <script lang="ts" setup>
-import { computed, reactive, onMounted, watch } from 'vue';
+import { computed, reactive, onMounted, watch, inject } from 'vue';
 import { ColorPicker } from 'vue3-colorpicker';
 import 'vue3-colorpicker/style.css';
 
 // components
+import Tooltip from '@/components/ui/Tooltip.vue';
 import ListItem from '@/components/ui/ListItem.vue';
 import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
+import ThemeLabel from '@/components/ThemeLabel.vue';
+import YInput from '@/components/ui/Input.vue';
 
 // config
 import type { ThemeType } from '@/config/theme';
+import type { COLOR_TYPE } from '@/types';
 
 // common
 import { setTheme } from '@/common/theme';
-import { darkenHexColor, lightenHexColor } from '@/common/color';
+import {
+  darkenHexColor,
+  lightenHexColor,
+  getCustomCssValue,
+  setCustomCssValue,
+  removeAllCustomCssValue
+} from '@/common/color';
 
 // png
 import favicon from '@/assets/favicon.png';
@@ -23,10 +33,26 @@ import IcoChange from '@/assets/svg/change.svg';
 import IcoArrow from '@/assets/svg/arrow.svg';
 import IcoMore from '@/assets/svg/more.svg';
 import IcoSetting from '@/assets/svg/setting.svg';
+import IcoTips from '@/assets/svg/tips.svg';
 
+// store
+import { storeToRefs } from 'pinia';
+import { useConfigStore } from '@/store/config';
+import { useUserStore } from '@/store/user';
+
+// apis
+import { createSuggest } from '@/request';
+
+const useConfig = useConfigStore();
+const userStore = useUserStore();
+const { profile, getProvinceUser } = storeToRefs(userStore);
+
+const confirm: any = inject('confirm');
+const message: any = inject('message');
+const suggestClick: any = inject('suggestClick');
 const state = reactive({
+  themeInput: '',
   show: false,
-  pureColor: 'red',
   selectThemeType: '自定义',
   mainColor: '',
   mainRedColor: '',
@@ -45,17 +71,22 @@ watch(
   () => state.selectThemeType,
   (val) => {
     if (val !== '自定义') {
-      state.mainColor = getCustomCssValue('--main-color');
-      state.mainRedColor = getCustomCssValue('--main-red');
-      state.backgroundGrayColor = getCustomCssValue('--background-gray');
-      state.layoutBackgroundGrayColor = getCustomCssValue('--layout-background-gray');
+      let target = 'root';
+      const mainColor = getCustomCssValue('--main-color', 'body');
+      if (mainColor) {
+        target = 'body';
+      }
+      state.mainColor = getCustomCssValue('--main-color', target);
+      state.mainRedColor = getCustomCssValue('--main-red', target);
+      state.backgroundGrayColor = getCustomCssValue('--background-gray', target);
+      state.layoutBackgroundGrayColor = getCustomCssValue('--layout-background-gray', target);
 
-      state.gray08Color = getCustomCssValue('--gray-08');
-      state.gray06Color = getCustomCssValue('--gray-06');
-      state.gray04Color = getCustomCssValue('--gray-04');
-      state.gray02Color = getCustomCssValue('--gray-02');
+      state.gray08Color = getCustomCssValue('--gray-08', target);
+      state.gray06Color = getCustomCssValue('--gray-06', target);
+      state.gray04Color = getCustomCssValue('--gray-04', target);
+      state.gray02Color = getCustomCssValue('--gray-02', target);
 
-      state.labelWhiteColor = getCustomCssValue('--label-white');
+      state.labelWhiteColor = getCustomCssValue('--label-white', target);
     }
   }
 );
@@ -115,31 +146,14 @@ watch(
   }
 );
 
-function getCustomCssValue(value: string) {
-  const rootElement = document.documentElement;
-  const computedStyle = window.getComputedStyle(rootElement);
-  const customColorValue = computedStyle.getPropertyValue(value);
-  return customColorValue;
-}
-function setCustomCssValue(css: string, value: string) {
-  const body = document.body;
-  body.style.setProperty(css, value);
-}
-function removeCustomCssValue(value: string) {
-  const body = document.body;
-  body.style.removeProperty(value);
-}
-function removeAllCustomCssValue() {
-  removeCustomCssValue('--main-color');
-  removeCustomCssValue('--main-red');
-  removeCustomCssValue('--background-gray');
-  removeCustomCssValue('--layout-background-gray');
-  removeCustomCssValue('--gray-08');
-  removeCustomCssValue('--gray-06');
-  removeCustomCssValue('--gray-04');
-  removeCustomCssValue('--gray-02');
-  removeCustomCssValue('--label-white');
-}
+const replyName = computed(() => {
+  if (profile.value?.userName) {
+    return profile.value.userName;
+  } else if (getProvinceUser.value) {
+    return getProvinceUser.value;
+  }
+  return '';
+});
 
 function showModal() {
   state.show = true;
@@ -171,6 +185,85 @@ function toLight() {
   state.gray02Color = lightenHexColor(state.gray08Color, 0.75);
 }
 
+function saveCustomTheme() {
+  confirm({
+    title: '确认保存',
+    content:
+      '保存后将在「建议与反馈」（入口为页面右下角图标）中展示，随后将根据投票情况保存到预设主题中。',
+    confirmClose: () => {
+      return true;
+    },
+    confirm: async () => {
+      const customTheme: COLOR_TYPE = {
+        MAIN_COLOR: state.mainColor,
+        MAIN_RED: state.mainRedColor,
+        BACKGROUND_COLOR: state.backgroundGrayColor,
+        LAYOUT_BACKGROUND_COLOR: state.layoutBackgroundGrayColor,
+        GRAY_08: state.gray08Color,
+        GRAY_06: state.gray06Color,
+        GRAY_04: state.gray04Color,
+        GRAY_02: state.gray02Color,
+        LABEL_WHITE: state.labelWhiteColor,
+        THEME_INPUT: state.themeInput
+      };
+      const info = `%${JSON.stringify(customTheme)}%`;
+      useConfig.setCustomThemeConfig(info);
+
+      state.show = false;
+
+      try {
+        let params: any = {
+          content: info
+        };
+        if (profile.value?.userName && profile.value?.userId) {
+          params = {
+            content: info,
+            userId: profile.value?.userId,
+            userName: profile.value?.userName
+          };
+          suggestClick({
+            isTheme: true,
+            down: 0,
+            content: info,
+            up: 0,
+            canShow: true,
+            userId: profile.value?.userId,
+            userName: profile.value?.userName,
+            createdAt: new Date().getTime()
+          });
+        } else if (replyName.value) {
+          params = {
+            content: info,
+            userName: replyName.value
+          };
+          suggestClick({
+            isTheme: true,
+            down: 0,
+            content: info,
+            up: 0,
+            canShow: true,
+            userName: replyName.value,
+            createdAt: new Date().getTime()
+          });
+        }
+        params['isTheme'] = true;
+        params['canShow'] = true;
+        const res = await createSuggest(params);
+        if (res.data?.message) {
+          message({ message: res.data?.message });
+        } else {
+          message({ message: '发布成功' });
+        }
+      } catch (error: any) {
+        const msg = error.response?.data?.message;
+        message({ message: msg, type: 'error' });
+      }
+
+      return true;
+    }
+  });
+}
+
 defineExpose({
   showModal
 });
@@ -183,13 +276,18 @@ defineExpose({
     :class-name="state.selectThemeType !== '自定义' ? 'y-modal__theme' : ''"
   >
     <template #header>
-      <h3>主题选择</h3>
+      <h3>{{ state.selectThemeType === '自定义' ? '预设主题选择' : '主题自定义' }}</h3>
     </template>
     <template #body>
       <div class="y-modal__theme-setting" v-if="state.selectThemeType !== '自定义'">
         <div class="gray-08">
           <div class="flex-center--y">
-            <span class="theme-setting__title">背景色</span>
+            <div class="theme-setting__title">
+              <span class="">背景色</span>
+              <Tooltip content="页面背景色">
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </div>
             <color-picker
               v-model:pureColor="state.backgroundGrayColor"
               shape="circle"
@@ -200,7 +298,12 @@ defineExpose({
             />
           </div>
           <div class="flex-center--y">
-            <span class="theme-setting__title">布局色</span>
+            <div class="theme-setting__title">
+              <span>布局色</span>
+              <Tooltip content="布局背景色，如弹框、下拉框背景色，排行榜列表区分色">
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </div>
             <color-picker
               v-model:pureColor="state.layoutBackgroundGrayColor"
               shape="circle"
@@ -233,7 +336,12 @@ defineExpose({
             />
           </div>
           <div class="flex-center--y">
-            <span class="theme-setting__title">主字体颜色</span>
+            <div class="theme-setting__title">
+              <span>主字体颜色</span>
+              <Tooltip html="字体颜色一共有四种，<br>对应右侧输入中、已输入、未输入和底部提示。">
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </div>
             <color-picker
               v-model:pureColor="state.gray08Color"
               shape="circle"
@@ -244,7 +352,14 @@ defineExpose({
             />
           </div>
           <div class="theme-setting__second">
-            <span class="theme-setting__title main-color">自动生成</span>
+            <div class="theme-setting__title main-color">
+              <span>自动生成</span>
+              <Tooltip
+                :html="`<p>这里其他三种颜色可以自动生成，<br>根据主题色是深还是浅，选择变暗或者变深。<br>一般来说，深色主题选择变暗，浅色主题选择变亮。</p>`"
+              >
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </div>
             <div>
               <YButton size="small" @click="toDark">变暗</YButton>
               <YButton size="small" @click="toLight">变亮</YButton>
@@ -284,7 +399,12 @@ defineExpose({
             />
           </div>
           <div class="flex-center--y">
-            <span class="theme-setting__title">标签字体颜色</span>
+            <div class="theme-setting__title">
+              <span>标签字体颜色</span>
+              <Tooltip content="按钮、标签等浅色字体颜色。">
+                <IcoTips></IcoTips>
+              </Tooltip>
+            </div>
             <color-picker
               v-model:pureColor="state.labelWhiteColor"
               shape="circle"
@@ -294,6 +414,13 @@ defineExpose({
               :debounce="100"
             />
           </div>
+          <div class="main-color" style="margin-bottom: 10px">
+            <div class="theme-setting__title">
+              <span>为主题定个名称吧</span>
+            </div>
+            <YInput v-model="state.themeInput" placeholder="主题名称" :max-length="6"></YInput>
+          </div>
+          <YButton @click="saveCustomTheme" :disable="!state.themeInput">保存自定义设置</YButton>
         </div>
         <div class="y-modal__theme-custom">
           <div class="y-modal__theme-chrome-header">
@@ -319,7 +446,7 @@ defineExpose({
             </div>
           </div>
           <div class="y-modal__theme-chrome-content-wrap">
-            <div class="content-top">这里是样式模板</div>
+            <div class="content-top">这里是预览界面</div>
             <div class="y-modal__theme-chrome-content">
               <div class="flex-center--y-between">
                 <div class="y-info__title main-color">Typing</div>
@@ -363,19 +490,23 @@ defineExpose({
       <div v-else class="y-theme__container gray-08">
         <ListItem @click="themeSet('dark')" class="flex-center--y-between">
           <span>深色模式</span>
-          <div class="y-theme__color y-theme__color--dark flex-center--y">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <ThemeLabel
+            label-background-color="#30323d"
+            background-color="#252733"
+            red-color="#f64c4c"
+            gray-color="#ffffff"
+            main-color="#15c5ce"
+          ></ThemeLabel>
         </ListItem>
         <ListItem @click="themeSet('light')" class="flex-center--y-between">
           <span>浅色模式</span>
-          <div class="y-theme__color y-theme__color--light flex-center--y">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+          <ThemeLabel
+            label-background-color="#ffffff"
+            background-color="#f5f7f8"
+            red-color="#f64c4c"
+            gray-color="#1d2127"
+            main-color="#15c5ce"
+          ></ThemeLabel>
         </ListItem>
       </div>
     </template>
@@ -384,7 +515,7 @@ defineExpose({
         <YButton
           @click="
             state.selectThemeType === '自定义'
-              ? (state.selectThemeType = '通用')
+              ? (state.selectThemeType = '预设')
               : (state.selectThemeType = '自定义')
           "
           >{{ state.selectThemeType }}</YButton
@@ -443,9 +574,28 @@ defineExpose({
   color: #fff;
 }
 .theme-setting__title {
-  width: 100px;
+  width: 120px;
   font-size: 14px;
   line-height: 30px;
+  display: flex;
+  align-items: center;
+  svg {
+    fill: $gray-06;
+    cursor: pointer;
+    width: 14px;
+    margin-top: 2px;
+    height: 14px;
+    margin-left: 4px;
+  }
+}
+.theme-setting__tips {
+  font-size: 12px;
+  color: $gray-02;
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: $main-color;
+  }
 }
 .theme-setting__second {
   margin-left: 20px;
@@ -456,6 +606,7 @@ defineExpose({
 
 .y-modal__theme-custom {
   width: 720px;
+  height: 420px;
   border-radius: 6px;
   background: rgb(43, 43, 43);
   overflow: hidden;
@@ -547,6 +698,7 @@ defineExpose({
 .y-modal__theme-chrome-content-wrap {
   display: flex;
   position: relative;
+  height: 100%;
   background: $background-gray;
 }
 .content-top {

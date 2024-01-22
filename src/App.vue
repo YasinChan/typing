@@ -27,8 +27,8 @@ import IcoClose from '@/assets/svg/close.svg';
 import IcoRanking from '@/assets/svg/ranking.svg';
 import IcoSetting from '@/assets/svg/setting.svg';
 
-// config
-import type { ThemeType } from '@/config/theme';
+// types
+import type { SuggestItem } from '@/types';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const themeModalRef = ref<InstanceType<typeof ThemeModal>>();
@@ -68,6 +68,10 @@ provide('message', (obj: any) => {
 
 provide('confirm', (obj: any) => {
   showConfirmModal(obj);
+});
+
+provide('suggestClick', (obj: any) => {
+  suggestClick(obj);
 });
 
 onMounted(() => {
@@ -169,11 +173,14 @@ function showConfirmModal({
   };
 }
 
-async function suggestClick() {
+async function suggestClick(info?: SuggestItem) {
   obj.showSuggest = true;
   await nextTick();
   if (suggestModalRef.value) {
     suggestModalRef.value.showSuggest();
+    if (info) {
+      suggestModalRef.value.activeSetFirstSuggest(info);
+    }
   }
 }
 </script>
@@ -279,7 +286,7 @@ async function suggestClick() {
     </template>
   </YModal>
   <Message :type="obj.type" :message="obj.message" :visible="obj.visible"></Message>
-  <YModal :show="obj.showConfirm" @close="obj.confirmClose" @confirm="obj.confirm">
+  <YModal :show="obj.showConfirm" :z-index="10" @close="obj.confirmClose" @confirm="obj.confirm">
     <template #header>
       <h3>{{ obj.confirmTitle }}</h3>
     </template>
