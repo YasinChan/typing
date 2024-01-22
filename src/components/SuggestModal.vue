@@ -341,7 +341,9 @@ defineExpose({
               style="margin-left: 4px; cursor: pointer"
             >
               点击设置该主题
-              <Tooltip content="在设置中可以自定义主题">
+              <Tooltip
+                content="在设置中「切换主题」可以自定义主题并生成至此，若支持该主题可以为此投票，投票多的将设置为预设主题。"
+              >
                 <IcoTips></IcoTips>
               </Tooltip>
             </span>
@@ -396,7 +398,9 @@ defineExpose({
               style="margin-left: 4px; cursor: pointer"
             >
               点击设置该主题
-              <Tooltip content="在设置中可以自定义主题">
+              <Tooltip
+                content="在设置中「切换主题」可以自定义主题并生成至此，若支持该主题可以为此投票，投票多的将设置为预设主题。"
+              >
                 <IcoTips></IcoTips>
               </Tooltip>
             </span>
@@ -442,7 +446,7 @@ defineExpose({
             >匿名发布</span
           >
         </div>
-        <YTextarea placeholder="请提出你的建议~" v-model="state.suggestContent"></YTextarea>
+        <YTextarea placeholder="提出您的建议或反馈~" v-model="state.suggestContent"></YTextarea>
         <YButton
           :disable="!state.suggestContent"
           style="margin-top: 10px"
