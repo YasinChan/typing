@@ -385,11 +385,7 @@ defineExpose({
             <ThemeLabel
               v-if="item.isTheme"
               style="margin-left: 4px"
-              :label-background-color="state.customObj['LAYOUT_BACKGROUND_COLOR']"
-              :background-color="state.customObj['BACKGROUND_COLOR']"
-              :red-color="state.customObj['MAIN_RED']"
-              :gray-color="state.customObj['GRAY_08']"
-              :main-color="state.customObj['MAIN_COLOR']"
+              :custom-theme-obj="getThemeName(item.content)"
             ></ThemeLabel>
             <template v-else>
               {{ item.content }}

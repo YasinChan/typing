@@ -1,19 +1,62 @@
 <script lang="ts" setup>
-defineProps<{
-  backgroundColor: string;
-  labelBackgroundColor: string;
-  redColor: string;
-  grayColor: string;
-  mainColor: string;
-}>();
+import { computed } from 'vue';
+
+// types
+import type { COLOR_TYPE } from '@/types';
+
+const props = defineProps<
+  Partial<{
+    customThemeObj: COLOR_TYPE | undefined;
+    backgroundColor: string;
+    labelBackgroundColor: string;
+    redColor: string;
+    grayColor: string;
+    mainColor: string;
+  }>
+>();
+
+const backgroundColorC = computed(() => {
+  if (props.customThemeObj) {
+    return props.customThemeObj['BACKGROUND_COLOR'];
+  }
+  return props.backgroundColor;
+});
+
+const labelBackgroundColorC = computed(() => {
+  if (props.customThemeObj) {
+    return props.customThemeObj['LAYOUT_BACKGROUND_COLOR'];
+  }
+  return props.labelBackgroundColor;
+});
+
+const redColorC = computed(() => {
+  if (props.customThemeObj) {
+    return props.customThemeObj['MAIN_RED'];
+  }
+  return props.redColor;
+});
+
+const grayColorC = computed(() => {
+  if (props.customThemeObj) {
+    return props.customThemeObj['GRAY_08'];
+  }
+  return props.grayColor;
+});
+
+const mainColorC = computed(() => {
+  if (props.customThemeObj) {
+    return props.customThemeObj['MAIN_COLOR'];
+  }
+  return props.mainColor;
+});
 </script>
 
 <template>
-  <div class="theme-label" :style="{ background: backgroundColor }">
-    <span :style="{ background: labelBackgroundColor }"></span>
-    <span :style="{ background: redColor }"></span>
-    <span :style="{ background: grayColor }"></span>
-    <span :style="{ background: mainColor }"></span>
+  <div class="theme-label" :style="{ background: backgroundColorC }">
+    <span :style="{ background: labelBackgroundColorC }"></span>
+    <span :style="{ background: redColorC }"></span>
+    <span :style="{ background: grayColorC }"></span>
+    <span :style="{ background: mainColorC }"></span>
   </div>
 </template>
 
