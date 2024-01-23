@@ -349,7 +349,7 @@ defineExpose({
             </template>
             <span
               @click="setCustomTheme(undefined)"
-              class="gray-06"
+              class="gray-06 list-content__set flex-center--y"
               style="margin-left: 4px; cursor: pointer"
             >
               点击设置该主题
@@ -392,7 +392,10 @@ defineExpose({
           >
             <YTag v-if="item.done" text="已完成"></YTag>
             <YTag v-if="item.accept" text="已采纳"></YTag>
-            <YTag v-if="item.isTheme" :text="`主题色：${getThemeName(item.content)}`"></YTag>
+            <YTag
+              v-if="item.isTheme"
+              :text="`主题色：${getTheme(item.content)?.['THEME_INPUT']}`"
+            ></YTag>
 
             <ThemeLabel
               v-if="item.isTheme"
