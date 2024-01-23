@@ -56,7 +56,7 @@ const props = withDefaults(
     width: 0;
     height: 0;
     border: 5px solid transparent;
-    border-top-color: $gray-08;
+    border-top-color: $main-color;
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
