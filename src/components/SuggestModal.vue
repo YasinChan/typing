@@ -241,6 +241,18 @@ function downClick(id: string) {
   }
 }
 
+function getTheme(ct: string) {
+  const reg = /%(.*?)%/;
+  const is = reg.test(ct);
+  if (is) {
+    const content = ct.match(reg)?.[1];
+    if (!content) return ct;
+    const obj = JSON.parse(content);
+
+    return obj;
+  }
+  return ct;
+}
 function getThemeName(ct: string) {
   const reg = /%(.*?)%/;
   const is = reg.test(ct);
@@ -385,7 +397,7 @@ defineExpose({
             <ThemeLabel
               v-if="item.isTheme"
               style="margin-left: 4px"
-              :custom-theme-obj="getThemeName(item.content)"
+              :custom-theme-obj="getTheme(item.content)"
             ></ThemeLabel>
             <template v-else>
               {{ item.content }}
