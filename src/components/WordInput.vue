@@ -155,7 +155,6 @@ watch(
     }
     const relativeTime = new Date().getTime() - state.startTime;
     state.typingRecord[Math.floor(relativeTime / 100)] = cloneDeep(state.typingRecordRealTime);
-    console.log('----------', 'state.typingRecord', state.typingRecord, '----------cyy log');
   },
   {
     deep: true
@@ -204,12 +203,6 @@ watch(
 watch(
   () => state.inputText,
   (newVal) => {
-    // if (newVal === '') {
-    //   setTimeout(() => {
-    //     reset();
-    //   });
-    //   return;
-    // }
     const inputTextArr = newVal.split('');
     const wrongPos: number[] = [];
     state.quoteArr.forEach((item, index) => {
@@ -381,7 +374,6 @@ function mouseDownEvent() {
 }
 
 function getTypingRecord() {
-  console.log('----------', 'state.typingRecord', state.typingRecord, '----------cyy log');
   return state.typingRecord;
 }
 

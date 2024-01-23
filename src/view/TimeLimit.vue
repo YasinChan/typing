@@ -160,7 +160,7 @@ function setTime() {
   }
   refresh();
   state.showSetTime = false;
-  state.selectTime = state.setCountDown;
+  state.selectTime = Number(state.setCountDown);
 }
 function restart() {
   state.isTyping = false;
