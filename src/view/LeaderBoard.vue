@@ -76,7 +76,7 @@ onMounted(async () => {
         </table>
       </div>
       <div class="y-leader-board__item y-leader-board__countdown">
-        <div class="y-leader-board__title">倒计时排行</div>
+        <div class="y-leader-board__title">计时排行</div>
         <table class="y-leader-board__header">
           <thead>
             <tr>
