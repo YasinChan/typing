@@ -155,6 +155,7 @@ watch(
     }
     const relativeTime = new Date().getTime() - state.startTime;
     state.typingRecord[Math.floor(relativeTime / 100)] = cloneDeep(state.typingRecordRealTime);
+    console.log('----------', 'state.typingRecord', state.typingRecord, '----------cyy log');
   },
   {
     deep: true
@@ -179,7 +180,9 @@ watch(
   (val) => {
     // 传入的内容发生变化时，重置
     state.quoteLength = val.length;
-    state.inputText = '';
+    setTimeout(() => {
+      reset();
+    });
     if (inputAreaRef.value) {
       inputAreaRef.value.innerHTML = '';
       inputAreaRef.value.focus();
@@ -201,12 +204,12 @@ watch(
 watch(
   () => state.inputText,
   (newVal) => {
-    if (newVal === '') {
-      setTimeout(() => {
-        reset();
-      });
-      return;
-    }
+    // if (newVal === '') {
+    //   setTimeout(() => {
+    //     reset();
+    //   });
+    //   return;
+    // }
     const inputTextArr = newVal.split('');
     const wrongPos: number[] = [];
     state.quoteArr.forEach((item, index) => {
@@ -378,6 +381,7 @@ function mouseDownEvent() {
 }
 
 function getTypingRecord() {
+  console.log('----------', 'state.typingRecord', state.typingRecord, '----------cyy log');
   return state.typingRecord;
 }
 

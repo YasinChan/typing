@@ -4,6 +4,7 @@ import { reactive, nextTick, ref, watch, onMounted, onUnmounted, computed } from
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
 import LeaderBoardItem from '@/components/LeaderBoardItem.vue';
+import YLoading from '@/components/ui/Loading.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -62,12 +63,15 @@ onMounted(async () => {
             </tr>
           </thead>
           <tbody>
-            <LeaderBoardItem
-              v-for="(item, index) in state.timeLeaderBoard"
-              :key="item.objectId"
-              :rank="index + 1"
-              :leader-board-item="item"
-            ></LeaderBoardItem>
+            <template v-if="state.timeLeaderBoard?.length">
+              <LeaderBoardItem
+                v-for="(item, index) in state.timeLeaderBoard"
+                :key="item.objectId"
+                :rank="index + 1"
+                :leader-board-item="item"
+              ></LeaderBoardItem>
+            </template>
+            <YLoading v-else class="y-leader-board__loading"></YLoading>
           </tbody>
         </table>
       </div>
@@ -85,12 +89,15 @@ onMounted(async () => {
             </tr>
           </thead>
           <tbody>
-            <LeaderBoardItem
-              v-for="(item, index) in state.countdownLeaderBoard"
-              :key="item.objectId"
-              :rank="index + 1"
-              :leader-board-item="item"
-            ></LeaderBoardItem>
+            <template v-if="state.countdownLeaderBoard?.length">
+              <LeaderBoardItem
+                v-for="(item, index) in state.countdownLeaderBoard"
+                :key="item.objectId"
+                :rank="index + 1"
+                :leader-board-item="item"
+              ></LeaderBoardItem>
+            </template>
+            <YLoading v-else class="y-leader-board__loading"></YLoading>
           </tbody>
         </table>
       </div>
@@ -133,6 +140,7 @@ onMounted(async () => {
     border-radius: 2px;
   }
   tbody {
+    position: relative;
     tr:nth-child(2n + 1) {
       background-color: $layout-background-gray;
     }
@@ -142,5 +150,11 @@ onMounted(async () => {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 16px;
+}
+.y-leader-board__loading {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
 }
 </style>

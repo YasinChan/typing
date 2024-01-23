@@ -374,7 +374,10 @@ defineExpose({
           v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"
           :key="item.id"
         >
-          <div class="y-submit-suggest__list-content flex-center--y">
+          <div
+            class="y-submit-suggest__list-content"
+            :class="[item.isTheme ? 'flex-center--y' : '']"
+          >
             <YTag v-if="item.done" text="已完成"></YTag>
             <YTag v-if="item.accept" text="已采纳"></YTag>
             <YTag v-if="item.isTheme" :text="`主题色：${getThemeName(item.content)}`"></YTag>
