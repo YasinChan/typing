@@ -339,7 +339,7 @@ defineExpose({
             <div class="theme-setting__title">
               <span>主字体颜色</span>
               <Tooltip
-                html="字体颜色一共有四种，对应右侧预览界面中的<br>输入中、已输入、未输入和底部提示四种<br>逐渐变亮或变暗的字体颜色。"
+                html="字体颜色一共有四种，对应右侧预览界面中的<br>输入中、已输入、未输入和底部提示四种<br>逐渐变亮或变暗的字体颜色。<br>一般来说，整体是亮色主题可以选择深色的字体颜色，<br>反之选择浅色的主字体颜色。"
               >
                 <IcoTips></IcoTips>
               </Tooltip>
