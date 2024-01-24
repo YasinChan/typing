@@ -107,6 +107,7 @@ async function refresh() {
   state.time = 0;
   state.quotes = null;
   state.currentIndex = 0;
+  state.typingRecordArr = [];
   await nextTick();
   state.quotes = getRandom();
 }

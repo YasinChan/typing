@@ -30,7 +30,6 @@ const state = reactive({
 onMounted(async () => {
   const res = await getLeaderBoard();
   const leaderboard = res.data.result?.leaderboard;
-  console.log('----------', 'leaderboard', leaderboard, '----------cyy log');
   state.timeLeaderBoard = leaderboard['time'];
   state.countdownLeaderBoard = leaderboard['countdown'];
 });
