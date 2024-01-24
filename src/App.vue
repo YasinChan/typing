@@ -207,9 +207,6 @@ async function suggestClick(info?: SuggestItem) {
 
       <Transition name="menu">
         <div class="y-menu" v-show="!onlyShowMain">
-          <router-link to="/leaderboard" class="y-menu__item y-menu__item--no-line flex-center--y">
-            <IcoRanking></IcoRanking>
-          </router-link>
           <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">计时模式</router-link>
@@ -217,6 +214,7 @@ async function suggestClick(info?: SuggestItem) {
           <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
             >键盘测试</router-link
           >
+          <router-link to="/leaderboard" class="y-menu__item">排行榜</router-link>
           <y-drop-down>
             <template #title>
               <div class="y-menu__item flex-center--y">
@@ -424,8 +422,14 @@ footer {
   cursor: pointer;
   letter-spacing: 1px;
   transition: color 0.5s;
+  svg {
+    transition: all 0.5s;
+  }
   &:hover {
     color: $main-color;
+    svg {
+      fill: $main-color;
+    }
   }
   svg {
     fill: $gray-08;
