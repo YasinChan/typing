@@ -56,7 +56,7 @@ onMounted(async () => {
             <tr>
               <td>排行</td>
               <td>昵称</td>
-              <td>速度(字/秒)</td>
+              <td>速度(字/分钟)</td>
               <td>准确率</td>
               <td>时长(s)</td>
               <td>完成时间</td>
@@ -82,7 +82,7 @@ onMounted(async () => {
             <tr>
               <td>排行</td>
               <td>昵称</td>
-              <td>速度(字/秒)</td>
+              <td>速度(字/分钟)</td>
               <td>准确率</td>
               <td>时长(s)</td>
               <td>完成时间</td>
