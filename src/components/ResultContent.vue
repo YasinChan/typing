@@ -15,6 +15,7 @@ import IcoReplay from '@/assets/svg/replay.svg';
 import IcoChange from '@/assets/svg/change.svg';
 import IcoSpeedUp from '@/assets/svg/speed-up.svg';
 import IcoRecord from '@/assets/svg/record.svg';
+import IcoTips from '@/assets/svg/tips.svg';
 
 // stores
 import { useUserStore } from '@/store/user';
@@ -289,16 +290,22 @@ async function record() {
 }
 </script>
 <template>
-  <Tooltip class="result-content cursor-pointer" :content="state.accuracyInfo">
+  <div class="result-content flex-center" :content="state.accuracyInfo">
     准确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
-  </Tooltip>
-  <Tooltip
-    class="result-content cursor-pointer"
-    content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。"
-  >
+    <Tooltip class="cursor-pointer result-content__tips" :content="state.accuracyInfo">
+      <IcoTips></IcoTips>
+    </Tooltip>
+  </div>
+  <div class="result-content flex-center">
     速度：<span class="result-content--main-color">{{ state.speed }}</span>
-  </Tooltip>
-  <div class="result-content">
+    <Tooltip
+      class="cursor-pointer result-content__tips"
+      content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。"
+    >
+      <IcoTips></IcoTips>
+    </Tooltip>
+  </div>
+  <div class="result-content flex-center">
     时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
   </div>
   <div class="result-content__toolbar flex-center">
@@ -357,8 +364,13 @@ async function record() {
   font-size: 20px;
   color: $gray-06;
   margin-bottom: 40px;
-  text-align: center;
-  display: block;
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: $gray-04;
+    margin-left: 6px;
+    margin-top: 2px;
+  }
 }
 .result-content--main-color {
   color: $main-color;

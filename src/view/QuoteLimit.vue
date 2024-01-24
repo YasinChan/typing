@@ -231,9 +231,11 @@ function restart() {
               class="y-quote-limit__setting-item y-quote-limit__refresh"
               @click="refresh"
             >
-              <Tooltip class="y-quote-limit__time-svg" content="刷新">
-                <IcoChange></IcoChange>
-              </Tooltip>
+              <div class="y-quote-limit__time-svg">
+                <Tooltip content="刷新">
+                  <IcoChange></IcoChange>
+                </Tooltip>
+              </div>
             </div>
           </Transition>
           <Transition name="menu">

@@ -27,7 +27,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="y-log">
+  <div class="y-main y-log">
     <YLoading class="y-log__loading" v-if="state.isLoading"></YLoading>
     <div class="log__content gray-08" v-html="state.markdown"></div>
   </div>

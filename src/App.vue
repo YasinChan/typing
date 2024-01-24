@@ -26,6 +26,9 @@ import IcoCapsLock from '@/assets/svg/caps-lock.svg';
 import IcoClose from '@/assets/svg/close.svg';
 import IcoRanking from '@/assets/svg/ranking.svg';
 import IcoSetting from '@/assets/svg/setting.svg';
+import IcoGithub from '@/assets/svg/github.svg';
+import IcoEmail from '@/assets/svg/email.svg';
+import IcoIntroduce from '@/assets/svg/introduce.svg';
 
 // types
 import type { SuggestItem } from '@/types';
@@ -196,53 +199,78 @@ async function suggestClick(info?: SuggestItem) {
     </span>
     <IcoClose></IcoClose>
   </div>
-  <header>
-    <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
-      <a href="/" class="y-info__title main-color">Typing</a>
-    </div>
+  <div class="y-app">
+    <header>
+      <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
+        <a href="/" class="y-info__title main-color">Typing</a>
+      </div>
+
+      <Transition name="menu">
+        <div class="y-menu" v-show="!onlyShowMain">
+          <router-link to="/leaderboard" class="y-menu__item y-menu__item--no-line flex-center--y">
+            <IcoRanking></IcoRanking>
+          </router-link>
+          <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
+          <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
+          <router-link to="/quote" class="y-menu__item">计时模式</router-link>
+          <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
+          <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
+            >键盘测试</router-link
+          >
+          <y-drop-down>
+            <template #title>
+              <div class="y-menu__item flex-center--y">
+                <IcoSetting></IcoSetting>
+              </div>
+            </template>
+            <template #menu>
+              <div class="y-auth__menu">
+                <div
+                  class="y-menu__change y-menu__change-font"
+                  @click="
+                    () => {
+                      obj.showChangeFontModal = true;
+                    }
+                  "
+                >
+                  切换字体
+                </div>
+                <div class="y-menu__change" @click="changeTheme">切换主题</div>
+                <router-link to="/statement" class="y-menu__change">声明</router-link>
+                <router-link to="/log" class="y-menu__change">更新日志</router-link>
+              </div>
+            </template>
+          </y-drop-down>
+          <div class="y-menu__item y-menu__item-auth">
+            <auth></auth>
+          </div>
+        </div>
+      </Transition>
+    </header>
+
+    <router-view></router-view>
 
     <Transition name="menu">
-      <div class="y-menu" v-show="!onlyShowMain">
-        <router-link to="/leaderboard" class="y-menu__item y-menu__item--no-line flex-center--y">
-          <IcoRanking></IcoRanking>
-        </router-link>
-        <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
-        <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
-        <router-link to="/quote" class="y-menu__item">计时模式</router-link>
-        <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
-        <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
-          >键盘测试</router-link
+      <footer v-show="!onlyShowMain" class="flex-center">
+        <a class="flex-center--y" href="https://github.com/YasinChan/typing" target="_blank">
+          <IcoGithub></IcoGithub>
+          <span>源码</span>
+        </a>
+        <a class="flex-center--y" href="mailto:867103198@qq.com">
+          <IcoEmail></IcoEmail>
+          <span>联系我</span>
+        </a>
+        <a
+          class="flex-center--y"
+          href="https://www.bilibili.com/video/BV1ci4y1s73q"
+          target="_blank"
         >
-        <y-drop-down>
-          <template #title>
-            <div class="y-menu__item flex-center--y">
-              <IcoSetting></IcoSetting>
-            </div>
-          </template>
-          <template #menu>
-            <div class="y-auth__menu">
-              <div
-                class="y-menu__change y-menu__change-font"
-                @click="
-                  () => {
-                    obj.showChangeFontModal = true;
-                  }
-                "
-              >
-                切换字体
-              </div>
-              <div class="y-menu__change" @click="changeTheme">切换主题</div>
-              <router-link to="/statement" class="y-menu__change">声明</router-link>
-              <router-link to="/log" class="y-menu__change">更新日志</router-link>
-            </div>
-          </template>
-        </y-drop-down>
-        <div class="y-menu__item y-menu__item-auth">
-          <auth></auth>
-        </div>
-      </div>
+          <IcoIntroduce></IcoIntroduce>
+          <span>介绍</span>
+        </a>
+      </footer>
     </Transition>
-  </header>
+  </div>
 
   <Transition name="menu">
     <div v-if="capsLockOn" class="y-app__caps-lock flex-center--y">
@@ -250,8 +278,6 @@ async function suggestClick(info?: SuggestItem) {
       <span>大写开启</span>
     </div>
   </Transition>
-
-  <router-view></router-view>
 
   <Transition name="menu">
     <Tooltip v-if="!onlyShowMain" class="y-submit-suggest" content="提出建议">
@@ -318,11 +344,35 @@ async function suggestClick(info?: SuggestItem) {
     margin-left: 20px;
   }
 }
+.y-app {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+}
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 38px;
+}
+main,
+.y-main {
+  flex: 1;
+}
+footer {
+  font-size: 12px;
+  a {
+    margin-right: 20px;
+  }
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: $gray-02;
+    margin-right: 4px;
+  }
+  span {
+    color: $gray-02;
+  }
 }
 .y-app__caps-lock {
   position: fixed;

@@ -238,12 +238,8 @@ function restart() {
         </span>
       </div>
       <Transition name="menu">
-        <div
-          v-show="!onlyShowMain"
-          class="y-time-limit__detail"
-          @click="detailModalRef?.setShowDetail()"
-        >
-          查看全文
+        <div v-show="!onlyShowMain" class="y-time-limit__detail">
+          <span @click="detailModalRef?.setShowDetail()">查看全文</span>
         </div>
       </Transition>
     </template>
@@ -385,7 +381,9 @@ function restart() {
   font-size: 14px;
   font-weight: normal;
   margin-top: 20px;
-  cursor: pointer;
+  span {
+    cursor: pointer;
+  }
 }
 .time-limit__container {
   color: $gray-04;

@@ -46,7 +46,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="statement">
+  <div class="y-main statement">
     <h1>声明</h1>
     <div class="log__content gray-08" v-html="state.markdown"></div>
   </div>
