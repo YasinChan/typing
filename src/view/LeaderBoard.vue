@@ -35,6 +35,9 @@ onMounted(async () => {
 });
 
 function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: T[], key: K): T[] {
+  if (!array || !array.length) {
+    return [];
+  }
   const map = new Map<string | number | symbol, T>();
   const result: T[] = [];
 
