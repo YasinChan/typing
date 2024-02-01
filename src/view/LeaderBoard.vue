@@ -184,7 +184,7 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
 .y-leader-board__bottom {
   margin: 50px 0 20px;
   font-size: 14px;
-  color: $gray-02;
+  color: $gray-04;
   li {
     margin-left: 20px;
   }
