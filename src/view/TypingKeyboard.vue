@@ -54,7 +54,30 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
 };
 </script>
 <template>
-  <div class="y-main">
+  <main>
+    <div class="y-keyboard__setting-wrap">
+      <Transition name="menu">
+        <div class="flex-center--y" style="justify-content: right" v-show="!onlyShowMain">
+          <div
+            class="y-keyboard__setting-item"
+            v-if="state.currentSystem === 'win'"
+            @click="state.currentSystem = 'mac'"
+          >
+            Windows
+          </div>
+          <div
+            class="y-keyboard__setting-item"
+            v-if="state.currentSystem === 'mac'"
+            @click="state.currentSystem = 'win'"
+          >
+            Mac
+          </div>
+          <div class="y-keyboard__setting-item" @click="state.keyboardModal = true">
+            切换键盘配列
+          </div>
+        </div>
+      </Transition>
+    </div>
     <div class="y-main__screen-wrap">
       <div class="y-main__screen" :class="[printContent ? 'y-main__screen--word' : '']">
         <div class="y-main__screen-main" v-html="printContent"></div>
@@ -66,25 +89,6 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
       >
         <div class="y-main__sub-screen-text" v-html="currentCode.join('')"></div>
       </div>
-      <Transition name="menu">
-        <div class="y-main__selection" v-show="!onlyShowMain">
-          <div
-            class="y-main__selection-item"
-            v-if="state.currentSystem === 'win'"
-            @click="state.currentSystem = 'mac'"
-          >
-            Windows
-          </div>
-          <div
-            class="y-main__selection-item"
-            v-if="state.currentSystem === 'mac'"
-            @click="state.currentSystem = 'win'"
-          >
-            Mac
-          </div>
-          <div class="y-main__selection-item" @click="state.keyboardModal = true">切换键盘</div>
-        </div>
-      </Transition>
     </div>
     <key-wrap
       v-if="state.currentKeyBoard === '68'"
@@ -152,7 +156,7 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
         </div>
       </template>
     </key-wrap>
-  </div>
+  </main>
   <YModal
     :show="state.keyboardModal"
     @close="state.keyboardModal = false"
@@ -178,23 +182,41 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
   align-items: flex-end;
   position: relative;
 }
-.y-main__selection {
-  position: absolute;
-  right: 0;
-  width: 100px;
+.y-keyboard__setting-wrap {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 24px;
+  transition: transform 0.2s ease;
+  font-size: 16px;
+  color: $gray-06;
+}
+.y-keyboard__setting-item {
+  cursor: pointer;
+}
+.y-keyboard__setting-item:not(:last-child) {
+  position: relative;
+  margin-right: 30px;
+  &::after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 12px;
+    background: $gray-02;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 }
 .y-main__selection-item {
   padding: 4px 8px;
   color: $gray-06;
-  margin-bottom: 4px;
   cursor: pointer;
-  text-align: center;
-  transform: scale(0.9);
-  opacity: 0.6;
+  text-align: right;
   transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
   &:hover {
-    opacity: 1;
-    transform: scale(1);
+    color: $main-color;
   }
 }
 .y-main__screen {
