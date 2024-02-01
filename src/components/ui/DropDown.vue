@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref, nextTick, reactive } from 'vue';
+import { ref, nextTick, reactive, onMounted } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 
 const menuRef = ref<any>(null);
 const obj = reactive({
   showMenu: false
 });
 
-nextTick().then(() => {
-  document.addEventListener('click', (event) => {
-    const targetElement: any = event.target;
-    if (!targetElement.closest('.y-drop-down--js')) {
-      obj.showMenu = false;
-    }
-  });
+onMounted(async () => {
+  await nextTick();
+  onClickOutside(menuRef, closeMenu);
+});
+function closeMenu() {
+  obj.showMenu = false;
+}
+defineExpose({
+  closeMenu
 });
 </script>
 <template>

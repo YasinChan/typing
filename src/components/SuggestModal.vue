@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, reactive, onMounted, inject, watch } from 'vue';
-import { nanoid } from 'nanoid';
+import { computed, reactive, onMounted, inject, watch, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
 // components
@@ -11,6 +11,7 @@ import YTag from '@/components/ui/Tag.vue';
 import YLoading from '@/components/ui/Loading.vue';
 import ThemeLabel from '@/components/ThemeLabel.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
+import YDropDown from '@/components/ui/DropDown.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -23,6 +24,7 @@ import { getSuggest, createSuggest, voteSuggest } from '@/request';
 import IcoUp from '@/assets/svg/up.svg';
 import IcoFilter from '@/assets/svg/filter.svg';
 import IcoTips from '@/assets/svg/tips.svg';
+import IcoStar from '@/assets/svg/star.svg';
 
 // types
 import type { SuggestItem, COLOR_TYPE } from '@/types';
@@ -35,20 +37,26 @@ const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
 
 const message: any = inject('message');
+
+const suggestFilterRef = ref();
+const router = useRouter();
+
 const state = reactive({
   show: false,
   isAnonymity: false,
   suggestList: [] as SuggestItem[],
   activeSuggest: {} as SuggestItem,
   customObj: {} as COLOR_TYPE,
-  currentSort: 'time' as 'time' | 'hot',
+  currentSort: 'time' as 'time' | 'hot' | 'theme',
   suggestContent: '',
   isLoading: true
 });
 
-onMounted(() => {
-  getSuggestList();
-});
+const emit = defineEmits(['openThemeModal']);
+
+// onMounted(() => {
+//   getSuggestList();
+// });
 
 watch(
   () => state.show,
@@ -56,6 +64,14 @@ watch(
     if (!show) {
       // @ts-ignore
       state.activeSuggest = {};
+      router.replace({ query: { suggest_filter: undefined } });
+    } else {
+      const query = router.currentRoute.value?.query;
+      if (query.suggest_filter === 'theme') {
+        getSuggestList('theme');
+        return;
+      }
+      getSuggestList();
     }
   }
 );
@@ -69,9 +85,14 @@ const replyName = computed(() => {
   return '';
 });
 
-async function getSuggestList(sort?: 'time' | 'hot') {
+async function getSuggestList(sort?: 'time' | 'hot' | 'theme') {
+  if (state.currentSort === sort) {
+    return;
+  }
+  suggestFilterRef.value?.closeMenu();
   state.isLoading = true;
   const suggest = await getSuggest({ sort });
+  state.currentSort = sort || 'time';
   const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
   const done = suggestList.filter((item) => item.done);
   const accept = suggestList.filter((item) => !item.done).filter((item) => item.accept);
@@ -82,18 +103,6 @@ async function getSuggestList(sort?: 'time' | 'hot') {
 
 function showSuggest() {
   state.show = true;
-}
-
-function filter() {
-  // @ts-ignore
-  state.activeSuggest = {};
-  if (state.currentSort === 'time') {
-    state.currentSort = 'hot';
-    getSuggestList('hot');
-  } else {
-    state.currentSort = 'time';
-    getSuggestList('time');
-  }
 }
 
 async function confirmSuggest() {
@@ -241,6 +250,11 @@ function downClick(id: string) {
   }
 }
 
+function setTheme() {
+  state.show = false;
+  emit('openThemeModal');
+}
+
 function getTheme(ct: string) {
   const reg = /%(.*?)%/;
   const is = reg.test(ct);
@@ -318,12 +332,56 @@ defineExpose({
           <a href="https://github.com/YasinChan/typing/issues" target="_blank">Github</a>
           中反馈或者共创。
         </span>
-        <span class="y-submit-suggest__filter flex-center--y" v-throttle-click:500="filter"
-          ><IcoFilter></IcoFilter>{{ state.currentSort === 'time' ? '最新' : '最热' }}</span
-        >
+        <YDropDown ref="suggestFilterRef">
+          <template #title>
+            <div class="y-submit-suggest__filter flex-center--y">
+              <IcoFilter></IcoFilter>
+              {{
+                state.currentSort === 'time'
+                  ? '最新'
+                  : state.currentSort === 'hot'
+                  ? '最热'
+                  : '主题'
+              }}
+            </div>
+          </template>
+          <template #menu>
+            <div class="y-submit-suggest__filter-menu">
+              <div
+                class="y-menu__change"
+                :class="[state.currentSort === 'time' ? 'y-menu__change--active' : '']"
+                @click="getSuggestList('time')"
+              >
+                最新
+              </div>
+              <div
+                class="y-menu__change"
+                :class="[state.currentSort === 'hot' ? 'y-menu__change--active' : '']"
+                @click="getSuggestList('hot')"
+              >
+                最热
+              </div>
+              <div
+                class="y-menu__change"
+                :class="[state.currentSort === 'theme' ? 'y-menu__change--active' : '']"
+                @click="getSuggestList('theme')"
+              >
+                主题
+              </div>
+            </div>
+          </template>
+        </YDropDown>
       </div>
       <YLoading class="y-submit-suggest__loading" v-if="state.isLoading"></YLoading>
       <template v-else>
+        <div v-if="state.currentSort === 'theme'" class="y-submit-suggest__custom gray-06">
+          以下为用户自定义设置生成的主题，若支持该主题可以点击对应主题下方的「<IcoStar
+          ></IcoStar>」为其投票，投票多的将设置为预设主题。如果你也想设置独特的主题，欢迎<span
+            class="main-color"
+            @click="setTheme"
+            >点击此处设置或自定义主题</span
+          >，然后你做的主题也可以生成至此展示使用。
+        </div>
         <div
           v-if="state.activeSuggest.createdAt"
           class="y-submit-suggest__list y-submit-suggest__list--active gray-08"
@@ -353,17 +411,12 @@ defineExpose({
               style="margin-left: 4px; cursor: pointer"
             >
               点击设置该主题
-              <Tooltip
-                content="在设置中「切换主题」可以自定义主题并生成至此，若支持该主题可以为此投票，投票多的将设置为预设主题。"
-              >
-                <IcoTips></IcoTips>
-              </Tooltip>
             </span>
           </div>
           <div class="y-submit-suggest__list-info">
             <div class="y-submit-suggest__list-data">
               <span class="y-submit-suggest__list-data-up">
-                <IcoUp></IcoUp>
+                <IcoStar></IcoStar>
               </span>
               <span class="y-submit-suggest__list-data-down">
                 <IcoUp></IcoUp>
@@ -412,11 +465,6 @@ defineExpose({
               style="margin-left: 4px; cursor: pointer"
             >
               点击设置该主题
-              <Tooltip
-                content="在设置中「切换主题」可以自定义主题并生成至此，若支持该主题可以为此投票，投票多的将设置为预设主题。"
-              >
-                <IcoTips></IcoTips>
-              </Tooltip>
             </span>
           </div>
           <div class="y-submit-suggest__list-info">
@@ -426,7 +474,7 @@ defineExpose({
                 class="y-submit-suggest__list-data-up"
                 :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1' }"
               >
-                <IcoUp></IcoUp>
+                <IcoStar></IcoStar>
                 {{ item.up ? item.up : '' }}
               </span>
               <span
@@ -508,12 +556,31 @@ defineExpose({
 }
 .y-submit-suggest__filter {
   cursor: pointer;
+  padding: 5px;
+  border-radius: 2px;
+  background: $gray-02;
+  transition: all 0.2s;
+  color: $gray-06;
   svg {
+    transition: all 0.2s;
     fill: $gray-06;
     width: 18px;
     height: 18px;
     margin-right: 4px;
   }
+  &:hover {
+    background: $main-color;
+    color: $label-white;
+    svg {
+      fill: $label-white;
+    }
+  }
+}
+.y-submit-suggest__filter-menu {
+  white-space: nowrap;
+  font-size: 14px;
+  border: 1px solid $gray-02;
+  border-radius: 2px;
 }
 
 .y-submit-suggest__loading {
@@ -521,6 +588,23 @@ defineExpose({
   top: 120px;
   left: 50%;
   transform: translateX(-50%);
+}
+.y-submit-suggest__custom {
+  font-size: 14px;
+  margin-bottom: 16px;
+  font-weight: bold;
+  span {
+    cursor: pointer;
+    font-weight: bold;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: $main-color;
+  }
 }
 .y-submit-suggest__list {
   padding: 16px 8px;
@@ -548,12 +632,9 @@ defineExpose({
   line-height: 20px;
 }
 .list-content__set {
-  svg {
-    margin-top: 1px;
-    margin-left: 4px;
-    width: 14px;
-    height: 14px;
-    fill: $gray-06;
+  transition: color 0.2s;
+  &:hover {
+    color: $main-color;
   }
 }
 .y-submit-suggest__list-info {

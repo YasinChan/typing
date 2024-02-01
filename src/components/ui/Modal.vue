@@ -8,11 +8,13 @@ const props = withDefaults(
       show: boolean;
       className: string;
       zIndex: number;
+      showCancel: boolean;
     }>
   >(),
   {
     show: false,
-    zIndex: 1
+    zIndex: 1,
+    showCancel: false
   }
 );
 
@@ -56,6 +58,14 @@ watch(
           <div class="y-modal__footer">
             <slot name="footer">
               <YButton @click="emit('confirm')">确定</YButton>
+              <YButton
+                v-if="showCancel"
+                style="margin-left: 20px"
+                theme="secondary"
+                @click="emit('close')"
+              >
+                取消
+              </YButton>
             </slot>
           </div>
         </div>

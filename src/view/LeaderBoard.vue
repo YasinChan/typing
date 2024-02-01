@@ -30,9 +30,23 @@ const state = reactive({
 onMounted(async () => {
   const res = await getLeaderBoard();
   const leaderboard = res.data.result?.leaderboard;
-  state.timeLeaderBoard = leaderboard['time'];
-  state.countdownLeaderBoard = leaderboard['countdown'];
+  state.timeLeaderBoard = removeDuplicates(leaderboard['time'], 'userName');
+  state.countdownLeaderBoard = removeDuplicates(leaderboard['countdown'], 'userName');
 });
+
+function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: T[], key: K): T[] {
+  const map = new Map<string | number | symbol, T>();
+  const result: T[] = [];
+
+  for (const item of array) {
+    if (!map.has(item[key])) {
+      map.set(item[key], item);
+      result.push(item);
+    }
+  }
+
+  return result;
+}
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-leader-board">
@@ -40,7 +54,7 @@ onMounted(async () => {
       <span>排行榜</span>
       <Tooltip
         style="cursor: pointer"
-        content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。"
+        html="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。<br>排行榜仅保留速度最快的记录。"
       >
         <IcoTips></IcoTips>
       </Tooltip>
@@ -101,6 +115,15 @@ onMounted(async () => {
         </table>
       </div>
     </div>
+    <div class="y-leader-board__bottom">
+      *注：
+      <ol>
+        <li>
+          速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。
+        </li>
+        <li>排行榜仅保留速度最快的记录。</li>
+      </ol>
+    </div>
   </main>
 </template>
 <style lang="scss">
@@ -124,6 +147,7 @@ onMounted(async () => {
 .y-leader-board__wrap {
   display: flex;
   justify-content: space-between;
+  min-height: 40vh;
 }
 .y-leader-board__item {
   width: 48%;
@@ -155,5 +179,14 @@ onMounted(async () => {
   left: 50%;
   top: 20px;
   transform: translateX(-50%);
+}
+
+.y-leader-board__bottom {
+  margin: 50px 0 20px;
+  font-size: 14px;
+  color: $gray-02;
+  li {
+    margin-left: 20px;
+  }
 }
 </style>

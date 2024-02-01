@@ -47,7 +47,8 @@ const state = reactive({
   accuracyInfo: '' as string,
   speed: '',
   speedInfo: '' as string,
-  playRatio: 1
+  playRatio: 1,
+  hadRecord: false
 });
 
 const keys = computed(() => {
@@ -106,6 +107,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  state.hadRecord = false;
   if (state.intervalId) {
     clearInterval(state.intervalId);
     state.intervalId = null;
@@ -249,6 +251,9 @@ function restart() {
 }
 
 async function record() {
+  if (state.hadRecord) {
+    return;
+  }
   if (Number(state.accuracy.replace('%', '')) >= 80 && props.totalTime >= 15) {
     confirm({
       title: '确认保存',
@@ -267,7 +272,8 @@ async function record() {
             wpm: Number(state.speedInfo)
           });
           message({ message: res.data?.message });
-          emit('restart');
+          // emit('restart');
+          state.hadRecord = true;
         } catch (error: any) {
           const msg = error.response?.data?.message;
           message({ message: msg, type: 'error' });
@@ -278,7 +284,7 @@ async function record() {
     return;
   }
   confirm({
-    title: '提示',
+    title: '不符合记录条件',
     content: '可以记录的条件为时长大于 15 秒，同时准确率大于 80%。',
     confirmClose: () => {
       return true;
@@ -318,7 +324,8 @@ async function record() {
     <Tooltip
       v-if="showSaveRecord"
       class="result-content__svg"
-      content="保存本次记录，将会在排行榜中展示。"
+      :class="[state.hadRecord ? 'result-content__svg--disabled' : '']"
+      :content="state.hadRecord ? '记录已保存' : '保存本次记录，将会在排行榜中展示。'"
     >
       <IcoRecord @click="record"></IcoRecord>
     </Tooltip>
@@ -352,6 +359,12 @@ async function record() {
 </template>
 <style lang="scss">
 .result-content__svg {
+  &.result-content__svg--disabled {
+    svg {
+      fill: $gray-04;
+      cursor: not-allowed;
+    }
+  }
   svg {
     width: 28px;
     height: 28px;

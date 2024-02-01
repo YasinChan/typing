@@ -48,7 +48,7 @@ export const postVerifyAnswer = (params: { userName: string; answer: string }) =
 };
 
 // 获取建议
-export const getSuggest = (params?: { sort?: 'time' | 'hot' }) => {
+export const getSuggest = (params?: { sort?: 'time' | 'hot' | 'theme' }) => {
   return axios.get('/api/suggest', { params });
 };
 

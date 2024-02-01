@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed, reactive, onMounted, watch, inject } from 'vue';
+import { useRouter } from 'vue-router';
 import { ColorPicker } from 'vue3-colorpicker';
 import 'vue3-colorpicker/style.css';
 
@@ -45,6 +46,7 @@ import { createSuggest } from '@/request';
 
 const useConfig = useConfigStore();
 const userStore = useUserStore();
+const router = useRouter();
 const { profile, getProvinceUser } = storeToRefs(userStore);
 
 const confirm: any = inject('confirm');
@@ -264,6 +266,14 @@ function saveCustomTheme() {
   });
 }
 
+function toThemeList() {
+  router.replace({ query: { suggest_filter: 'theme' } });
+  setTimeout(() => {
+    state.show = false;
+    suggestClick();
+  }, 200);
+}
+
 defineExpose({
   showModal
 });
@@ -280,7 +290,7 @@ defineExpose({
     </template>
     <template #body>
       <div class="y-modal__theme-setting" v-if="state.selectThemeType !== '自定义'">
-        <div class="gray-08">
+        <div class="gray-08" style="max-width: 200px">
           <div class="flex-center--y">
             <div class="theme-setting__title">
               <span class="">背景色</span>
@@ -423,6 +433,9 @@ defineExpose({
             <YInput v-model="state.themeInput" placeholder="主题名称" :max-length="6"></YInput>
           </div>
           <YButton @click="saveCustomTheme" :disable="!state.themeInput">保存自定义设置</YButton>
+          <div @click="toThemeList" class="theme-setting__title-click font-bold">
+            点击此处查看用户已定义的主题，并为你喜欢的主题投票吧~
+          </div>
         </div>
         <div class="y-modal__theme-custom">
           <div class="y-modal__theme-chrome-header">
@@ -482,7 +495,7 @@ defineExpose({
                 —— <span>《额尔古纳河右岸》节选</span> -
                 <span>迟子建</span>
               </div>
-              <div class="theme-content__word-tips">
+              <div class="theme-content__word-tips" style="margin-top: 100px">
                 <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
               </div>
             </div>
@@ -590,6 +603,16 @@ defineExpose({
     margin-left: 4px;
   }
 }
+.theme-setting__title-click {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  color: $main-color;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
 .theme-setting__tips {
   font-size: 12px;
   color: $gray-02;
@@ -608,7 +631,7 @@ defineExpose({
 
 .y-modal__theme-custom {
   width: 720px;
-  height: 420px;
+  height: 460px;
   border-radius: 6px;
   background: rgb(43, 43, 43);
   overflow: hidden;

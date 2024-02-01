@@ -29,6 +29,10 @@ import IcoSetting from '@/assets/svg/setting.svg';
 import IcoGithub from '@/assets/svg/github.svg';
 import IcoEmail from '@/assets/svg/email.svg';
 import IcoIntroduce from '@/assets/svg/introduce.svg';
+import IcoTheme from '@/assets/svg/theme.svg';
+import IcoFont from '@/assets/svg/font.svg';
+import IcoStatement from '@/assets/svg/statement.svg';
+import IcoLog from '@/assets/svg/log.svg';
 
 // types
 import type { SuggestItem } from '@/types';
@@ -139,6 +143,10 @@ async function changeTheme() {
   }
 }
 
+function changeFont() {
+  obj.showChangeFontModal = true;
+}
+
 function showMessage({ message = '', type = 'success', timeout = 3000 }) {
   clearTimeout(obj.timeout);
   // 在这个函数中，设置Message组件的message和show属性，
@@ -176,13 +184,13 @@ function showConfirmModal({
   };
 }
 
-async function suggestClick(info?: SuggestItem) {
+async function suggestClick(info?: SuggestItem | MouseEvent) {
   obj.showSuggest = true;
   await nextTick();
   if (suggestModalRef.value) {
     suggestModalRef.value.showSuggest();
     if (info) {
-      suggestModalRef.value.activeSetFirstSuggest(info);
+      suggestModalRef.value.activeSetFirstSuggest(info as SuggestItem);
     }
   }
 }
@@ -215,7 +223,7 @@ async function suggestClick(info?: SuggestItem) {
             >键盘测试</router-link
           >
           <router-link to="/leaderboard" class="y-menu__item">排行榜</router-link>
-          <y-drop-down>
+          <YDropDown>
             <template #title>
               <div class="y-menu__item flex-center--y">
                 <IcoSetting></IcoSetting>
@@ -223,22 +231,12 @@ async function suggestClick(info?: SuggestItem) {
             </template>
             <template #menu>
               <div class="y-auth__menu">
-                <div
-                  class="y-menu__change y-menu__change-font"
-                  @click="
-                    () => {
-                      obj.showChangeFontModal = true;
-                    }
-                  "
-                >
-                  切换字体
-                </div>
+                <div class="y-menu__change y-menu__change-font" @click="changeFont">切换字体</div>
                 <div class="y-menu__change" @click="changeTheme">切换主题</div>
-                <router-link to="/statement" class="y-menu__change">声明</router-link>
-                <router-link to="/log" class="y-menu__change">更新日志</router-link>
+                <div class="y-menu__change" @click="suggestClick">建议与反馈</div>
               </div>
             </template>
-          </y-drop-down>
+          </YDropDown>
           <div class="y-menu__item y-menu__item-auth">
             <auth></auth>
           </div>
@@ -250,22 +248,42 @@ async function suggestClick(info?: SuggestItem) {
 
     <Transition name="menu">
       <footer v-show="!onlyShowMain" class="flex-center">
-        <a class="flex-center--y" href="https://github.com/YasinChan/typing" target="_blank">
+        <a
+          class="flex-center--y y-app__footer"
+          href="https://github.com/YasinChan/typing"
+          target="_blank"
+        >
           <IcoGithub></IcoGithub>
           <span>源码</span>
         </a>
-        <a class="flex-center--y" href="mailto:867103198@qq.com">
-          <IcoEmail></IcoEmail>
-          <span>联系我</span>
-        </a>
         <a
-          class="flex-center--y"
+          class="flex-center--y y-app__footer"
           href="https://www.bilibili.com/video/BV1ci4y1s73q"
           target="_blank"
         >
           <IcoIntroduce></IcoIntroduce>
           <span>介绍</span>
         </a>
+        <router-link to="/statement" class="flex-center--y cursor-pointer y-app__footer">
+          <IcoStatement></IcoStatement>
+          <span>声明</span>
+        </router-link>
+        <router-link to="/log" class="flex-center--y cursor-pointer y-app__footer">
+          <IcoLog></IcoLog>
+          <span>日志</span>
+        </router-link>
+        <span class="flex-center--y cursor-pointer y-app__footer" @click="changeTheme">
+          <IcoTheme></IcoTheme>
+          <span>主题</span>
+        </span>
+        <span class="flex-center--y cursor-pointer y-app__footer" @click="changeFont">
+          <IcoFont></IcoFont>
+          <span>字体</span>
+        </span>
+        <span class="flex-center--y cursor-pointer y-app__footer" @click="suggestClick">
+          <IcoMessage></IcoMessage>
+          <span>建议与反馈</span>
+        </span>
       </footer>
     </Transition>
   </div>
@@ -278,11 +296,15 @@ async function suggestClick(info?: SuggestItem) {
   </Transition>
 
   <Transition name="menu">
-    <Tooltip v-if="!onlyShowMain" class="y-submit-suggest" content="提出建议">
+    <Tooltip v-if="!onlyShowMain" class="y-submit-suggest" content="建议与反馈">
       <IcoMessage @click="suggestClick" class="y-submit-suggest__svg"></IcoMessage>
     </Tooltip>
   </Transition>
-  <SuggestModal ref="suggestModalRef" v-if="obj.showSuggest"></SuggestModal>
+  <SuggestModal
+    ref="suggestModalRef"
+    v-if="obj.showSuggest"
+    @open-theme-modal="changeTheme"
+  ></SuggestModal>
   <ThemeModal ref="themeModalRef" v-if="obj.showThemeSelect"></ThemeModal>
 
   <YModal
@@ -310,7 +332,13 @@ async function suggestClick(info?: SuggestItem) {
     </template>
   </YModal>
   <Message :type="obj.type" :message="obj.message" :visible="obj.visible"></Message>
-  <YModal :show="obj.showConfirm" :z-index="10" @close="obj.confirmClose" @confirm="obj.confirm">
+  <YModal
+    :show="obj.showConfirm"
+    :z-index="10"
+    @close="obj.confirmClose"
+    @confirm="obj.confirm"
+    :show-cancel="true"
+  >
     <template #header>
       <h3>{{ obj.confirmTitle }}</h3>
     </template>
@@ -325,7 +353,7 @@ async function suggestClick(info?: SuggestItem) {
 <style lang="scss">
 .y-remind {
   position: fixed;
-  z-index: 1;
+  z-index: 10;
   top: 0;
   left: 0;
   width: 100%;
@@ -359,7 +387,8 @@ main,
 }
 footer {
   font-size: 12px;
-  a {
+  a,
+  > span {
     margin-right: 20px;
   }
   svg {
@@ -473,6 +502,10 @@ footer {
     background-color: $main-color;
     color: $label-white;
   }
+  &.y-menu__change--active {
+    background-color: $main-color;
+    color: $label-white;
+  }
 }
 
 main {
@@ -491,6 +524,23 @@ main {
 .y-change__container {
   li {
     cursor: pointer;
+  }
+}
+
+.y-app__footer {
+  span {
+    transition: all 0.2s ease;
+  }
+  svg {
+    transition: all 0.2s ease;
+  }
+  &:hover {
+    span {
+      color: $main-color;
+    }
+    svg {
+      fill: $main-color;
+    }
   }
 }
 

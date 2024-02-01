@@ -76,6 +76,7 @@ const handlerClick = () => {
 }
 .y-button--secondary {
   background: $label-white;
+  opacity: 0.8;
   color: $main-color;
   &:hover {
     background: $label-white;
