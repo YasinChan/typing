@@ -45,6 +45,26 @@ a {
   src: url('@/assets/font/zhankugaoduanhei-min.ttf');
 }
 
+@font-face {
+  font-family: 'deyihei';
+  src: url('@/assets/font/SmileySans-Oblique.ttf');
+}
+
+@font-face {
+  font-family: 'deyihei-min';
+  src: url('@/assets/font/SmileySans-Oblique-min.ttf');
+}
+
+@font-face {
+  font-family: 'alibabapuhuiti';
+  src: url('@/assets/font/AlibabaPuHuiTi-3-65-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'alibabapuhuiti-min';
+  src: url('@/assets/font/AlibabaPuHuiTi-3-65-Medium-min.ttf');
+}
+
 .y-font--zpix-min {
   font-family: zpix-min;
 }
@@ -61,8 +81,18 @@ a {
   font-family: zhankugaoduanhei-min;
 }
 
-.y-font--AlibabaPuHuiTi {
-  font-family: AlibabaPuHuiTi;
+.y-font--deyihei {
+  font-family: deyihei;
+}
+.y-font--deyihei-min {
+  font-family: deyihei-min;
+}
+
+.y-font--alibabapuhuiti {
+  font-family: alibabapuhuiti;
+}
+.y-font--alibabapuhuiti-min {
+  font-family: alibabapuhuiti-min;
 }
 
 #app {

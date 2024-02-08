@@ -326,7 +326,15 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
         <ListItem
           @click="useConfig.setCurrentFont('zhankugaoduanhei')"
           class="y-font--zhankugaoduanhei-min"
-          >zhankugaoduanhei 字体 测试 TEST test</ListItem
+          >站酷高端黑 字体 测试 TEST test</ListItem
+        >
+        <ListItem @click="useConfig.setCurrentFont('deyihei')" class="y-font--deyihei-min"
+          >得意黑 字体 测试 TEST test</ListItem
+        >
+        <ListItem
+          @click="useConfig.setCurrentFont('alibabapuhuiti')"
+          class="y-font--alibabapuhuiti-min"
+          >阿里巴巴普惠体 字体 测试 TEST test</ListItem
         >
       </div>
     </template>
