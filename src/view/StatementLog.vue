@@ -18,7 +18,11 @@ onMounted(async () => {
 
 ## 素材来源
 - icon-font 来源 [iconfont.cn](https://www.iconfont.cn/)
-- 字体 来源 [free-font](https://wordshub.github.io/free-font/) [Google Fonts](https://fonts.google.com/)
+- 字体 来源
+  - [free-font](https://wordshub.github.io/free-font/)
+  - [Google Fonts](https://fonts.google.com/)
+  - [得意黑](https://github.com/atelier-anchor/smiley-sans)
+  - [阿里巴巴普惠体](https://fonts.alibabagroup.com/#/home)
 - 词句来源互联网
 
 ## 参考
