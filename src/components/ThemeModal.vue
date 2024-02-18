@@ -447,7 +447,10 @@ defineExpose({
               </div>
               <div class="header-control__tag">
                 <img :src="favicon" alt="" />
-                <span>Typing | 一个简约风格的打字测试网站</span>
+                <span
+                  title="Typing | 一个简约风格的可自定义主题、可切换字体的打字记录和键盘测试网站。"
+                  >Typing | 一个简约风格的可自定义主题、可切换字体的打字记录和键盘测试网站。</span
+                >
               </div>
             </div>
             <div class="header-control__line">
