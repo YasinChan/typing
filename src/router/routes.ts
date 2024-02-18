@@ -17,5 +17,9 @@ export default [
   { path: '/user/:id', name: 'User', component: User },
   { path: '/log', name: 'Log', component: Log },
   { path: '/statement', name: 'statement', component: StatementLog },
-  { path: '/leaderboard', name: 'LeaderBoard', component: LeaderBoard }
+  { path: '/leaderboard', name: 'LeaderBoard', component: LeaderBoard },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/'
+  }
 ];
