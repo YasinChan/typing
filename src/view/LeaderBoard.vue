@@ -57,7 +57,7 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
       <span>排行榜</span>
       <Tooltip
         style="cursor: pointer"
-        html="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。<br>排行榜仅保留速度最快的记录。"
+        html="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。<br>排行榜仅保留速度最快的记录。"
       >
         <IcoTips></IcoTips>
       </Tooltip>
@@ -122,9 +122,9 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
       *注：
       <ol>
         <li>
-          速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。
+          速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。
         </li>
-        <li>排行榜仅保留速度最快的记录。</li>
+        <li>排行榜仅保留同一用户或同一IP下速度最快的记录。</li>
       </ol>
     </div>
   </main>

@@ -6,6 +6,9 @@ import { useScroll } from '@vueuse/core';
 import cloneDeep from 'lodash/cloneDeep';
 import type { SentenceArrItem, TypingRecordItemType, TypingRecordType } from '@/types';
 
+// common
+import { replacePunctuationWithSpace } from '@/common/string';
+
 const LINE_HEIGHT = 70;
 const el = ref<HTMLElement | null>(null);
 const { y } = useScroll(el, { behavior: 'smooth' });
@@ -17,9 +20,13 @@ const props = withDefaults(
     quote: string;
     showMask?: boolean;
     className?: string;
+    isSpaceType?: boolean; // 是否是空格模式，指需要将标点符号都转为空格
+    canSpace?: boolean;
   }>(),
   {
-    showMask: true
+    showMask: true,
+    isSpaceType: false,
+    canSpace: false
   }
 );
 
@@ -29,6 +36,7 @@ const state = reactive({
   currentAreaHeight: LINE_HEIGHT,
   isComposing: false,
   inputText: '',
+  content: '',
   quoteLength: 0,
   quoteArr: [] as SentenceArrItem[],
   isTyping: false,
@@ -178,6 +186,19 @@ watch(
   () => props.quote,
   (val) => {
     // 传入的内容发生变化时，重置
+    state.content = val;
+  },
+  {
+    immediate: true
+  }
+);
+
+watch(
+  () => state.content,
+  (val) => {
+    if (props.isSpaceType) {
+      state.content = replacePunctuationWithSpace(val);
+    }
     state.quoteLength = val.length;
     setTimeout(() => {
       reset();
@@ -194,6 +215,20 @@ watch(
         isWrong: false
       };
     });
+  },
+  {
+    immediate: true
+  }
+);
+
+watch(
+  () => props.isSpaceType,
+  (val) => {
+    if (val) {
+      state.content = replacePunctuationWithSpace(state.content);
+    } else {
+      state.content = props.quote;
+    }
   },
   {
     immediate: true
@@ -325,7 +360,10 @@ function pasteEvent(e: ClipboardEvent) {
 }
 function keyDownEvent(e: KeyboardEvent) {
   emit('keydown-event', e);
-  if (e.code === KEY_CODE_ENUM['ENTER'] || e.code === KEY_CODE_ENUM['SPACE']) {
+  if (e.code === KEY_CODE_ENUM['ENTER']) {
+    e.preventDefault();
+  }
+  if (!props.isSpaceType && !props.canSpace && e.code === KEY_CODE_ENUM['SPACE']) {
     e.preventDefault();
   }
   if (

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, reactive, watch, ref, onUnmounted } from 'vue';
+import { inject, reactive, watch, ref, onUnmounted, nextTick } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -34,6 +34,7 @@ const customTime = [15, 30, 60, 120];
 const state = reactive({
   showDetail: false,
   showSetTime: false,
+  isSpaceType: false,
   quote: {} as any,
   lastIndex: -1,
   selectTime: 15 as number, // 设置的倒计时
@@ -166,6 +167,14 @@ function restart() {
   state.isTyping = false;
   state.showResult = false;
 }
+
+async function changePunctuation() {
+  if (state.isTyping) {
+    refresh();
+  }
+  await nextTick();
+  state.isSpaceType = !state.isSpaceType;
+}
 </script>
 <template>
   <main class="y-time-limit" :class="'y-font--' + currentFont">
@@ -186,6 +195,15 @@ function restart() {
             @click="state.showCountDown = !state.showCountDown"
           >
             显示倒计时
+          </div>
+        </Transition>
+        <Transition name="menu">
+          <div
+            v-show="!onlyShowMain"
+            class="y-time-limit__setting-item y-time-limit__set-time"
+            @click="changePunctuation"
+          >
+            {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
           </div>
         </Transition>
         <Transition name="menu">
@@ -224,6 +242,7 @@ function restart() {
       </div>
       <WordInput
         ref="wordInputRef"
+        :is-space-type="state.isSpaceType"
         :quote="state.quote?.content"
         @is-typing="isTypingFunc"
       ></WordInput>
@@ -320,6 +339,10 @@ function restart() {
   line-height: 24px;
   height: 24px;
   cursor: pointer;
+  transition: color 0.2s ease;
+  &:hover {
+    color: $main-color;
+  }
   &.y-time-limit__time--active {
     color: $main-color;
   }

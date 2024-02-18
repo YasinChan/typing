@@ -30,6 +30,7 @@ const { currentFont, onlyShowMain, isEscape } = storeToRefs(useConfig);
 
 const state = reactive({
   customInfo: '',
+  isSpaceType: false,
   show: false,
   isSet: false, // 记录是否一句确认，确认后刷新按钮隐藏
   quotes: null as any,
@@ -141,7 +142,7 @@ function customClick() {
 }
 
 function confirmSet() {
-  state.quotes = { content: state.customInfo.replace(/[\r\n]+/g, '。').replace(/\s+/g, '，') };
+  state.quotes = { content: state.customInfo.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ') };
   state.show = false;
   state.isSet = true;
 }
@@ -169,6 +170,14 @@ function uploadFileFunc() {
     uploadFile.value.click();
   }
 }
+
+async function changePunctuation() {
+  if (state.isTyping) {
+    refresh();
+  }
+  await nextTick();
+  state.isSpaceType = !state.isSpaceType;
+}
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-custom-page">
@@ -190,6 +199,16 @@ function uploadFileFunc() {
               @click="state.showTime = !state.showTime"
             >
               显示计时
+            </div>
+          </Transition>
+          <Transition name="menu">
+            <div
+              v-show="!onlyShowMain"
+              v-if="!state.isSet"
+              class="y-custom-page__setting-item y-custom-page__set-time"
+              @click="changePunctuation"
+            >
+              {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -219,6 +238,8 @@ function uploadFileFunc() {
         ref="wordInputRef"
         v-if="state.quotes"
         :quote="state.quotes?.content"
+        :is-space-type="state.isSpaceType"
+        :can-space="state.isSet"
         @is-typing="isTypingFunc"
         @is-finished="finished"
         class-name="y-custom-page__word-input"
@@ -344,6 +365,10 @@ function uploadFileFunc() {
   line-height: 24px;
   height: 24px;
   cursor: pointer;
+  transition: color 0.2s ease;
+  &:hover {
+    color: $main-color;
+  }
   &.y-custom-page__time--active {
     color: $main-color;
   }

@@ -92,7 +92,7 @@ onMounted(() => {
     if (lastRecord.length > 0) {
       lastRecord.forEach((item) => {
         if (item.isInput) {
-          state.totalWord += item.word?.length ? item.word?.length : 0;
+          state.totalWord += item.word?.length ? item.word.replace(/\s+/g, '').length : 0;
           state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
         }
       });
@@ -306,7 +306,7 @@ async function record() {
     速度：<span class="result-content--main-color">{{ state.speed }}</span>
     <Tooltip
       class="cursor-pointer result-content__tips"
-      content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号。"
+      content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。"
     >
       <IcoTips></IcoTips>
     </Tooltip>

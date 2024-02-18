@@ -46,6 +46,7 @@ const typeList = [
 const state = reactive({
   quotes: null as any, // [] 或 {}
   isTyping: false,
+  isSpaceType: false,
   intervalId: null as null | number,
   lastIndex: -1,
   len: 5,
@@ -200,6 +201,14 @@ function restart() {
   state.showResult = false;
   state.currentIndex = 0;
 }
+
+async function changePunctuation() {
+  if (state.isTyping) {
+    refresh();
+  }
+  await nextTick();
+  state.isSpaceType = !state.isSpaceType;
+}
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
@@ -224,6 +233,16 @@ function restart() {
               @click="state.showTime = !state.showTime"
             >
               显示计时
+            </div>
+          </Transition>
+          <Transition name="menu">
+            <div
+              v-show="!onlyShowMain"
+              v-if="state.type !== 'short'"
+              class="y-quote-limit__setting-item y-quote-limit__set-time"
+              @click="changePunctuation"
+            >
+              {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -293,6 +312,7 @@ function restart() {
         <WordInput
           ref="wordInputRef"
           v-if="state.quotes"
+          :is-space-type="state.isSpaceType"
           :quote="state.quotes?.content"
           @is-typing="isTypingFunc"
           @is-finished="finished"
@@ -353,6 +373,10 @@ function restart() {
   line-height: 24px;
   height: 24px;
   cursor: pointer;
+  transition: color 0.2s ease;
+  &:hover {
+    color: $main-color;
+  }
   &.y-quote-limit__time--active {
     color: $main-color;
   }
