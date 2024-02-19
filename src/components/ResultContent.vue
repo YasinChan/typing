@@ -3,6 +3,7 @@ import { reactive, computed, onMounted, onUnmounted, inject } from 'vue';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
+import YButton from '@/components/ui/Button.vue';
 
 // types
 import type { TypingRecordType, TypingRecordItemType } from '@/types';
@@ -315,19 +316,21 @@ async function record() {
     时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
   </div>
   <div class="result-content__toolbar flex-center">
-    <Tooltip class="result-content__svg" content="重新开始">
-      <IcoChange @click="restart"></IcoChange>
-    </Tooltip>
-    <Tooltip v-if="!isShort" class="result-content__svg" content="查看回放">
-      <IcoReplay @click="replay"></IcoReplay>
-    </Tooltip>
+    <YButton class="result-content__svg" size="large" @click="restart"
+      ><IcoChange></IcoChange>重新开始</YButton
+    >
+    <YButton class="result-content__svg" v-if="!isShort" size="large" @click="replay"
+      ><IcoReplay></IcoReplay>查看回放</YButton
+    >
     <Tooltip
       v-if="showSaveRecord"
       class="result-content__svg"
       :class="[state.hadRecord ? 'result-content__svg--disabled' : '']"
       :content="state.hadRecord ? '记录已保存' : '保存本次记录，将会在排行榜中展示。'"
     >
-      <IcoRecord @click="record"></IcoRecord>
+      <YButton class="flex-center--y" :disable="state.hadRecord" size="large" @click="record"
+        ><IcoRecord></IcoRecord> 保存记录</YButton
+      >
     </Tooltip>
   </div>
   <div class="result-content__replay" v-if="state.currentOperation">
@@ -335,10 +338,16 @@ async function record() {
       {{ timeFormat }}
     </div>
     <div class="result-content__speed-up flex-center--y">
-      <Tooltip content="加速">
+      <Tooltip content="快进">
         <IcoSpeedUp @click="speedUp"></IcoSpeedUp>
       </Tooltip>
       <span class="result-content__speed-up-ratio">{{ state.playRatio }} 倍速</span>
+    </div>
+    <div class="result-content__speed-again result-content__speed-up flex-center--y">
+      <Tooltip content="重播">
+        <IcoChange @click="replay"></IcoChange>
+      </Tooltip>
+      <span class="result-content__speed-up-ratio">重播</span>
     </div>
     <span
       class="result-content__replay-item"
@@ -361,15 +370,17 @@ async function record() {
 .result-content__svg {
   &.result-content__svg--disabled {
     svg {
-      fill: $gray-04;
       cursor: not-allowed;
     }
   }
+  display: flex;
+  align-items: center;
   svg {
-    width: 28px;
-    height: 28px;
-    fill: $gray-06;
+    width: 18px;
+    height: 18px;
+    fill: $label-white;
     cursor: pointer;
+    margin-right: 4px;
   }
   margin: 0 20px;
 }
@@ -426,6 +437,9 @@ async function record() {
   }
   .result-content__speed-up-ratio {
     margin-left: 4px;
+  }
+  &.result-content__speed-again {
+    left: 150px;
   }
 }
 .result-content__replay-item {

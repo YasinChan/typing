@@ -46,7 +46,7 @@ const handlerClick = () => {
 
 <style lang="scss">
 .y-button {
-  display: inline-block;
+  display: inline-flex;
   white-space: nowrap;
   border: none;
   box-shadow: 0 2px #00000004;
@@ -66,6 +66,10 @@ const handlerClick = () => {
 .y-button--small {
   padding: 4px 10px;
   font-size: 12px;
+}
+.y-button--large {
+  padding: 6px 12px;
+  font-size: 16px;
 }
 .y-button--disabled {
   cursor: not-allowed;

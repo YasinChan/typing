@@ -5,6 +5,8 @@
 
 整个项目包含前端和后端，前端 Vue3 + Vite，后端使用 Koa2 + [Leancloud](https://leancloud.cn)。该项目是前端部分，后端也将在未来开源。
 
+### 2024.2.19
+- 优化结算页面展示样式。
 ### 2024.2.18
 - 增加标点符号转空格模式，适合更多中国宝宝的打字习惯。
 - 自定义模式中自定义文案从之前「空格会被转为逗号，换行会被转为句号」的逻辑调整为「支持空格，换行会被转成空格」。
@@ -42,7 +44,11 @@
 
 ## 素材来源
 - icon-font 来源 [iconfont.cn](https://www.iconfont.cn/)
-- 字体 来源 [free-font](https://wordshub.github.io/free-font/) [Google Fonts](https://fonts.google.com/)
+- 字体 来源
+  - [free-font](https://wordshub.github.io/free-font/)
+  - [Google Fonts](https://fonts.google.com/)
+  - [得意黑](https://github.com/atelier-anchor/smiley-sans)
+  - [阿里巴巴普惠体](https://fonts.alibabagroup.com/#/home)
 - 词句来源互联网
 
 ## 参考

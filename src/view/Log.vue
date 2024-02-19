@@ -63,5 +63,10 @@ onMounted(async () => {
     text-decoration: underline;
     color: $gray-06;
   }
+  code {
+    background: $gray-02;
+    padding: 2px;
+    border-radius: 2px;
+  }
 }
 </style>
