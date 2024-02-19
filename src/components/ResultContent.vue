@@ -404,7 +404,7 @@ async function record() {
 }
 .result-content__replay {
   line-height: 28px;
-  margin-top: 40px;
+  margin-top: 60px;
   position: relative;
 }
 .result-content__replay-item--underline {

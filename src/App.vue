@@ -207,6 +207,17 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
     </span>
     <IcoClose></IcoClose>
   </div>
+  <div class="y-mobile-show">
+    <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
+      <a href="/" class="y-info__title main-color">Typing</a>
+    </div>
+    <h1>一个简约风格的可自定义主题、可切换字体的打字记录和键盘测试网站。</h1>
+    <h2>欢迎使用电脑端访问该页面，体验 Typing 的更多功能！</h2>
+    <img src="https://file.yasinchan.com/MCOD5rboejy8aB14T97iybJsYbPt2oAV/2272970956.png" alt="" />
+    <img src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png" alt="" />
+    <img src="https://file.yasinchan.com/mWeNzOLyIAIqhDdjxeOWdIoKvbQIBmfo/2343042681.png" alt="" />
+    <img src="https://file.yasinchan.com/3mJW6cYdhhonSKsrLNIrPRescfb9202i/1757293763.png" alt="" />
+  </div>
   <div class="y-app">
     <header>
       <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
@@ -382,6 +393,22 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 64px);
+}
+.y-mobile-show {
+  color: $gray-08;
+  h1 {
+    margin-top: 30px;
+    font-size: 22px;
+  }
+  h2 {
+    color: $gray-06;
+    font-size: 20px;
+    margin-top: 20px;
+  }
+  img {
+    width: 100%;
+    margin-top: 40px;
+  }
 }
 header {
   display: flex;

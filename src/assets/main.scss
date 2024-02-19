@@ -16,6 +16,18 @@ body {
   padding: 32px;
 }
 
+.y-mobile-show {
+  display: none;
+}
+@media only screen and (max-width: 767px) {
+  .y-mobile-show {
+    display: block;
+  }
+  .y-app {
+    display: none !important;
+  }
+}
+
 a {
   color: $gray-08;
   text-decoration: none;

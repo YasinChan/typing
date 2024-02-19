@@ -26,3 +26,6 @@ $font-en: Verdana, sans-serif;
   word-wrap: break-word;
   word-break: break-word;
 }
+
+$pcLayout: 'only screen and (max-width: 767px)';
+$mobileLayout: 'only screen and (max-width: 767px)';

@@ -72,10 +72,10 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
             <tr>
               <td>排行</td>
               <td>昵称</td>
-              <td>速度(字/分钟)</td>
+              <td>速度</td>
               <td>准确率</td>
-              <td>时长(s)</td>
-              <td>完成时间</td>
+              <td>时长</td>
+              <td class="y-leader-board__header-finish-time">完成时间</td>
             </tr>
           </thead>
           <tbody>
@@ -98,10 +98,10 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
             <tr>
               <td>排行</td>
               <td>昵称</td>
-              <td>速度(字/分钟)</td>
+              <td>速度</td>
               <td>准确率</td>
-              <td>时长(s)</td>
-              <td>完成时间</td>
+              <td>时长</td>
+              <td class="y-leader-board__header-finish-time">完成时间</td>
             </tr>
           </thead>
           <tbody>
@@ -161,7 +161,7 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
   border-collapse: collapse;
   border-spacing: 0;
   td {
-    padding: 4px 10px;
+    padding: 4px 6px;
     white-space: nowrap;
     border-radius: 2px;
   }
@@ -190,6 +190,11 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
   color: $gray-04;
   li {
     margin-left: 20px;
+  }
+}
+@media only screen and (max-width: 1199px) {
+  .y-leader-board__header-finish-time {
+    display: none;
   }
 }
 </style>
