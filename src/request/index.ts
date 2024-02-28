@@ -80,3 +80,10 @@ export const getLeaderBoard = () => {
 export const saveLeaderBoard = (params: any) => {
   return axios.post('/api/leaderboard/save', params);
 };
+
+export const getGame = (params?: { id: string }) => {
+  return axios.get('/api/game', { params });
+};
+export const creteGame = (params?: { userName: string; userId?: string; count: number }) => {
+  return axios.post('/api/game/create', params);
+};

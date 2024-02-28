@@ -226,6 +226,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
 
       <Transition name="menu">
         <div class="y-menu" v-show="!onlyShowMain">
+          <router-link to="/game" class="y-menu__item">比一比</router-link>
           <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">计时模式</router-link>

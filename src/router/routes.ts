@@ -7,6 +7,8 @@ import User from '@/view/User.vue';
 import Log from '@/view/Log.vue';
 import StatementLog from '@/view/StatementLog.vue';
 import LeaderBoard from '@/view/LeaderBoard.vue';
+import Game from '@/view/Game.vue';
+import GameRoom from '@/view/GameRoom.vue';
 
 export default [
   { path: '/', name: 'TimeLimit', component: TimeLimit },
@@ -18,6 +20,8 @@ export default [
   { path: '/log', name: 'Log', component: Log },
   { path: '/statement', name: 'statement', component: StatementLog },
   { path: '/leaderboard', name: 'LeaderBoard', component: LeaderBoard },
+  { path: '/game', name: 'Race', component: Game },
+  { path: '/game/:id', name: 'RaceRoom', component: GameRoom },
   {
     path: '/:catchAll(.*)',
     redirect: '/'
