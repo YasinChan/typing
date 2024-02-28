@@ -79,7 +79,7 @@ function startWs(id: string, name: string) {
     );
   };
   // 接收到服务器消息时的事件
-  state.ws.onmessage = function (event) {
+  state.ws.onmessage = function (event: MessageEvent) {
     console.log('收到服务器消息：' + event.data);
     const data = JSON.parse(event.data);
     state.getValue = data.info;
@@ -90,7 +90,7 @@ function startWs(id: string, name: string) {
     console.log('WebSocket 连接已关闭！');
   };
   // 连接出错时的事件
-  state.ws.onerror = function (error) {
+  state.ws.onerror = function (error: Error) {
     console.log('WebSocket 错误：' + error);
   };
 }
