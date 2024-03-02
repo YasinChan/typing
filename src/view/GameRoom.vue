@@ -64,7 +64,7 @@ watch(
 function startWs(id: string, name: string) {
   // 创建 WebSocket 连接
   // state.ws = new WebSocket(`ws://localhost:8080?id=${id}&name=${name}`);
-  state.ws = new WebSocket(`wss://typing.yasinchan.com//ws?id=${id}&name=${name}`);
+  state.ws = new WebSocket(`wss://typing.yasinchan.com/ws?id=${id}&name=${name}`);
   // window.ws = state.ws;
   // 连接打开时的事件
   state.ws.onopen = function () {
