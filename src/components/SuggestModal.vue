@@ -423,6 +423,8 @@ defineExpose({
               </span>
             </div>
             <div>
+              <span class="main-color cursor-pointer" @click="setTheme">点击定制你的主题</span>
+              <span> · </span>
               <span v-if="state.activeSuggest.userName" class="gray-08">{{
                 state.activeSuggest.userName
               }}</span>
@@ -487,6 +489,10 @@ defineExpose({
               </span>
             </div>
             <div>
+              <span v-if="item.isTheme" class="main-color cursor-pointer" @click="setTheme"
+                >点击定制你的主题</span
+              >
+              <span v-if="item.isTheme"> · </span>
               <span v-if="item.userName" class="gray-08">{{ item.userName }}</span>
               <span v-if="item.userName"> · </span>
               <span class="gray-06">{{ dayjs(item.createdAt).format('YY/MM/DD HH:mm') }}</span>
@@ -543,6 +549,7 @@ defineExpose({
     max-height: calc(80vh - 256px);
     overflow: auto;
     padding-bottom: 20px;
+    padding-right: 20px;
   }
   .y-modal__footer {
     border-top: 1px solid $gray-02;
@@ -552,7 +559,10 @@ defineExpose({
 .y-submit-suggest__tips {
   color: $gray-04;
   font-size: 14px;
-  margin-bottom: 10px;
+  padding-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background: $layout-background-gray;
 }
 .y-submit-suggest__filter {
   cursor: pointer;

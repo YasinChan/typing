@@ -39,6 +39,7 @@ import type { SuggestItem } from '@/types';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const themeModalRef = ref<InstanceType<typeof ThemeModal>>();
+const authRef = ref<InstanceType<typeof Auth>>();
 const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
@@ -79,6 +80,10 @@ provide('confirm', (obj: any) => {
 
 provide('suggestClick', (obj: any) => {
   suggestClick(obj);
+});
+
+provide('triggerShowLogin', () => {
+  authRef.value?.triggerShowLogin();
 });
 
 onMounted(() => {
@@ -135,11 +140,11 @@ function handleMouseMove(event: any) {
   }
 }
 
-async function changeTheme() {
+async function changeTheme(type: string = 'normal') {
   obj.showThemeSelect = true;
   await nextTick();
   if (themeModalRef.value) {
-    themeModalRef.value.showModal();
+    themeModalRef.value.showModal(type);
   }
 }
 
@@ -244,13 +249,13 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
             <template #menu>
               <div class="y-auth__menu">
                 <div class="y-menu__change y-menu__change-font" @click="changeFont">切换字体</div>
-                <div class="y-menu__change" @click="changeTheme">切换主题</div>
+                <div class="y-menu__change" @click="changeTheme('normal')">切换主题</div>
                 <div class="y-menu__change" @click="suggestClick">建议与反馈</div>
               </div>
             </template>
           </YDropDown>
           <div class="y-menu__item y-menu__item-auth">
-            <auth></auth>
+            <auth ref="authRef"></auth>
           </div>
         </div>
       </Transition>
@@ -284,7 +289,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           <IcoLog></IcoLog>
           <span>日志</span>
         </router-link>
-        <span class="flex-center--y cursor-pointer y-app__footer" @click="changeTheme">
+        <span class="flex-center--y cursor-pointer y-app__footer" @click="changeTheme('normal')">
           <IcoTheme></IcoTheme>
           <span>主题</span>
         </span>
@@ -315,7 +320,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
   <SuggestModal
     ref="suggestModalRef"
     v-if="obj.showSuggest"
-    @open-theme-modal="changeTheme"
+    @open-theme-modal="changeTheme('custom')"
   ></SuggestModal>
   <ThemeModal ref="themeModalRef" v-if="obj.showThemeSelect"></ThemeModal>
 

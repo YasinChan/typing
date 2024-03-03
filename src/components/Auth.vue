@@ -311,6 +311,14 @@ const updatePassword = () => {
       obj.upDisable = false;
     });
 };
+
+function triggerShowLogin() {
+  obj.showLogin = true;
+}
+
+defineExpose({
+  triggerShowLogin
+});
 </script>
 
 <template>

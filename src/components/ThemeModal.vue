@@ -55,7 +55,7 @@ const suggestClick: any = inject('suggestClick');
 const state = reactive({
   themeInput: '',
   show: false,
-  selectThemeType: '自定义',
+  selectThemeType: '预设',
   mainColor: '',
   mainRedColor: '',
   backgroundGrayColor: '',
@@ -72,7 +72,7 @@ onMounted(() => {});
 watch(
   () => state.selectThemeType,
   (val) => {
-    if (val !== '自定义') {
+    if (val !== '预设') {
       let target = 'root';
       const mainColor = getCustomCssValue('--main-color', 'body');
       if (mainColor) {
@@ -157,8 +157,9 @@ const replyName = computed(() => {
   return '';
 });
 
-function showModal() {
+function showModal(type: string = 'normal') {
   state.show = true;
+  state.selectThemeType = type === 'normal' ? '预设' : '自定义';
 }
 
 function themeSet(type: ThemeType) {
@@ -283,13 +284,13 @@ defineExpose({
     :show="state.show"
     @close="state.show = false"
     @confirm="state.show = false"
-    :class-name="state.selectThemeType !== '自定义' ? 'y-modal__theme' : ''"
+    :class-name="state.selectThemeType === '自定义' ? 'y-modal__theme' : ''"
   >
     <template #header>
-      <h3>{{ state.selectThemeType === '自定义' ? '预设主题选择' : '主题自定义' }}</h3>
+      <h3>{{ state.selectThemeType === '自定义' ? '主题自定义' : '预设主题选择' }}</h3>
     </template>
     <template #body>
-      <div class="y-modal__theme-setting" v-if="state.selectThemeType !== '自定义'">
+      <div class="y-modal__theme-setting" v-if="state.selectThemeType === '自定义'">
         <div class="gray-08" style="max-width: 200px">
           <div class="flex-center--y">
             <div class="theme-setting__title">
@@ -536,7 +537,7 @@ defineExpose({
               ? (state.selectThemeType = '预设')
               : (state.selectThemeType = '自定义')
           "
-          >{{ state.selectThemeType }}</YButton
+          >{{ state.selectThemeType === '自定义' ? '预设' : '自定义' }}</YButton
         >
         <YButton @click="state.show = false">确定</YButton>
       </div>
