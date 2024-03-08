@@ -66,3 +66,10 @@ export type COLOR_KEY_TYPE = keyof typeof COLOR_ENUM | 'THEME_INPUT';
 export type COLOR_TYPE = {
   [key in COLOR_KEY_TYPE]: string; // 这里假设值类型为字符串，您可以根据实际情况替换
 };
+
+export type WsItem = {
+  op: string;
+  player: string[];
+  time: number;
+  count: number;
+};

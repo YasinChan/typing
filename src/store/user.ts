@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { getMe, getConfig } from '@/request/index';
 import { nanoid } from 'nanoid';
+import { userProfileDeferred } from '@/utils/defer';
 
 export type profileType = {
   isAdmin: boolean;
@@ -32,6 +33,12 @@ export const useUserStore = defineStore('user', {
     myUserId(): any {
       if ('userId' in this.profile) {
         return this.profile.userId;
+      }
+      return '';
+    },
+    myUserName(): any {
+      if ('userName' in this.profile) {
+        return this.profile.userName;
       }
       return '';
     },
@@ -69,11 +76,13 @@ export const useUserStore = defineStore('user', {
           const info = res.data?.result?.info;
           if (info) {
             this.profile = info;
+            userProfileDeferred.resolve(info);
           }
         })
         .catch((e) => {
           console.log(e);
           this.profile = {};
+          userProfileDeferred.reject(null);
         });
     },
     setConfig() {

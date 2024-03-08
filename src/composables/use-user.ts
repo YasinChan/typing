@@ -5,21 +5,22 @@ import { storeToRefs } from 'pinia';
 export function useUser() {
   const userStore = useUserStore();
   const { profile, getProvinceUser, myUserId } = storeToRefs(userStore);
-  const replyName = computed(() => {
-    if (profile.value?.userName) {
-      return profile.value.userName;
+
+  const isLogin = computed(() => {
+    return !!myUserId.value;
+  });
+
+  const userName = computed(() => {
+    if (isLogin.value) {
+      return profile.value?.userName;
     } else if (getProvinceUser.value) {
       return getProvinceUser.value;
     }
     return '';
   });
 
-  const isLogin = computed(() => {
-    return !!myUserId.value;
-  });
-
   return {
-    replyName,
+    userName,
     isLogin
   };
 }

@@ -20,8 +20,8 @@ export default [
   { path: '/log', name: 'Log', component: Log },
   { path: '/statement', name: 'statement', component: StatementLog },
   { path: '/leaderboard', name: 'LeaderBoard', component: LeaderBoard },
-  { path: '/game', name: 'Race', component: Game },
-  { path: '/game/:id', name: 'RaceRoom', component: GameRoom },
+  { path: '/game', name: 'Game', component: Game },
+  { path: '/game/:id', name: 'GameRoom', component: GameRoom },
   {
     path: '/:catchAll(.*)',
     redirect: '/'

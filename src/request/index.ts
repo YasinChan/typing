@@ -87,3 +87,11 @@ export const getGame = (params?: { id: string }) => {
 export const creteGame = (params?: { userName: string; userId?: string; count: number }) => {
   return axios.post('/api/game/create', params);
 };
+
+export const getWs = (params?: { id: string }) => {
+  return axios.get('/api/ws', { params });
+};
+
+export const getWsById = (params?: { id: string }) => {
+  return axios.get('/api/ws/by-id', { params });
+};

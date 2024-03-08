@@ -36,6 +36,7 @@ import IcoLog from '@/assets/svg/log.svg';
 
 // types
 import type { SuggestItem } from '@/types';
+import YButton from '@/components/ui/Button.vue';
 
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const themeModalRef = ref<InstanceType<typeof ThemeModal>>();
@@ -66,6 +67,8 @@ const obj = reactive({
   showConfirm: false,
   confirmTitle: '',
   confirmContent: '',
+  confirmOk: '确定',
+  confirmCancel: '取消',
   confirmClose: () => {},
   confirm: () => {}
 });
@@ -169,11 +172,15 @@ function showMessage({ message = '', type = 'success', timeout = 3000 }) {
 function showConfirmModal({
   title = '',
   content = '',
+  ok = '确定',
+  cancel = '取消',
   confirmClose = () => true,
   confirm = () => true
 }) {
   obj.confirmTitle = title;
   obj.confirmContent = content;
+  obj.confirmOk = ok;
+  obj.confirmCancel = cancel;
   obj.showConfirm = true;
   obj.confirmClose = () => {
     const close = confirmClose();
@@ -371,6 +378,12 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
       <div class="y-change__container gray-08">
         {{ obj.confirmContent }}
       </div>
+    </template>
+    <template #footer>
+      <YButton @click="obj.confirm">{{ obj.confirmOk }}</YButton>
+      <YButton style="margin-left: 20px" theme="secondary" @click="obj.confirmClose">
+        {{ obj.confirmCancel }}
+      </YButton>
     </template>
   </YModal>
 </template>
