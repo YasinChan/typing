@@ -440,7 +440,7 @@ main,
   flex: 1;
 }
 footer {
-  font-size: 12px;
+  font-size: 14px;
   a,
   > span {
     margin-right: 20px;
