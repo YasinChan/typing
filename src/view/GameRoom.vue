@@ -20,6 +20,7 @@ import { userProfileDeferred } from '@/utils/defer';
 const gamerStore = useGameStore();
 const { setting, isFromGame } = storeToRefs(gamerStore);
 const confirm: any = inject('confirm');
+const message: any = inject('message');
 
 const state = reactive({
   ws: null as any,
@@ -134,6 +135,11 @@ function startWs(id: string, name: string, count: number | string = '') {
   state.ws.onmessage = function (event: MessageEvent) {
     console.log('收到服务器消息：' + event.data);
     const data = JSON.parse(event.data);
+    if (data.type === 'remind') {
+      // 房间在没有操作的情况下可以维持五分钟，还剩五秒会被关闭时 websocket 会发这个事件来提醒。
+      message({ message: data.info, type: 'warn', timeout: 5000 });
+      return;
+    }
     state.getValue = data.info;
     state.getName = data.name;
   };
@@ -141,17 +147,18 @@ function startWs(id: string, name: string, count: number | string = '') {
   state.ws.onclose = function (e: CloseEvent) {
     console.log('WebSocket 连接已关闭！', e.code);
     if (e.code === 3001) {
+      // 没有这个房间哦，请重新创建。
       confirm({
         title: e.reason,
         ok: '去创建房间',
         confirmClose: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
         },
         confirm: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
@@ -164,13 +171,13 @@ function startWs(id: string, name: string, count: number | string = '') {
         title: e.reason,
         ok: '去创建房间',
         confirmClose: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
         },
         confirm: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
@@ -179,22 +186,28 @@ function startWs(id: string, name: string, count: number | string = '') {
       return;
     }
     if (e.code === 3002) {
+      // 房间人数已满，请加入其他房间或者重新创建。
       confirm({
         title: e.reason,
         ok: '去创建房间',
         confirmClose: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
         },
         confirm: () => {
-          router.push({
+          router.replace({
             name: 'Game'
           });
           return true;
         }
       });
+      return;
+    }
+    if (e.code === 3003) {
+      // 超时关闭
+      location.reload();
       return;
     }
   };

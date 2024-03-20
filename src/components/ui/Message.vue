@@ -28,7 +28,7 @@ defineProps({
   position: fixed;
   top: 20px;
   left: 50%;
-  transform: translateY(0);
+  transform: translateX(-50%);
   padding: 10px 20px;
   border-radius: 4px;
   color: #fff;
