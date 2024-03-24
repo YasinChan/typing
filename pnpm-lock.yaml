@@ -16,6 +16,7 @@ specifiers:
   dayjs: ^1.11.10
   eslint: ^8.39.0
   eslint-plugin-vue: ^9.11.0
+  fontfaceobserver: ^2.3.0
   jdenticon: ^3.2.0
   js-cookie: ^3.0.5
   lodash: ^4.17.21
@@ -38,6 +39,7 @@ dependencies:
   '@vueuse/core': 10.7.0_vue@3.3.4
   axios: 1.4.0
   dayjs: 1.11.10
+  fontfaceobserver: 2.3.0
   jdenticon: 3.2.0
   js-cookie: 3.0.5
   lodash: 4.17.21
@@ -1819,6 +1821,10 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+    dev: false
+
+  /fontfaceobserver/2.3.0:
+    resolution: {integrity: sha512-6FPvD/IVyT4ZlNe7Wcn5Fb/4ChigpucKYSvD6a+0iMoLn2inpo711eyIcKjmDtE5XNcgAkSH9uN/nfAeZzHEfg==}
     dev: false
 
   /for-each/0.3.3:

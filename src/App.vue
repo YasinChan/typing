@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { reactive, provide, onMounted, ref, nextTick } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
+// @ts-ignore
+import FontFaceObserver from 'fontfaceobserver';
 
 // components
 import Message from '@/components/ui/Message.vue';
@@ -153,6 +155,37 @@ async function changeTheme(type: string = 'normal') {
 
 function changeFont() {
   obj.showChangeFontModal = true;
+}
+
+// function preloadFont(url: string) {
+//   const link = document.createElement('link');
+//   link.rel = 'preload';
+//   link.as = 'font';
+//   link.href = url;
+//   link.crossOrigin = '';
+//   document.head.appendChild(link);
+// }
+
+function listenFont(name: string) {
+  if (name === 'default') {
+    showMessage({ message: '默认字体加载成功！' });
+    return;
+  }
+  showMessage({ message: '"' + name + '"' + ' 字体加载中...', timeout: 8000 });
+  const myFont = new FontFaceObserver(name, {});
+  myFont.load(null, 8000).then(
+    function () {
+      showMessage({ message: '"' + name + '"' + ' 字体加载成功！' });
+    },
+    function () {
+      showMessage({ message: '"' + name + '"' + ' 字体加载失败！', type: 'error' });
+    }
+  );
+}
+
+function setCurrentFont(type: string) {
+  listenFont(type);
+  useConfig.setCurrentFont(type);
 }
 
 function showMessage({ message = '', type = 'success', timeout = 3000 }) {
@@ -341,23 +374,19 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
     </template>
     <template #body>
       <div class="y-change__container gray-08">
-        <ListItem @click="useConfig.setCurrentFont('default')" class="y-font--default"
+        <ListItem @click="setCurrentFont('default')" class="y-font--default"
           >默认 字体 测试 TEST test</ListItem
         >
-        <ListItem @click="useConfig.setCurrentFont('zpix')" class="y-font--zpix-min"
+        <ListItem @click="setCurrentFont('zpix')" class="y-font--zpix-min"
           >zpix 字体 测试 TEST test</ListItem
         >
-        <ListItem
-          @click="useConfig.setCurrentFont('zhankugaoduanhei')"
-          class="y-font--zhankugaoduanhei-min"
+        <ListItem @click="setCurrentFont('zhankugaoduanhei')" class="y-font--zhankugaoduanhei-min"
           >站酷高端黑 字体 测试 TEST test</ListItem
         >
-        <ListItem @click="useConfig.setCurrentFont('deyihei')" class="y-font--deyihei-min"
+        <ListItem @click="setCurrentFont('deyihei')" class="y-font--deyihei-min"
           >得意黑 字体 测试 TEST test</ListItem
         >
-        <ListItem
-          @click="useConfig.setCurrentFont('alibabapuhuiti')"
-          class="y-font--alibabapuhuiti-min"
+        <ListItem @click="setCurrentFont('alibabapuhuiti')" class="y-font--alibabapuhuiti-min"
           >阿里巴巴普惠体 字体 测试 TEST test</ListItem
         >
       </div>
