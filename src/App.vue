@@ -35,6 +35,7 @@ import IcoTheme from '@/assets/svg/theme.svg';
 import IcoFont from '@/assets/svg/font.svg';
 import IcoStatement from '@/assets/svg/statement.svg';
 import IcoLog from '@/assets/svg/log.svg';
+import IcoDocument from '@/assets/svg/document.svg';
 
 // types
 import type { SuggestItem } from '@/types';
@@ -312,6 +313,14 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
         >
           <IcoGithub></IcoGithub>
           <span>源码</span>
+        </a>
+        <a
+          class="flex-center--y y-app__footer"
+          href="https://yasinchan.com/tags/typing/"
+          target="_blank"
+        >
+          <IcoDocument></IcoDocument>
+          <span>技术</span>
         </a>
         <a
           class="flex-center--y y-app__footer"
