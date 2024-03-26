@@ -8,7 +8,7 @@ export function replacePunctuationWithSpace(input: string): string {
 }
 
 // 字符串转 Base64
-export function stringToBase64(str: string): string {
+export function stringToBase64(str: string | undefined): string | undefined {
   if (typeof window !== 'undefined' && typeof window.btoa === 'function') {
     // 浏览器环境
     const encoder = new TextEncoder();

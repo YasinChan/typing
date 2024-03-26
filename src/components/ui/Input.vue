@@ -46,6 +46,7 @@ const blurHandler = (event: any): any => {
 </template>
 <style lang="scss">
 .y-input {
+  position: relative;
   input {
     touch-action: manipulation;
     -webkit-appearance: none;
@@ -85,5 +86,8 @@ const blurHandler = (event: any): any => {
 .y-input__error-text {
   font-size: 12px;
   color: $main-red;
+  left: 0;
+  top: 25px;
+  position: absolute;
 }
 </style>

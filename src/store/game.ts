@@ -3,6 +3,8 @@ import { useUserStore } from '@/store/user';
 
 type settingValueType = {
   count: number;
+  index: number;
+  countDown: number;
 };
 type settingType = {
   [key: string]: settingValueType;

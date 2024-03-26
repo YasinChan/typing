@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, inject, computed, onMounted } from 'vue';
+import { reactive, ref, inject, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 // api
@@ -11,6 +11,7 @@ import IcoChange from '@/assets/svg/change.svg';
 // components
 import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
+import YInput from '@/components/ui/Input.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 import YLoading from '@/components/ui/Loading.vue';
 import GameEnterConfirm from '@/components/GameEnterConfirm.vue';
@@ -23,7 +24,7 @@ import IcoFilter from '@/assets/svg/filter.svg';
 import { base64ToString, stringToBase64 } from '@/common/string';
 
 // stores
-import { storeToRefs } from 'pinia';
+// import { storeToRefs } from 'pinia';
 import { useGameStore } from '@/store/game';
 
 // types
@@ -32,7 +33,7 @@ import type { WsItem } from '@/types';
 const { userName, isLogin } = useUser();
 
 const gameStore = useGameStore();
-const { setting } = storeToRefs(gameStore);
+// const { setting } = storeToRefs(gameStore);
 const confirm: any = inject('confirm');
 
 const router = useRouter();
@@ -41,11 +42,16 @@ const triggerShowLogin: any = inject('triggerShowLogin');
 
 const gameEnterConfirmRef = ref();
 
+const quoteList = ['《背影》节选', '《我与地坛》节选', '《冰灯》节选'];
+
 const state = reactive({
   showSetting: false,
   count: 2,
   lists: [] as WsItem[],
-  isLoading: true
+  isLoading: true,
+  quoteIndex: 0 as number,
+  setCountDown: 15 as number, // 自定义的倒计时
+  errorText: ''
 });
 
 onMounted(() => {
@@ -82,7 +88,7 @@ async function confirmCreate() {
           router.push({
             name: 'GameRoom',
             params: { id: routerPath },
-            query: { name: userName.value }
+            query: { name: userName.value ? encodeURIComponent(userName.value) : userName.value }
           });
           return true;
         }
@@ -90,13 +96,15 @@ async function confirmCreate() {
       return;
     }
     gameStore.setSetting(userName.value, {
-      count: state.count
+      count: state.count,
+      index: state.quoteIndex,
+      countDown: state.setCountDown
     });
 
     await router.push({
       name: 'GameRoom',
       params: { id: routerPath },
-      query: { name: userName.value }
+      query: { name: encodeURIComponent(userName.value) }
     });
   }
   state.showSetting = false;
@@ -115,7 +123,7 @@ function enterRoom(target: WsItem) {
     router.push({
       name: 'GameRoom',
       params: { id: target.op },
-      query: { name: userName.value }
+      query: { name: userName.value ? encodeURIComponent(userName.value) : userName.value }
     });
   } else {
     gameEnterConfirmRef.value?.setShowSettingGameName(target);
@@ -126,26 +134,43 @@ function getNickname(val: string, op: string) {
   router.push({
     name: 'GameRoom',
     params: { id: op },
-    query: { name: val }
+    query: { name: encodeURIComponent(val) }
   });
 }
+
+watch(
+  () => state.setCountDown,
+  () => {
+    // @ts-ignore
+    if (!/\d+/.test(Number(state.setCountDown))) {
+      state.errorText = '请输入数字';
+    } else {
+      state.errorText = '';
+    }
+  }
+);
 </script>
 
 <template>
   <main class="y-game">
     <h1 style="margin-bottom: 20px">
-      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦！
+      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦~
     </h1>
-    <div class="y-game__rule">
-      在这里你可以创建比一比，并邀请好友一起参加。
-      <div v-if="!isLogin" class="y-game__rule gray-06">
-        不过由于目前服务器资源有限，为限制人数，暂时需要<span
+    <div class="y-game__rule y-game__rule-title">游戏规则：</div>
+    <ul class="y-game__rule">
+      <li>在这里你可以创建比一比，并邀请好友一起参加。游戏是基于「限时模式」倒计时的方式。</li>
+      <li v-if="!isLogin">
+        由于目前服务器资源有限，为限制人数，暂时需要<span
           class="main-color cursor-pointer"
           @click="triggerShowLogin"
           >登录</span
-        >后才能创建比一比。
-      </div>
-    </div>
+        >后才能创建比一比。不过加入已创建的房间则<strong>不需要登录</strong>，设置一个昵称就可以了哦。
+      </li>
+      <li>
+        创建的房间如果<strong>五分钟</strong>内没有任何操作，则会自动关闭。不过当还剩五秒会关闭时，会有弹框提示，任何输入操作都可以避免关闭。
+      </li>
+      <li>遇到任何问题欢迎点击右下角按钮反馈。</li>
+    </ul>
     <YButton @click="clickCreate">{{ isLogin ? '创建比一比' : '点击登录/注册' }}</YButton>
     <div class="y-game__current flex-center--y">
       <div>
@@ -183,8 +208,8 @@ function getNickname(val: string, op: string) {
     </template>
     <template #body>
       <div class="y-game__setting gray-08">
-        <div>身份：{{ userName }}</div>
-        <div class="flex-center--y">
+        <div class="y-game__setting-item">身份：{{ userName }}</div>
+        <div class="y-game__setting-item flex-center--y">
           <span>选择参赛人数：</span>
           <YDropDown>
             <template #title>
@@ -220,6 +245,38 @@ function getNickname(val: string, op: string) {
             </template>
           </YDropDown>
         </div>
+        <div class="y-game__setting-item flex-center--y">
+          <span>选择文案：</span>
+          <YDropDown>
+            <template #title>
+              <div class="y-game__modal-title flex-center--y">
+                <IcoFilter></IcoFilter>
+                {{ quoteList[state.quoteIndex] }}
+              </div>
+            </template>
+            <template #menu>
+              <div class="y-game__modal-content">
+                <div
+                  class="y-game__modal-content-item"
+                  :class="state.quoteIndex === index ? 'y-game__modal-content-item--active' : ''"
+                  @click="state.quoteIndex = index"
+                  v-for="(item, index) in quoteList"
+                  :key="item"
+                >
+                  {{ item }}
+                </div>
+              </div>
+            </template>
+          </YDropDown>
+        </div>
+        <div class="y-game__setting-item flex-center--y" style="white-space: nowrap">
+          <span>设置倒计时：</span>
+          <YInput
+            :error-text="state.errorText"
+            v-model="state.setCountDown"
+            placeholder="单位：秒"
+          ></YInput>
+        </div>
       </div>
     </template>
   </YModal>
@@ -227,10 +284,27 @@ function getNickname(val: string, op: string) {
 </template>
 
 <style lang="scss">
+.y-game__setting {
+  .y-drop-down__menu {
+    left: 0;
+    right: auto;
+  }
+}
+.y-game__setting-item {
+  margin-bottom: 10px;
+}
 .y-game__rule {
   margin-bottom: 20px;
   line-height: 28px;
+  font-size: 14px;
+  font-weight: 400;
 }
+.y-game__rule-title {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 .y-game__modal-title {
   cursor: pointer;
   padding: 2px;
