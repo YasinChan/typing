@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { reactive, watch, inject, onMounted, computed, ref, nextTick } from 'vue';
+import { reactive, watch, inject, onMounted, computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import type { TypingRecordType } from '@/types';
+import type { TypingRecordType, IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
+import dayjs from 'dayjs';
 
 // api
 import { getWsById } from '@/request';
@@ -9,7 +10,8 @@ import { getWsById } from '@/request';
 // components
 import YInput from '@/components/ui/Input.vue';
 import YButton from '@/components/ui/Button.vue';
-import Draggable from '@/components/ui/Draggable.vue';
+import YDraggable from '@/components/ui/Draggable.vue';
+import YLoading from '@/components/ui/Loading.vue';
 
 // common
 import { base64ToString } from '@/common/string';
@@ -47,7 +49,9 @@ const state = reactive({
   typingRecord: {} as TypingRecordType,
   ws: null as any,
   value: '',
-  getValue: '',
+  websocketInfos: [] as Partial<IWebsocketInfos>[],
+  websocketTyping: '',
+  websocketTypingInfo: {} as IWebsocketTypingInfo,
   getName: '',
   isOwner: false,
   currentRoom: '' as any,
@@ -65,6 +69,16 @@ const routerName = computed(() => {
   } else {
     return '';
   }
+});
+
+const typingAccuracy = computed(() => {
+  const typingInfo = JSON.parse(state.websocketTyping);
+  return typingInfo.accuracy || '0&';
+});
+
+const typingLength = computed(() => {
+  const typingInfo = JSON.parse(state.websocketTyping);
+  return typingInfo.length || 0;
 });
 
 onMounted(async () => {
@@ -135,9 +149,6 @@ onMounted(async () => {
       });
     }
   }
-  setTimeout(async () => {
-    await getList();
-  }, 500);
 });
 
 async function getList() {
@@ -161,19 +172,6 @@ async function getList() {
     console.log('----------', 'e', e, '----------cyy log');
   }
 }
-
-watch(
-  () => state.value,
-  (val) => {
-    state.ws.send(
-      JSON.stringify({
-        id: routerId.value,
-        name: routerName.value,
-        info: val
-      })
-    );
-  }
-);
 
 function startWs(
   id: string,
@@ -214,8 +212,22 @@ function startWs(
       message({ message: data.info, type: 'warn', timeout: 5000 });
       return;
     }
-    state.getValue = data.info;
+    state.websocketTyping = data.typing || '';
     state.getName = data.name;
+
+    state.websocketTypingInfo[data.name] = {
+      len: data.typing.len,
+      accuracy: data.typing.accuracy
+    };
+
+    if (state.websocketInfos.length >= 2) {
+      state.websocketInfos.shift();
+    }
+    state.websocketInfos.push({
+      name: data.name,
+      info: data.info,
+      time: dayjs().format('HH:mm:ss')
+    });
   };
   // 连接关闭时的事件
   state.ws.onclose = function (e: CloseEvent) {
@@ -289,6 +301,10 @@ function startWs(
   state.ws.onerror = function (error: Error) {
     console.log('WebSocket 错误：' + error);
   };
+
+  setTimeout(async () => {
+    await getList();
+  }, 500);
 }
 
 interface WebSocketAction {
@@ -351,6 +367,40 @@ function isTypingFunc() {
   state.isTyping = true;
 }
 
+function getTypingInfo({
+  wordLength,
+  wrongLength,
+  accuracy
+}: {
+  wordLength: number;
+  wrongLength: number;
+  accuracy: string;
+}) {
+  state.ws.send(
+    JSON.stringify({
+      id: routerId.value,
+      name: routerName.value,
+      typing: {
+        len: wordLength,
+        accuracy: accuracy
+      }
+    })
+  );
+}
+
+watch(
+  () => state.value,
+  (val) => {
+    state.ws.send(
+      JSON.stringify({
+        id: routerId.value,
+        name: routerName.value,
+        typing: val
+      })
+    );
+  }
+);
+
 watch(
   () => state.isTyping,
   (val) => {
@@ -381,17 +431,33 @@ watch(
 </script>
 
 <template>
-  <Draggable>
+  <YDraggable>
+    <template #remind>
+      <div class="y-game-room__draggable-header-wrap">
+        <div
+          v-for="item in state.websocketInfos"
+          :key="item.time"
+          class="y-game-room__draggable-header flex-center--y"
+        >
+          <span style="width: 75px">{{ item.time }}</span>
+          <span style="width: 170px">{{ item.name }}</span>
+          <span style="margin-left: 8px">{{ item.info }}</span>
+        </div>
+      </div>
+    </template>
     <div class="y-game-room__remind">*请注意不要刷新页面，这可能导致房间无法再次进入。</div>
     <div class="y-game-room__online">
       <div class="y-game-room__online-title">当前在线：</div>
-      <div v-for="(item, key) in state.player" class="flex-center--y-between" :key="key">
-        <div class="y-game-room__owner">
-          <span>{{ key }}</span>
-          <span class="y-game-room__label" v-if="item.isOwner">房主</span>
+      <template v-if="Object.keys(state.player).length">
+        <div v-for="(item, key) in state.player" class="flex-center--y-between" :key="key">
+          <div class="y-game-room__owner">
+            <span>{{ key }}</span>
+            <span class="y-game-room__label" v-if="item.isOwner">房主</span>
+          </div>
+          <div class="y-game-room__ready" v-if="item.isReady">已准备</div>
         </div>
-        <div class="y-game-room__ready" v-if="item.isReady">已准备</div>
-      </div>
+      </template>
+      <YLoading class="y-game-room__online-loading" v-else></YLoading>
     </div>
     <div class="y-game-room__btn flex-center--y-between">
       <YButton :theme="state.youIsReady ? 'secondary' : 'default'" @click="ready">{{
@@ -399,7 +465,7 @@ watch(
       }}</YButton>
       <YButton v-if="state.isOwner" @click="closeRoom">关闭房间</YButton>
     </div>
-  </Draggable>
+  </YDraggable>
   <main class="y-game-room">
     <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px">
       功能还差一点哦，再等等~
@@ -409,8 +475,8 @@ watch(
     </div>
     <span>{{ state.getName }}</span
     >:
-    <span>{{ state.getValue }}</span>
-    <YInput v-model="state.value"></YInput>
+    <span>{{ state.websocketTyping }}</span>
+    <!--    <YInput v-model="state.value"></YInput>-->
     <div class="y-game-room__setting">
       <div>{{ state.countDown || state.selectTime }}</div>
       <div
@@ -424,10 +490,14 @@ watch(
     <WordInput
       ref="wordInputRef"
       v-if="state.quote"
+      :is-show-progress="true"
+      :progress-info="state.websocketTypingInfo"
       :is-space-type="state.isSpaceType"
       :quote="state.quote?.content"
+      @typing-info="getTypingInfo"
       @is-typing="isTypingFunc"
     ></WordInput>
+    <YLoading class="y-game-room__loading" v-else></YLoading>
   </main>
 </template>
 
@@ -441,6 +511,8 @@ watch(
 .y-game-room__online-title {
   margin-bottom: 4px;
   font-weight: bold;
+}
+.y-game-room__online-loading {
 }
 .y-game-room__label {
   background: $main-color;
@@ -479,6 +551,23 @@ watch(
   font-weight: bold;
   &.y-game-room__count-down--active {
     color: $main-color;
+  }
+}
+.y-game-room__loading {
+  position: fixed;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.y-game-room__draggable-header-wrap {
+  font-size: 14px;
+  padding: 0 10px 10px;
+}
+.y-game-room__draggable-header {
+  span {
+    @include limit-line(1);
   }
 }
 </style>

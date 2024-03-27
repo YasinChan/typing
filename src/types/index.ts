@@ -1,5 +1,24 @@
 export type KeyBoardType = '68' | 'standard' | 'mbp';
 
+export interface IWebsocketInfos {
+  id: string;
+  name: string;
+  typing: string;
+  info: string;
+  action: string[];
+  time: string;
+}
+
+export interface IWebsocketTyping {
+  len: number;
+  accuracy: string;
+  name?: string;
+}
+
+export interface IWebsocketTypingInfo {
+  [key: string]: IWebsocketTyping;
+}
+
 export type SystemType = 'mac' | 'win';
 
 export type SentenceArrItem = {
@@ -7,6 +26,7 @@ export type SentenceArrItem = {
   word: string;
   isInput: boolean;
   isWrong: boolean;
+  info: null | IWebsocketTyping[];
 };
 
 export type TypingRecordItemType = {

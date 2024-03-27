@@ -91,7 +91,10 @@ function toggleContent() {
   <Teleport to="body">
     <div ref="draggableElement" class="draggable">
       <div class="draggable__head flex-center--y-between" @mousedown.prevent="handleMouseDown">
-        <IcoMove></IcoMove>
+        <div class="flex-center--y-between">
+          <IcoMove style="flex-shrink: 0"></IcoMove>
+          <slot name="header"></slot>
+        </div>
         <div
           class="draggable__btn"
           :class="{
@@ -101,6 +104,7 @@ function toggleContent() {
           @click="toggleContent"
         ></div>
       </div>
+      <slot name="remind"></slot>
       <div class="draggable__content" v-show="state.isShowContent">
         <slot></slot>
       </div>
@@ -110,8 +114,8 @@ function toggleContent() {
 
 <style lang="scss">
 .draggable {
-  position: fixed; /* 或absolute/fixed */
-  width: 300px;
+  position: fixed;
+  width: 340px;
   color: $gray-08;
   background-color: $layout-background-gray;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -119,6 +123,7 @@ function toggleContent() {
   left: 0;
   border-radius: 2px;
   overflow: hidden;
+  z-index: 999;
 }
 .draggable__head {
   width: 100%;
@@ -145,6 +150,7 @@ function toggleContent() {
   border-radius: 2px;
   cursor: pointer;
   color: $layout-background-gray;
+  flex-shrink: 0;
   transition: color 0.2s, background-color 0.2s;
 }
 .draggable__btn-plus {

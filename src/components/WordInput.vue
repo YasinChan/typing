@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, nextTick, watch, unref } from 'vue';
+import { ref, onMounted, reactive, nextTick, watch, unref, computed } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 // @ts-ignore
 import cloneDeep from 'lodash/cloneDeep';
-import type { SentenceArrItem, TypingRecordItemType, TypingRecordType } from '@/types';
+import type {
+  SentenceArrItem,
+  TypingRecordItemType,
+  TypingRecordType,
+  IWebsocketTypingInfo
+} from '@/types';
 
 // common
 import { replacePunctuationWithSpace } from '@/common/string';
@@ -15,6 +20,7 @@ const { y } = useScroll(el, { behavior: 'smooth' });
 const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单，这些字符不会被标记为错误
 const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’']; // composition 状态下的字符
 const inputAreaRef = ref<HTMLElement | null>(null);
+
 const props = withDefaults(
   defineProps<{
     quote: string;
@@ -22,15 +28,18 @@ const props = withDefaults(
     className?: string;
     isSpaceType?: boolean; // 是否是空格模式，指需要将标点符号都转为空格
     canSpace?: boolean;
+    isShowProgress?: boolean; // 是否展示进度，配合比一比游戏，展示其他人的进度。
+    progressInfo?: IWebsocketTypingInfo;
   }>(),
   {
     showMask: true,
     isSpaceType: false,
-    canSpace: false
+    canSpace: false,
+    isShowProgress: false
   }
 );
 
-const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished']);
+const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished', 'typingInfo']);
 
 const state = reactive({
   currentAreaHeight: LINE_HEIGHT,
@@ -52,6 +61,90 @@ onMounted(async () => {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.focus();
 });
+
+/**
+ * 将 props.progressInfo 由这样的结构
+ * {
+ *     "1234": {
+ *         "len": 9,
+ *         "accuracy": "89%"
+ *     },
+ *     "阿斯蒂芬": {
+ *         "len": 4,
+ *         "accuracy": "75%"
+ *     }
+ * }
+ * 转为
+ * {
+ *     9: [{
+ *         "name": "1234",
+ *         "accuracy": "89%"
+ *     }],
+ *     4: [{
+ *         "len": "阿斯蒂芬",
+ *         "accuracy": "75%"
+ *     }]
+ * }
+ *
+ * 这里将后面的 value 定义为数组，是因为 key 是 len 数字，可能同一个数字下会对应多个用户的输入，比如
+ * {
+ *     3: [
+ *         {
+ *             "name": "1341234",
+ *             "accuracy": "100%"
+ *         },
+ *         {
+ *             "name": "阿斯蒂芬阿斯蒂芬阿斯蒂芬",
+ *             "accuracy": "67%"
+ *         }
+ *     ]
+ * }
+ */
+const progressInfoComputed = computed<Record<number, any>>(() => {
+  const transformed: Record<number, any> = {};
+
+  if (!props.progressInfo) {
+    return transformed;
+  }
+  for (const [key, value] of Object.entries(props.progressInfo)) {
+    const len = value.len;
+    const name = key;
+    const accuracy = value.accuracy;
+
+    if (transformed[len]) {
+      transformed[len].push({ name, accuracy });
+    } else {
+      transformed[len] = [{ name, accuracy }];
+    }
+  }
+  return transformed;
+});
+
+/**
+ *
+ */
+const progressInfoKeys = computed(() => {
+  const keys = Object.keys(progressInfoComputed.value);
+  return keys.map(Number);
+});
+
+watch(
+  () => progressInfoKeys.value,
+  (val) => {
+    if (props.isShowProgress) {
+      console.log('----------', 'val', val, '----------cyy log');
+      console.log(
+        '----------',
+        'progressInfoComputed',
+        progressInfoComputed.value,
+        '----------cyy log'
+      );
+    }
+  },
+  {
+    deep: true
+  }
+);
 
 watch(
   () => {
@@ -212,7 +305,8 @@ watch(
         id: index,
         word: item,
         isInput: false,
-        isWrong: false
+        isWrong: false,
+        info: null
       };
     });
   },
@@ -255,6 +349,15 @@ watch(
         }
       }
     });
+    const wrongLength = wrongPos.length;
+    const wordLength = inputTextArr.length;
+    const accuracy = (((wordLength - wrongLength) / wordLength) * 100).toFixed(0) + '%';
+    emit('typingInfo', {
+      wordLength,
+      wrongLength,
+      accuracy
+    });
+
     state.typingRecordRealTime = [
       {
         word: newVal,
@@ -430,11 +533,20 @@ defineExpose({
     <div class="y-word-input" ref="el">
       <div class="y-word-input__quote">
         <span
-          v-for="item in state.quoteArr"
+          v-for="(item, index) in state.quoteArr"
+          style="position: relative"
           :class="[item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
           :key="item.id"
-          >{{ item.word }}</span
-        >
+          >{{ item.word
+          }}<template v-if="progressInfoKeys.includes(index)"
+            ><span
+              class="y-word-input__typing-info"
+              v-for="i in progressInfoComputed[index]"
+              :key="i.name"
+              >{{ i.name.substring(0, 2) }}：{{ i.accuracy }}</span
+            ></template
+          >
+        </span>
       </div>
       <div
         ref="inputAreaRef"
@@ -544,5 +656,24 @@ defineExpose({
 .mask-enter-from,
 .mask-leave-to {
   opacity: 0;
+}
+.y-word-input__typing-info {
+  position: absolute;
+  top: -17px;
+  line-height: 20px;
+  font-size: 12px;
+  white-space: nowrap;
+  height: 20px;
+  display: block;
+  left: 0;
+  &:after {
+    position: absolute;
+    content: '';
+    width: 1px;
+    background: $gray-08;
+    height: 36px;
+    left: 0;
+    top: 0;
+  }
 }
 </style>
