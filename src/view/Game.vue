@@ -301,7 +301,7 @@ watch(
 }
 .y-game__rule-title {
   margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
 }
 

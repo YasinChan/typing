@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watch, inject, onMounted, computed, ref } from 'vue';
+import { reactive, watch, inject, onMounted, computed, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import type { TypingRecordType } from '@/types';
 
@@ -135,7 +135,7 @@ onMounted(async () => {
       });
     }
   }
-
+  await nextTick();
   await getList();
 });
 
