@@ -135,8 +135,9 @@ onMounted(async () => {
       });
     }
   }
-  await nextTick();
-  await getList();
+  setTimeout(async () => {
+    await getList();
+  }, 500);
 });
 
 async function getList() {
