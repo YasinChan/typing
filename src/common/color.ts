@@ -134,3 +134,12 @@ export function removeAllCustomCssValue() {
   removeCustomCssValue(COLOR_ENUM['GRAY_02']);
   removeCustomCssValue(COLOR_ENUM['LABEL_WHITE']);
 }
+
+export function getRandomColor(): string {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}

@@ -85,6 +85,18 @@ function handleMouseUp() {
 function toggleContent() {
   state.isShowContent = !state.isShowContent;
 }
+
+function hideContent() {
+  state.isShowContent = false;
+}
+function showContent() {
+  state.isShowContent = true;
+}
+
+defineExpose({
+  hideContent,
+  showContent
+});
 </script>
 
 <template>
@@ -115,7 +127,7 @@ function toggleContent() {
 <style lang="scss">
 .draggable {
   position: fixed;
-  width: 340px;
+  width: 360px;
   color: $gray-08;
   background-color: $layout-background-gray;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -123,7 +135,7 @@ function toggleContent() {
   left: 0;
   border-radius: 2px;
   overflow: hidden;
-  z-index: 999;
+  z-index: 9;
 }
 .draggable__head {
   width: 100%;

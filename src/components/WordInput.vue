@@ -351,7 +351,8 @@ watch(
     });
     const wrongLength = wrongPos.length;
     const wordLength = inputTextArr.length;
-    const accuracy = (((wordLength - wrongLength) / wordLength) * 100).toFixed(0) + '%';
+    const accuracy =
+      wordLength === 0 ? '0%' : (((wordLength - wrongLength) / wordLength) * 100).toFixed(0) + '%';
     emit('typingInfo', {
       wordLength,
       wrongLength,
@@ -425,6 +426,10 @@ function focusInput() {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.focus();
   moveCaretToEnd(inputAreaRef.value);
+}
+function blurInput() {
+  if (!inputAreaRef.value) return;
+  inputAreaRef.value.blur();
 }
 
 function moveCaretToEnd(element: HTMLElement) {
@@ -520,6 +525,7 @@ function getTypingRecord() {
 
 defineExpose({
   focusInput,
+  blurInput,
   getTypingRecord
 });
 </script>
@@ -534,8 +540,7 @@ defineExpose({
       <div class="y-word-input__quote">
         <span
           v-for="(item, index) in state.quoteArr"
-          style="position: relative"
-          :class="[item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
+          :class="['letter', item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
           :key="item.id"
           >{{ item.word
           }}<template v-if="progressInfoKeys.includes(index)"
@@ -594,6 +599,7 @@ defineExpose({
   left: 0;
   width: 100%;
   height: 100px;
+  pointer-events: none;
   background: linear-gradient(
     to top,
     $background-gray 0%,
@@ -614,6 +620,11 @@ defineExpose({
   line-height: 70px;
   user-select: none;
   color: $gray-04;
+  word-break: break-all;
+  white-space: normal;
+  .letter {
+    position: relative;
+  }
   .is-input {
     color: $gray-06;
   }
@@ -666,14 +677,28 @@ defineExpose({
   height: 20px;
   display: block;
   left: 0;
+  opacity: 0.6;
   &:after {
     position: absolute;
     content: '';
     width: 1px;
     background: $gray-08;
-    height: 36px;
+    height: 38px;
     left: 0;
     top: 0;
+    animation: blink 1s infinite;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 </style>

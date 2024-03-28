@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { reactive, watch, inject, onMounted, computed, ref } from 'vue';
+import { reactive, watch, inject, onMounted, computed, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import type { TypingRecordType, IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
+import type { IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
 import dayjs from 'dayjs';
 
 // api
 import { getWsById } from '@/request';
 
 // components
-import YInput from '@/components/ui/Input.vue';
 import YButton from '@/components/ui/Button.vue';
 import YDraggable from '@/components/ui/Draggable.vue';
 import YLoading from '@/components/ui/Loading.vue';
+import YModal from '@/components/ui/Modal.vue';
 
 // common
 import { base64ToString } from '@/common/string';
@@ -40,26 +40,30 @@ interface IPlayer {
 }
 
 const state = reactive({
+  showRemindStart: false,
+  countDownStartTime: 3,
+  selectedQuoteIndex: 0,
   quote: null as any, // [] 或 {}
   isSpaceType: false,
   isTyping: false,
   selectTime: 15 as number, // 设置的倒计时
-  countDown: null as null | number, // 实时倒计时
+  countDown: 0 as number, // 实时倒计时
   intervalId: null as null | number,
-  typingRecord: {} as TypingRecordType,
   ws: null as any,
-  value: '',
-  websocketInfos: [] as Partial<IWebsocketInfos>[],
-  websocketTyping: '',
-  websocketTypingInfo: {} as IWebsocketTypingInfo,
+  websocketInfos: [] as Partial<IWebsocketInfos>[], // 这里是包含 action 的信息，比如“已准备”“取消准备”等。
+  websocketTypingInfo: {} as IWebsocketTypingInfo, // 输入中的相关信息，比如字数、正确率等。
   getName: '',
   isOwner: false,
   currentRoom: '' as any,
   player: {} as IPlayer,
-  youIsReady: false
+  youIsReady: false,
+  isAllReady: false, // 是否已经都准备好了
+  isStart: false // 是否已经开始了
 });
 
-const wordInputRef = ref<any>(null);
+const wordInputRef = ref<InstanceType<typeof WordInput>>();
+const draggableRef = ref<InstanceType<typeof YDraggable>>();
+
 const router = useRouter();
 
 const routerId = computed(() => router.currentRoute.value.params.id || '');
@@ -69,16 +73,6 @@ const routerName = computed(() => {
   } else {
     return '';
   }
-});
-
-const typingAccuracy = computed(() => {
-  const typingInfo = JSON.parse(state.websocketTyping);
-  return typingInfo.accuracy || '0&';
-});
-
-const typingLength = computed(() => {
-  const typingInfo = JSON.parse(state.websocketTyping);
-  return typingInfo.length || 0;
 });
 
 onMounted(async () => {
@@ -124,8 +118,7 @@ onMounted(async () => {
         }
       });
     }
-  } catch (e) {
-    console.log('----------', 'e', '未登录', '----------cyy log');
+  } catch (_e) {
     const id = routerId.value as string;
     const name = routerName.value as string;
     if (id && name) {
@@ -160,7 +153,9 @@ async function getList() {
     state.selectTime = Number(countDown);
 
     const sen = Object.values(Sentence.long);
+    state.selectedQuoteIndex = Number(index);
     state.quote = sen[Number(index)];
+    state.player = {};
     if (data && data.player) {
       for (let w in data['player']) {
         state.player[w] = state.player[w] || {};
@@ -212,22 +207,26 @@ function startWs(
       message({ message: data.info, type: 'warn', timeout: 5000 });
       return;
     }
-    state.websocketTyping = data.typing || '';
     state.getName = data.name;
 
-    state.websocketTypingInfo[data.name] = {
-      len: data.typing.len,
-      accuracy: data.typing.accuracy
-    };
-
-    if (state.websocketInfos.length >= 2) {
-      state.websocketInfos.shift();
+    if (data.typing) {
+      state.websocketTypingInfo[data.name] = {
+        len: data.typing.len,
+        accuracy: data.typing.accuracy
+      };
     }
-    state.websocketInfos.push({
-      name: data.name,
-      info: data.info,
-      time: dayjs().format('HH:mm:ss')
-    });
+
+    if (data.action && data.action.length) {
+      if (state.websocketInfos.length >= 2) {
+        state.websocketInfos.shift();
+      }
+      state.websocketInfos.push({
+        name: data.name,
+        info: data.info,
+        action: data.action,
+        time: dayjs().format('HH:mm:ss')
+      });
+    }
   };
   // 连接关闭时的事件
   state.ws.onclose = function (e: CloseEvent) {
@@ -313,6 +312,7 @@ interface WebSocketAction {
   name: string;
 }
 
+// 接收到服务器消息时，对其中的 action 进行操作。
 function webSocketAction(data: WebSocketAction) {
   data.action.forEach((action) => {
     switch (action) {
@@ -322,7 +322,15 @@ function webSocketAction(data: WebSocketAction) {
       case 'cancelReady':
         state.player[data.name].isReady = false;
         break;
+      case 'start':
+        state.isStart = true;
+        startCountDown();
+        break;
+      case 'end':
+        resetGameStatus();
+        break;
       case 'enter':
+      case 'exit':
         getList();
         // 玩家进入房间
         break;
@@ -337,8 +345,23 @@ function closeRoom() {
   });
 }
 
-function ready() {
-  if (state.youIsReady) {
+function exitRoom() {
+  state.ws.send(
+    JSON.stringify({
+      id: routerId.value,
+      name: routerName.value,
+      action: ['exit'],
+      info: `退出房间`
+    })
+  );
+  router.replace({
+    name: 'Game'
+  });
+}
+
+// 取消准备
+function cancelReady() {
+  if (state.player[routerName.value].isReady) {
     state.player[routerName.value].isReady = false;
     state.ws.send(
       JSON.stringify({
@@ -348,7 +371,12 @@ function ready() {
         action: ['cancelReady']
       })
     );
-    state.youIsReady = false;
+  }
+  state.youIsReady = false;
+}
+function ready() {
+  if (state.youIsReady) {
+    cancelReady();
     return;
   }
   state.player[routerName.value].isReady = true;
@@ -363,19 +391,98 @@ function ready() {
   state.youIsReady = true;
 }
 
+function startGame() {
+  state.ws.send(
+    JSON.stringify({
+      id: routerId.value,
+      name: routerName.value,
+      action: ['start'],
+      info: `即将开始！`
+    })
+  );
+}
+
+async function resetQuote() {
+  wordInputRef.value?.blurInput();
+  getTypingInfo({
+    wordLength: 0,
+    accuracy: '0%'
+  });
+
+  state.quote = null;
+  await nextTick();
+  const sen = Object.values(Sentence.long);
+  state.quote = sen[state.selectedQuoteIndex];
+  await nextTick();
+  setTimeout(() => {
+    wordInputRef.value?.blurInput();
+  }, 0);
+}
+// 房主点了开始游戏按钮，每个玩家都弹框倒计时提示。
+function startCountDown() {
+  resetQuote();
+
+  state.showRemindStart = true;
+  let intervalId = setInterval(() => {
+    state.countDownStartTime = state.countDownStartTime - 1;
+    if (state.countDownStartTime < 1) {
+      clearInterval(intervalId);
+      state.countDownStartTime = 3;
+      state.showRemindStart = false;
+
+      draggableRef.value?.hideContent();
+      wordInputRef.value?.focusInput();
+
+      // state.ws.send(
+      //   JSON.stringify({
+      //     id: routerId.value,
+      //     name: routerName.value,
+      //   }
+      // }
+      startTypingFunc();
+    }
+  }, 1000);
+}
+
+// 开始游戏
+function startTypingFunc() {
+  wordInputRef.value?.focusInput();
+  state.countDown = state.selectTime;
+  // TODO 这里是使用的 setInterval 做的倒计时，可能会被浏览器影响，更好的方式是由 websocket 提供倒计时。
+  state.intervalId = setInterval(() => {
+    state.countDown -= 1;
+    if (state.countDown < 1) {
+      if (state.intervalId !== null) {
+        state.ws.send(
+          JSON.stringify({
+            id: routerId.value,
+            name: routerName.value,
+            action: ['end'],
+            info: `游戏结束`
+          })
+        );
+      }
+    }
+  }, 1000);
+}
+
+function resetGameStatus() {
+  resetQuote();
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  state.countDown = 0;
+  draggableRef.value?.showContent();
+  cancelReady();
+  state.isStart = false;
+}
+
 function isTypingFunc() {
   state.isTyping = true;
 }
 
-function getTypingInfo({
-  wordLength,
-  wrongLength,
-  accuracy
-}: {
-  wordLength: number;
-  wrongLength: number;
-  accuracy: string;
-}) {
+function getTypingInfo({ wordLength, accuracy }: { wordLength: number; accuracy: string }) {
   state.ws.send(
     JSON.stringify({
       id: routerId.value,
@@ -388,50 +495,48 @@ function getTypingInfo({
   );
 }
 
-watch(
-  () => state.value,
-  (val) => {
-    state.ws.send(
-      JSON.stringify({
-        id: routerId.value,
-        name: routerName.value,
-        typing: val
-      })
-    );
-  }
-);
+// watch(
+//   () => state.isTyping,
+//   (val) => {
+//     if (val && state.selectTime) {
+//       state.countDown = state.selectTime;
+//       state.intervalId = setInterval(() => {
+//         if (state.countDown) {
+//           state.countDown -= 1;
+//           if (state.countDown < 1) {
+//             if (state.intervalId !== null) {
+//               clearInterval(state.intervalId);
+//               state.intervalId = null;
+//               // xxx
+//             }
+//           }
+//         }
+//       }, 1000);
+//     } else {
+//       // message({ message: '已结束' });
+//       state.countDown = null;
+//       if (state.intervalId !== null) {
+//         clearInterval(state.intervalId);
+//         state.intervalId = null;
+//       }
+//     }
+//   }
+// );
 
 watch(
-  () => state.isTyping,
+  () => state.player,
   (val) => {
-    if (val && state.selectTime) {
-      state.countDown = state.selectTime;
-      state.intervalId = setInterval(() => {
-        if (state.countDown) {
-          state.countDown -= 1;
-          if (state.countDown < 1) {
-            if (state.intervalId !== null) {
-              clearInterval(state.intervalId);
-              state.intervalId = null;
-              state.typingRecord = wordInputRef.value?.getTypingRecord();
-            }
-          }
-        }
-      }, 1000);
-    } else {
-      // message({ message: '已结束' });
-      state.countDown = null;
-      if (state.intervalId !== null) {
-        clearInterval(state.intervalId);
-        state.intervalId = null;
-      }
-    }
+    state.isAllReady = Object.values(state.player).every((item) => item.isReady);
+  },
+  {
+    deep: true,
+    immediate: true
   }
 );
 </script>
 
 <template>
-  <YDraggable>
+  <YDraggable ref="draggableRef">
     <template #remind>
       <div class="y-game-room__draggable-header-wrap">
         <div
@@ -439,9 +544,19 @@ watch(
           :key="item.time"
           class="y-game-room__draggable-header flex-center--y"
         >
-          <span style="width: 75px">{{ item.time }}</span>
-          <span style="width: 170px">{{ item.name }}</span>
-          <span style="margin-left: 8px">{{ item.info }}</span>
+          <span style="width: 70px">{{ item.time }}</span>
+          <span
+            style="width: 190px; margin-right: 8px"
+            v-if="
+              !(
+                item.action &&
+                item.action.length &&
+                (item.action.includes('start') || item.action.includes('end'))
+              )
+            "
+            >{{ item.name === routerName ? '你' : item.name }}</span
+          >
+          <span>{{ item.info }}</span>
         </div>
       </div>
     </template>
@@ -453,6 +568,7 @@ watch(
           <div class="y-game-room__owner">
             <span>{{ key }}</span>
             <span class="y-game-room__label" v-if="item.isOwner">房主</span>
+            <span class="y-game-room__label" v-if="key === routerName">你</span>
           </div>
           <div class="y-game-room__ready" v-if="item.isReady">已准备</div>
         </div>
@@ -460,10 +576,23 @@ watch(
       <YLoading class="y-game-room__online-loading" v-else></YLoading>
     </div>
     <div class="y-game-room__btn flex-center--y-between">
-      <YButton :theme="state.youIsReady ? 'secondary' : 'default'" @click="ready">{{
-        state.youIsReady ? '取消准备' : '准备'
-      }}</YButton>
-      <YButton v-if="state.isOwner" @click="closeRoom">关闭房间</YButton>
+      <div class="flex-center--y-between">
+        <YButton
+          :theme="state.youIsReady ? 'secondary' : 'default'"
+          @click="ready"
+          :disable="state.isStart"
+          >{{ state.youIsReady ? '取消准备' : '准备' }}</YButton
+        >
+        <YButton
+          style="margin-left: 5px"
+          :disable="!state.isAllReady || state.isStart"
+          v-if="state.isOwner"
+          @click="startGame"
+          >开始游戏</YButton
+        >
+      </div>
+      <YButton v-if="state.isOwner" :disable="state.isStart" @click="closeRoom">关闭房间</YButton>
+      <YButton v-else :disable="state.isStart" @click="exitRoom">退出房间</YButton>
     </div>
   </YDraggable>
   <main class="y-game-room">
@@ -473,10 +602,6 @@ watch(
     <div class="y-game-room__header">
       <!--      <div v-if="state.isOwner">房主</div>-->
     </div>
-    <span>{{ state.getName }}</span
-    >:
-    <span>{{ state.websocketTyping }}</span>
-    <!--    <YInput v-model="state.value"></YInput>-->
     <div class="y-game-room__setting">
       <div>{{ state.countDown || state.selectTime }}</div>
       <div
@@ -499,9 +624,38 @@ watch(
     ></WordInput>
     <YLoading class="y-game-room__loading" v-else></YLoading>
   </main>
+  <YModal
+    :show="state.showRemindStart"
+    @close="state.showRemindStart = false"
+    :z-index="10"
+    :show-close-btn="false"
+    :close-on-click-mask="false"
+  >
+    <template #header>
+      <h3>即将开始！</h3>
+    </template>
+    <template #body>
+      <div class="y-game-room__modal-content gray-08">
+        游戏将在
+        <span class="main-color" style="display: inline-block; width: 10px; text-align: center">{{
+          state.countDownStartTime
+        }}</span>
+        秒后开始，请做好准备！
+      </div>
+    </template>
+    <template #footer>
+      <div></div>
+    </template>
+  </YModal>
 </template>
 
 <style lang="scss">
+.y-game-room {
+  .y-word-input__wrap,
+  .y-word-input {
+    height: 280px;
+  }
+}
 .y-game-room__remind {
   color: $gray-06;
 }

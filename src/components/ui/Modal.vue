@@ -9,12 +9,16 @@ const props = withDefaults(
       className: string;
       zIndex: number;
       showCancel: boolean;
+      closeOnClickMask: boolean;
+      showCloseBtn: boolean;
     }>
   >(),
   {
     show: false,
     zIndex: 1,
-    showCancel: false
+    showCancel: false,
+    closeOnClickMask: true,
+    showCloseBtn: true
   }
 );
 
@@ -39,16 +43,21 @@ watch(
     immediate: true
   }
 );
+function clickMask() {
+  if (props.closeOnClickMask) {
+    emit('close');
+  }
+}
 </script>
 
 <template>
   <Transition name="modal">
     <Teleport to="body">
-      <div v-if="show" class="y-modal__mask" :style="{ zIndex: zIndex }" @click="emit('close')">
+      <div v-if="show" class="y-modal__mask" :style="{ zIndex: zIndex }" @click="clickMask">
         <div class="y-modal__container" :class="className" @click.stop>
           <div class="y-modal__header flex-center--y">
             <slot name="header">default header</slot>
-            <IcoClose @click="emit('close')"></IcoClose>
+            <IcoClose v-if="showCloseBtn" @click="emit('close')"></IcoClose>
           </div>
 
           <div class="y-modal__body">

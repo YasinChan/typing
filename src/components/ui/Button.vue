@@ -73,9 +73,9 @@ const handlerClick = () => {
 }
 .y-button--disabled {
   cursor: not-allowed;
-  opacity: 0.3;
+  opacity: 0.3 !important;
   &:hover {
-    opacity: 0.3;
+    opacity: 0.3 !important;
   }
 }
 .y-button--secondary {
