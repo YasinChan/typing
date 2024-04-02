@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
 // types
-import type { IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
+import { NAME_COLOR_ENUM, type IWebsocketInfos, type IWebsocketTypingInfo } from '@/types';
 
 // api
 import { getWsById } from '@/request';
@@ -223,6 +223,16 @@ async function getList() {
   }
 }
 
+const NAME_COLOR = [
+  NAME_COLOR_ENUM.RED,
+  NAME_COLOR_ENUM.GREEN,
+  NAME_COLOR_ENUM.YELLOW,
+  NAME_COLOR_ENUM.PURPLE,
+  NAME_COLOR_ENUM.PINK,
+  NAME_COLOR_ENUM.ORANGE,
+  NAME_COLOR_ENUM.GRAY
+];
+
 function startWs(
   id: string,
   name: string,
@@ -265,10 +275,14 @@ function startWs(
     state.getName = data.name;
 
     if (data.typing) {
-      state.websocketTypingInfo[data.name] = {
+      const info = state.websocketTypingInfo[data.name] || {};
+      if (!info.color) {
+        info.color = NAME_COLOR.shift();
+      }
+      state.websocketTypingInfo[data.name] = Object.assign(info, {
         len: data.typing.len,
         accuracy: data.typing.accuracy
-      };
+      });
       if (!(data.typing.len === 0 && data.typing.accuracy === '0%')) {
         // 结束的时候会发送清零的消息，这里是需要记录下结束之前的数据的，所以当有空信息就不记录。
         state.recordResult[data.name] = {

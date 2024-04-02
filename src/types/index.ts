@@ -1,5 +1,15 @@
 export type KeyBoardType = '68' | 'standard' | 'mbp';
 
+export enum NAME_COLOR_ENUM {
+  RED = 'red',
+  GREEN = 'green',
+  PINK = 'pink',
+  YELLOW = 'yellow',
+  PURPLE = 'purple',
+  ORANGE = 'orange',
+  GRAY = 'gray'
+}
+
 export interface IWebsocketInfos {
   id: string;
   name: string;
@@ -16,6 +26,7 @@ export interface IWebsocketTyping {
   name?: string;
   isLenLargest?: boolean;
   isAccuracyLargest?: boolean;
+  color?: string;
 }
 
 export interface IWebsocketTypingInfo {

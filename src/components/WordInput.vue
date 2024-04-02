@@ -4,11 +4,11 @@ import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 // @ts-ignore
 import cloneDeep from 'lodash/cloneDeep';
-import type {
-  IWebsocketTypingInfo,
-  SentenceArrItem,
-  TypingRecordItemType,
-  TypingRecordType
+import {
+  type IWebsocketTypingInfo,
+  type SentenceArrItem,
+  type TypingRecordItemType,
+  type TypingRecordType
 } from '@/types';
 
 // common
@@ -110,11 +110,12 @@ const progressInfoComputed = computed<Record<number, any>>(() => {
     const len = value.len;
     const name = key;
     const accuracy = value.accuracy;
+    const color = value.color;
 
     if (transformed[len]) {
-      transformed[len].push({ name, accuracy });
+      transformed[len].push({ name, accuracy, color });
     } else {
-      transformed[len] = [{ name, accuracy }];
+      transformed[len] = [{ name, accuracy, color }];
     }
   }
   return transformed;
@@ -559,8 +560,11 @@ defineExpose({
             ><span
               class="y-word-input__typing-info"
               v-for="i in progressInfoComputed[index]"
+              :style="{
+                color: i.color
+              }"
               :key="i.name"
-              >{{ shortenString(i.name) }}：{{ i.accuracy }}</span
+              >{{ shortenString(i.name) }} : {{ i.accuracy }}</span
             ></template
           >
         </span>
@@ -689,13 +693,14 @@ defineExpose({
   height: 20px;
   display: block;
   left: 0;
-  opacity: 0.6;
+  opacity: 0.4;
   color: $gray-06;
   &:after {
     position: absolute;
     content: '';
     width: 1px;
-    background: $gray-08;
+    //background: $gray-08;
+    border-left: 1px solid;
     height: 38px;
     left: 0;
     top: 0;

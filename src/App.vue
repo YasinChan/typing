@@ -277,10 +277,13 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           <router-link
             to="/game"
             class="y-menu__item"
-            :class="router.currentRoute.value.name !== 'Game' ? 'y-menu__item--blink' : ''"
+            :class="{
+              'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom',
+              'y-menu__item--blink': $route.name !== 'Game' && $route.name !== 'GameRoom'
+            }"
             >比一比</router-link
           >
-          <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
+          <router-link to="/" class="y-menu__item">限时模式</router-link>
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">计时模式</router-link>
           <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
@@ -588,6 +591,9 @@ footer {
   }
   &.y-menu__item-auth {
     padding: 0;
+  }
+  &.y-menu__item--active {
+    color: $main-color;
   }
 }
 .y-menu__item--blink {
