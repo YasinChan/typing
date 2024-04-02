@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, nextTick, ref, watch, onUnmounted, computed } from 'vue';
+import { reactive, nextTick, ref, watch, onMounted, onUnmounted, computed } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -60,6 +60,11 @@ const state = reactive({
 });
 
 state.quotes = getRandom();
+
+onMounted(async () => {
+  await nextTick();
+  wordInputRef.value?.focusInput();
+});
 
 onUnmounted(() => {
   if (state.intervalId) {

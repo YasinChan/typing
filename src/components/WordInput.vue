@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, nextTick, watch, unref, computed } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 // @ts-ignore
 import cloneDeep from 'lodash/cloneDeep';
 import type {
+  IWebsocketTypingInfo,
   SentenceArrItem,
   TypingRecordItemType,
-  TypingRecordType,
-  IWebsocketTypingInfo
+  TypingRecordType
 } from '@/types';
 
 // common
@@ -59,7 +59,7 @@ const state = reactive({
 onMounted(async () => {
   await nextTick();
   if (!inputAreaRef.value) return;
-  inputAreaRef.value.focus();
+  // inputAreaRef.value.focus();
 });
 
 /**
@@ -128,23 +128,23 @@ const progressInfoKeys = computed(() => {
   return keys.map(Number);
 });
 
-watch(
-  () => progressInfoKeys.value,
-  (val) => {
-    if (props.isShowProgress) {
-      console.log('----------', 'val', val, '----------cyy log');
-      console.log(
-        '----------',
-        'progressInfoComputed',
-        progressInfoComputed.value,
-        '----------cyy log'
-      );
-    }
-  },
-  {
-    deep: true
-  }
-);
+// watch(
+//   () => progressInfoKeys.value,
+//   (val) => {
+//     if (props.isShowProgress) {
+//       console.log('----------', 'val', val, '----------cyy log');
+//       console.log(
+//         '----------',
+//         'progressInfoComputed',
+//         progressInfoComputed.value,
+//         '----------cyy log'
+//       );
+//     }
+//   },
+//   {
+//     deep: true
+//   }
+// );
 
 watch(
   () => {
@@ -298,7 +298,7 @@ watch(
     });
     if (inputAreaRef.value) {
       inputAreaRef.value.innerHTML = '';
-      inputAreaRef.value.focus();
+      // inputAreaRef.value.focus();
     }
     state.quoteArr = val.split('').map((item, index) => {
       return {
@@ -523,6 +523,18 @@ function getTypingRecord() {
   return state.typingRecord;
 }
 
+function shortenString(str) {
+  // 如果字符串长度小于等于3，则不需要截断，直接返回原字符串
+  if (str.length <= 3) {
+    return str;
+  }
+
+  const firstChar = str.charAt(0);
+  const lastChar = str.charAt(str.length - 1);
+
+  return firstChar + '…' + lastChar;
+}
+
 defineExpose({
   focusInput,
   blurInput,
@@ -548,7 +560,7 @@ defineExpose({
               class="y-word-input__typing-info"
               v-for="i in progressInfoComputed[index]"
               :key="i.name"
-              >{{ i.name.substring(0, 2) }}：{{ i.accuracy }}</span
+              >{{ shortenString(i.name) }}：{{ i.accuracy }}</span
             ></template
           >
         </span>
@@ -678,6 +690,7 @@ defineExpose({
   display: block;
   left: 0;
   opacity: 0.6;
+  color: $gray-06;
   &:after {
     position: absolute;
     content: '';

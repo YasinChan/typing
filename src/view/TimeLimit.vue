@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, reactive, watch, ref, onUnmounted, nextTick } from 'vue';
+import { inject, reactive, watch, ref, onUnmounted, nextTick, onMounted } from 'vue';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -48,6 +48,11 @@ const state = reactive({
   typingRecord: {} as TypingRecordType
 });
 state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+
+onMounted(async () => {
+  await nextTick();
+  wordInputRef.value?.focusInput();
+});
 
 onUnmounted(() => {
   state.countDown = null;

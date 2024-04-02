@@ -7,12 +7,15 @@ export interface IWebsocketInfos {
   info: string;
   action: string[];
   time: string;
+  result: any;
 }
 
 export interface IWebsocketTyping {
   len: number;
   accuracy: string;
   name?: string;
+  isLenLargest?: boolean;
+  isAccuracyLargest?: boolean;
 }
 
 export interface IWebsocketTypingInfo {

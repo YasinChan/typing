@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { getMe, getConfig } from '@/request/index';
 import { nanoid } from 'nanoid';
-import { userProfileDeferred } from '@/utils/defer';
+import { userProfileDeferred, configDeferred } from '@/utils/defer';
 
 export type profileType = {
   isAdmin: boolean;
@@ -75,14 +75,14 @@ export const useUserStore = defineStore('user', {
         .then((res) => {
           const info = res.data?.result?.info;
           if (info) {
-            this.profile = info;
             userProfileDeferred.resolve(info);
+            this.profile = info;
           }
         })
         .catch((e) => {
           console.log(e);
           this.profile = {};
-          userProfileDeferred.reject(null);
+          userProfileDeferred.reject(e);
         });
     },
     setConfig() {
@@ -90,12 +90,14 @@ export const useUserStore = defineStore('user', {
         .then((res) => {
           const config = res.data?.result?.config;
           if (config) {
+            configDeferred.resolve(config);
             this.config = config;
           }
         })
         .catch((e) => {
           console.log(e);
           this.config = {};
+          configDeferred.reject(e);
         });
     }
   }

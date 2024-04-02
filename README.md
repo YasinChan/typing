@@ -5,6 +5,8 @@
 
 整个项目包含前端和后端，前端 Vue3 + Vite，后端使用 Koa2 + [Leancloud](https://leancloud.cn)。该项目是前端部分，后端也将在未来开源。
 
+### 2024.4.2
+- **[比一比](https://typing.yasinchan.com/game)功能基本完成！**
 ### 2024.3.8
 - **重大更新！新增[比一比](https://typing.yasinchan.com/game)功能。**
 ### 2024.2.19

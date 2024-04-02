@@ -25,3 +25,4 @@ export const getDeferred = (): DeferredPromise<any | void> => {
 };
 
 export const userProfileDeferred = getDeferred();
+export const configDeferred = getDeferred();

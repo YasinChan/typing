@@ -176,7 +176,8 @@ const login = () => {
     .then(function (response) {
       message({ message: response.data?.message });
       setTimeout(() => {
-        location.replace('/user/' + response.data?.result?.info?.userId);
+        // location.replace('/user/' + response.data?.result?.info?.userId);
+        location.reload();
       }, 500);
     })
     .catch(function (error) {

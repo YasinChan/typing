@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { reactive, watch, inject, onMounted, computed, ref, nextTick } from 'vue';
+import { reactive, watch, inject, onMounted, computed, ref, nextTick, markRaw } from 'vue';
+import Clipboard from 'clipboard';
 import { useRouter } from 'vue-router';
-import type { IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
 import dayjs from 'dayjs';
+
+// types
+import type { IWebsocketInfos, IWebsocketTypingInfo } from '@/types';
 
 // api
 import { getWsById } from '@/request';
@@ -12,6 +15,9 @@ import YButton from '@/components/ui/Button.vue';
 import YDraggable from '@/components/ui/Draggable.vue';
 import YLoading from '@/components/ui/Loading.vue';
 import YModal from '@/components/ui/Modal.vue';
+import Tooltip from '@/components/ui/Tooltip.vue';
+import YDropDown from '@/components/ui/DropDown.vue';
+import YInput from '@/components/ui/Input.vue';
 
 // common
 import { base64ToString } from '@/common/string';
@@ -40,6 +46,7 @@ interface IPlayer {
 }
 
 const state = reactive({
+  saySomething: '',
   showRemindStart: false,
   countDownStartTime: 3,
   selectedQuoteIndex: 0,
@@ -49,6 +56,7 @@ const state = reactive({
   selectTime: 15 as number, // 设置的倒计时
   countDown: 0 as number, // 实时倒计时
   intervalId: null as null | number,
+  count: 2, // 房间可以容纳的玩家数量
   ws: null as any,
   websocketInfos: [] as Partial<IWebsocketInfos>[], // 这里是包含 action 的信息，比如“已准备”“取消准备”等。
   websocketTypingInfo: {} as IWebsocketTypingInfo, // 输入中的相关信息，比如字数、正确率等。
@@ -58,7 +66,9 @@ const state = reactive({
   player: {} as IPlayer,
   youIsReady: false,
   isAllReady: false, // 是否已经都准备好了
-  isStart: false // 是否已经开始了
+  isStart: false, // 是否已经开始了
+  showResult: false, // 是否展示结果
+  recordResult: {} as IWebsocketTypingInfo // 比赛结果，是通过过程中发送的信息和个人的信息合并后的结果。
 });
 
 const wordInputRef = ref<InstanceType<typeof WordInput>>();
@@ -73,6 +83,49 @@ const routerName = computed(() => {
   } else {
     return '';
   }
+});
+
+const recordResultComp = computed<IWebsocketTypingInfo>(() => {
+  // 比赛结果找一下其中准确度和字符数最多的标记一下，渲染的时候高亮。
+  let largestLen: string[] = [];
+  let largestAccuracy: string[] = [];
+  let result: IWebsocketTypingInfo = markRaw(state.recordResult);
+  for (let item in state.recordResult) {
+    const len = state.recordResult[item].len;
+    const accuracy = state.recordResult[item].accuracy;
+    if (largestLen.length) {
+      const currentLargestLen = state.recordResult[largestLen[0]].len;
+      if (len > currentLargestLen) {
+        largestLen = [item];
+      } else if (len === currentLargestLen) {
+        largestLen.push(item);
+      }
+    } else {
+      largestLen = [item];
+    }
+    if (largestAccuracy.length) {
+      const currentLargestAccuracy = state.recordResult[largestAccuracy[0]].accuracy;
+      if (getAccuracyNumber(accuracy) > getAccuracyNumber(currentLargestAccuracy)) {
+        largestAccuracy = [item];
+      } else if (getAccuracyNumber(accuracy) === getAccuracyNumber(currentLargestAccuracy)) {
+        largestAccuracy.push(item);
+      }
+    } else {
+      largestAccuracy = [item];
+    }
+  }
+
+  function getAccuracyNumber(accuracy: string) {
+    return Number(accuracy.replace('%', ''));
+  }
+
+  largestLen.forEach((item) => {
+    result[item].isLenLargest = true;
+  });
+  largestAccuracy.forEach((item) => {
+    result[item].isAccuracyLargest = true;
+  });
+  return result;
 });
 
 onMounted(async () => {
@@ -144,6 +197,7 @@ onMounted(async () => {
   }
 });
 
+// 获取列表
 async function getList() {
   try {
     const res = await getWsById({ id: routerId.value as string });
@@ -156,6 +210,7 @@ async function getList() {
     state.selectedQuoteIndex = Number(index);
     state.quote = sen[Number(index)];
     state.player = {};
+    state.count = data?.count || 2;
     if (data && data.player) {
       for (let w in data['player']) {
         state.player[w] = state.player[w] || {};
@@ -214,6 +269,13 @@ function startWs(
         len: data.typing.len,
         accuracy: data.typing.accuracy
       };
+      if (!(data.typing.len === 0 && data.typing.accuracy === '0%')) {
+        // 结束的时候会发送清零的消息，这里是需要记录下结束之前的数据的，所以当有空信息就不记录。
+        state.recordResult[data.name] = {
+          len: data.typing.len,
+          accuracy: data.typing.accuracy
+        };
+      }
     }
 
     if (data.action && data.action.length) {
@@ -295,6 +357,26 @@ function startWs(
       location.reload();
       return;
     }
+    if (e.code === 3005) {
+      // 被踢了
+      confirm({
+        title: e.reason,
+        ok: '去创建房间',
+        confirmClose: () => {
+          router.replace({
+            name: 'Game'
+          });
+          return true;
+        },
+        confirm: () => {
+          router.replace({
+            name: 'Game'
+          });
+          return true;
+        }
+      });
+      return;
+    }
   };
   // 连接出错时的事件
   state.ws.onerror = function (error: Error) {
@@ -331,8 +413,9 @@ function webSocketAction(data: WebSocketAction) {
         break;
       case 'enter':
       case 'exit':
+      case 'remove':
         getList();
-        // 玩家进入房间
+        // 玩家进入房间/退出房间/被踢
         break;
     }
   });
@@ -374,6 +457,8 @@ function cancelReady() {
   }
   state.youIsReady = false;
 }
+
+// 准备
 function ready() {
   if (state.youIsReady) {
     cancelReady();
@@ -391,6 +476,30 @@ function ready() {
   state.youIsReady = true;
 }
 
+// 房主可以讲别人踢出去
+function removePlayer(player) {
+  state.ws.send(
+    JSON.stringify({
+      id: routerId.value,
+      name: player,
+      action: ['remove'],
+      info: `被移出房间`
+    })
+  );
+}
+
+function sendMessage(msg: string) {
+  state.ws.send(
+    JSON.stringify({
+      id: routerId.value,
+      name: routerName.value,
+      action: ['message'],
+      info: msg
+    })
+  );
+}
+
+// 发送开始比赛信息
 function startGame() {
   state.ws.send(
     JSON.stringify({
@@ -402,11 +511,31 @@ function startGame() {
   );
 }
 
+// 分享房间
+function shareRoom() {
+  const text = `${location.origin}/game?op=${router.currentRoute.value.params.id}`;
+  const clipboard = new Clipboard('.btn', {
+    text: () => text
+  });
+
+  clipboard.on('success', () => {
+    message({ message: '复制成功，可以去分享了' });
+    clipboard.destroy();
+  });
+
+  clipboard.on('error', () => {
+    message({ message: '没复制成功，请手动复制这个链接后分享：' + text });
+    clipboard.destroy();
+  });
+
+  clipboard.onClick(event);
+}
+
+// 重置文案和输入状态
 async function resetQuote() {
   wordInputRef.value?.blurInput();
   getTypingInfo({
-    wordLength: 0,
-    accuracy: '0%'
+    isReset: true
   });
 
   state.quote = null;
@@ -418,6 +547,7 @@ async function resetQuote() {
     wordInputRef.value?.blurInput();
   }, 0);
 }
+
 // 房主点了开始游戏按钮，每个玩家都弹框倒计时提示。
 function startCountDown() {
   resetQuote();
@@ -444,7 +574,7 @@ function startCountDown() {
   }, 1000);
 }
 
-// 开始游戏
+// 倒计时三秒后开始游戏
 function startTypingFunc() {
   wordInputRef.value?.focusInput();
   state.countDown = state.selectTime;
@@ -466,6 +596,7 @@ function startTypingFunc() {
   }, 1000);
 }
 
+// 游戏结束后的操作
 function resetGameStatus() {
   resetQuote();
   if (state.intervalId !== null) {
@@ -476,13 +607,33 @@ function resetGameStatus() {
   draggableRef.value?.showContent();
   cancelReady();
   state.isStart = false;
+  state.showResult = true;
 }
 
 function isTypingFunc() {
   state.isTyping = true;
 }
 
-function getTypingInfo({ wordLength, accuracy }: { wordLength: number; accuracy: string }) {
+function getTypingInfo({ wordLength, accuracy, isReset = false }: any) {
+  if (isReset) {
+    state.ws.send(
+      JSON.stringify({
+        id: routerId.value,
+        name: routerName.value,
+        typing: {
+          len: 0,
+          accuracy: '0%'
+        }
+      })
+    );
+    return;
+  }
+
+  // 这里是记录下自己的输入情况的，因为发送出去的只有别人的。
+  state.recordResult[routerName.value] = {
+    len: wordLength,
+    accuracy: accuracy
+  };
   state.ws.send(
     JSON.stringify({
       id: routerId.value,
@@ -562,18 +713,72 @@ watch(
     </template>
     <div class="y-game-room__remind">*请注意不要刷新页面，这可能导致房间无法再次进入。</div>
     <div class="y-game-room__online">
-      <div class="y-game-room__online-title">当前在线：</div>
+      <div class="y-game-room__online-title">
+        当前在线：<span>{{ Object.keys(state.player)?.length }}/{{ state.count }}</span>
+      </div>
       <template v-if="Object.keys(state.player).length">
-        <div v-for="(item, key) in state.player" class="flex-center--y-between" :key="key">
+        <div
+          v-for="(item, key) in state.player"
+          class="flex-center--y-between y-game-room__online-list"
+          :key="key"
+        >
           <div class="y-game-room__owner">
             <span>{{ key }}</span>
             <span class="y-game-room__label" v-if="item.isOwner">房主</span>
             <span class="y-game-room__label" v-if="key === routerName">你</span>
           </div>
           <div class="y-game-room__ready" v-if="item.isReady">已准备</div>
+          <div
+            class="y-game-room__ready y-game-room__remove cursor-pointer"
+            v-if="!item.isReady && state.isOwner && !(key === routerName)"
+            @click="removePlayer(key)"
+          >
+            踢了
+          </div>
         </div>
       </template>
       <YLoading class="y-game-room__online-loading" v-else></YLoading>
+    </div>
+    <div class="y-game-room__say flex-center--y-between">
+      <div class="flex-center--y">
+        <span class="gray-06">说些什么：</span>
+        <YInput v-model="state.saySomething" placeholder="说吧。" :max-length="6" />
+      </div>
+      <YDropDown>
+        <template #title>
+          <div class="y-game-room__modal-title flex-center--y">发送</div>
+        </template>
+        <template #menu>
+          <div class="y-game-room__modal-content">
+            <div
+              class="y-game-room__modal-content-item"
+              v-throttle-click:1000="sendMessage.bind(null, '说：快准备！')"
+            >
+              快准备！
+            </div>
+            <div
+              class="y-game-room__modal-content-item"
+              v-throttle-click:1000="sendMessage.bind(null, '说：时间不多咯')"
+            >
+              时间不多咯
+            </div>
+            <div
+              v-if="state.isOwner"
+              class="y-game-room__modal-content-item"
+              v-throttle-click:1000="sendMessage.bind(null, '说：要踢人咯')"
+            >
+              要踢人咯
+            </div>
+            <div
+              class="flex-center"
+              v-if="state.saySomething"
+              v-throttle-click:1000="sendMessage.bind(null, '说：' + state.saySomething)"
+            >
+              <YButton size="small">直接发送</YButton>
+            </div>
+          </div>
+        </template>
+      </YDropDown>
     </div>
     <div class="y-game-room__btn flex-center--y-between">
       <div class="flex-center--y-between">
@@ -583,27 +788,27 @@ watch(
           :disable="state.isStart"
           >{{ state.youIsReady ? '取消准备' : '准备' }}</YButton
         >
-        <YButton
-          style="margin-left: 5px"
-          :disable="!state.isAllReady || state.isStart"
-          v-if="state.isOwner"
-          @click="startGame"
-          >开始游戏</YButton
-        >
+        <Tooltip content="等大伙都准备了就可以开始游戏">
+          <YButton
+            style="margin-left: 5px"
+            :disable="!state.isAllReady || state.isStart"
+            v-if="state.isOwner"
+            @click="startGame"
+          >
+            开始游戏
+          </YButton>
+        </Tooltip>
+        <YButton style="margin-left: 5px" @click="shareRoom">分享房间</YButton>
       </div>
       <YButton v-if="state.isOwner" :disable="state.isStart" @click="closeRoom">关闭房间</YButton>
       <YButton v-else :disable="state.isStart" @click="exitRoom">退出房间</YButton>
     </div>
   </YDraggable>
   <main class="y-game-room">
-    <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px">
-      功能还差一点哦，再等等~
-    </div>
-    <div class="y-game-room__header">
-      <!--      <div v-if="state.isOwner">房主</div>-->
-    </div>
+    <!--    <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px">-->
+    <!--      功能还差一点哦，再等等~-->
+    <!--    </div>-->
     <div class="y-game-room__setting">
-      <div>{{ state.countDown || state.selectTime }}</div>
       <div
         v-if="state.countDown || state.selectTime"
         class="y-game-room__count-down"
@@ -647,6 +852,41 @@ watch(
       <div></div>
     </template>
   </YModal>
+  <YModal
+    :show="state.showResult"
+    class-name="y-game-room__result-modal"
+    @close="state.showResult = false"
+    @confirm="state.showResult = false"
+    :z-index="10"
+  >
+    <template #header>
+      <h3>本局结算</h3>
+    </template>
+    <template #body>
+      <table class="y-game-room__table gray-08">
+        <caption>
+          结算数据
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">玩家</th>
+            <th scope="col">准确率</th>
+            <th scope="col">字符数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, key) in recordResultComp" :key="key">
+            <th scope="row">
+              <span>{{ key }}</span>
+              <span class="y-game-room__label" v-if="key === routerName">你</span>
+            </th>
+            <td :class="item.isAccuracyLargest ? 'main-color' : ''">{{ item.accuracy }}</td>
+            <td :class="item.isLenLargest ? 'main-color' : ''">{{ item.len }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+  </YModal>
 </template>
 
 <style lang="scss">
@@ -666,7 +906,73 @@ watch(
   margin-bottom: 4px;
   font-weight: bold;
 }
+.y-game-room__online-list {
+  //.y-game-room__remove {
+  //  display: none;
+  //}
+  //&:hover {
+  //  .y-game-room__remove {
+  //    display: block;
+  //  }
+  //}
+}
 .y-game-room__online-loading {
+}
+.y-game-room__say {
+  margin: 10px 0;
+  border-top: 1px solid $gray-04;
+  border-bottom: 1px solid $gray-04;
+  padding: 5px 0;
+  .y-drop-down__menu {
+    top: auto;
+    bottom: 26px;
+  }
+}
+
+.y-game-room__modal-title {
+  cursor: pointer;
+  padding: 2px;
+  font-size: 14px;
+  border-radius: 2px;
+  background: $gray-02;
+  transition: all 0.2s;
+  color: $gray-06;
+  svg {
+    transition: all 0.2s;
+    fill: $gray-06;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+  &:hover {
+    background: $main-color;
+    color: $label-white;
+    svg {
+      fill: $label-white;
+    }
+  }
+}
+.y-game-room__modal-content {
+  white-space: nowrap;
+  font-size: 14px;
+  border: 1px solid $gray-02;
+  border-radius: 2px;
+}
+.y-game-room__modal-content-item {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 4px 10px;
+  display: block;
+  transition: all 0.2s;
+  color: inherit;
+  &:hover {
+    background-color: $main-color;
+    color: $label-white;
+  }
+  &.y-game-room__modal-content-item--active {
+    background-color: $main-color;
+    color: $label-white;
+  }
 }
 .y-game-room__label {
   background: $main-color;
@@ -723,5 +1029,37 @@ watch(
   span {
     @include limit-line(1);
   }
+}
+
+.y-game-room__result-modal {
+  width: 400px;
+  .y-modal__body {
+    margin-bottom: 0;
+  }
+}
+.y-game-room__table {
+  border-collapse: collapse;
+  border: 2px solid $gray-06;
+  width: 100%;
+  caption {
+    caption-side: bottom;
+    padding: 10px;
+    font-weight: bold;
+  }
+  thead,
+  tfoot {
+  }
+  thead th {
+    white-space: nowrap;
+  }
+  th,
+  td {
+    border: 1px solid rgb(160 160 160);
+    padding: 8px 10px;
+  }
+}
+
+.limit-line-1 {
+  @include limit-line(1);
 }
 </style>

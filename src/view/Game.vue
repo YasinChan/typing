@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, inject, computed, onMounted, watch } from 'vue';
+import { reactive, ref, inject, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
 // api
@@ -30,6 +30,9 @@ import { useGameStore } from '@/store/game';
 // types
 import type { WsItem } from '@/types';
 
+// utils
+import { userProfileDeferred, configDeferred } from '@/utils/defer';
+
 const { userName, isLogin } = useUser();
 
 const gameStore = useGameStore();
@@ -56,6 +59,22 @@ const state = reactive({
 
 onMounted(() => {
   gameStore.setIsFromGame(true);
+
+  Promise.allSettled([configDeferred, userProfileDeferred]).then(async () => {
+    // 等这俩都执行完了，不管成功与否都会到这里来。
+    await nextTick();
+    const op = router.currentRoute.value?.query?.op;
+    // 这里是判断是否是分享链接的
+    if (op) {
+      // 这表示是复制过来的
+      enterRoom({
+        op: op,
+        player: [],
+        time: 0,
+        count: ''
+      });
+    }
+  });
   refreshList();
 });
 
@@ -153,9 +172,10 @@ watch(
 
 <template>
   <main class="y-game">
-    <h1 style="margin-bottom: 20px">
-      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦~
-    </h1>
+    <!--    <Chart1></Chart1>-->
+    <!--    <h1 style="margin-bottom: 20px">-->
+    <!--      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦~-->
+    <!--    </h1>-->
     <div class="y-game__rule y-game__rule-title">游戏规则：</div>
     <ul class="y-game__rule">
       <li>在这里你可以创建比一比，并邀请好友一起参加。游戏是基于「限时模式」倒计时的方式。</li>
