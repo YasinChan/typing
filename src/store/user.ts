@@ -64,7 +64,8 @@ export const useUserStore = defineStore('user', {
         } else {
           id = nanoid(4);
         }
-        return `来自${this.regionFormat[2]}的网友 - ${id}`;
+        const province = this.regionFormat[2] || '地球';
+        return `来自${province}的网友 - ${id}`;
       }
       return '';
     }

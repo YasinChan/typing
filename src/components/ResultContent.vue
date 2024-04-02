@@ -99,7 +99,9 @@ onMounted(() => {
       });
     }
   }
-  state.accuracy = (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
+  state.accuracy = !state.totalWord
+    ? '0%'
+    : (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
   state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
   state.speedInfo = props.totalTime
     ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0)

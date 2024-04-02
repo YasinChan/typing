@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, provide, onMounted, ref, nextTick } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
+import { useRouter } from 'vue-router';
 // @ts-ignore
 import FontFaceObserver from 'fontfaceobserver';
 
@@ -48,6 +49,7 @@ const userStore = useUserStore();
 userStore.setProfile();
 userStore.setConfig();
 const useConfig = useConfigStore();
+const router = useRouter();
 
 const { config } = storeToRefs(userStore);
 const { onlyShowMain, capsLockOn } = storeToRefs(useConfig);
@@ -272,7 +274,12 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
 
       <Transition name="menu">
         <div class="y-menu" v-show="!onlyShowMain">
-          <router-link to="/game" class="y-menu__item">比一比</router-link>
+          <router-link
+            to="/game"
+            class="y-menu__item"
+            :class="router.currentRoute.value.name !== 'Game' ? 'y-menu__item--blink' : ''"
+            >比一比</router-link
+          >
           <router-link to="/" class="y-menu__item y-menu__item--active">限时模式</router-link>
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">计时模式</router-link>
@@ -583,6 +590,9 @@ footer {
     padding: 0;
   }
 }
+.y-menu__item--blink {
+  animation: title-blink 0.8s infinite alternate;
+}
 .y-menu__change {
   cursor: pointer;
   border-radius: 2px;
@@ -644,5 +654,14 @@ main {
 .menu-enter-from,
 .menu-leave-to {
   opacity: 0;
+}
+
+@keyframes title-blink {
+  0% {
+    text-shadow: none;
+  }
+  100% {
+    text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px #fff, 0 0 16px $main-color;
+  }
 }
 </style>
