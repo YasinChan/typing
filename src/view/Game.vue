@@ -63,7 +63,7 @@ onMounted(() => {
   Promise.allSettled([configDeferred, userProfileDeferred]).then(async () => {
     // 等这俩都执行完了，不管成功与否都会到这里来。
     await nextTick();
-    const op = router.currentRoute.value?.query?.op;
+    const op = router.currentRoute.value?.query?.op as string;
     // 这里是判断是否是分享链接的
     if (op) {
       // 这表示是复制过来的
@@ -71,7 +71,7 @@ onMounted(() => {
         op: op,
         player: [],
         time: 0,
-        count: ''
+        count: 0
       });
     }
   });

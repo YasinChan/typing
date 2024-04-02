@@ -477,7 +477,7 @@ function ready() {
 }
 
 // 房主可以讲别人踢出去
-function removePlayer(player) {
+function removePlayer(player: string | number) {
   state.ws.send(
     JSON.stringify({
       id: routerId.value,
@@ -528,6 +528,7 @@ function shareRoom() {
     clipboard.destroy();
   });
 
+  // @ts-ignore
   clipboard.onClick(event);
 }
 

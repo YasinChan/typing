@@ -523,7 +523,7 @@ function getTypingRecord() {
   return state.typingRecord;
 }
 
-function shortenString(str) {
+function shortenString(str: string) {
   // 如果字符串长度小于等于3，则不需要截断，直接返回原字符串
   if (str.length <= 3) {
     return str;
