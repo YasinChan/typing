@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, provide, onMounted } from 'vue';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -26,9 +26,6 @@ use([
 ]);
 
 provide(THEME_KEY, 'dark');
-
-const info = [90, 39, 100, 50, 98, 99, 103, 89, 40, 99, 120, 40, 90, 99, 190];
-const info2 = [39, 99, 100, 98, 90, 89, 50, 190];
 
 const option = ref();
 
