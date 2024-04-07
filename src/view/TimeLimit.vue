@@ -22,6 +22,7 @@ import type { TypingRecordType } from '@/types';
 import IcoSetting from '@/assets/svg/setting.svg';
 import IcoChange from '@/assets/svg/change.svg';
 import YInput from '@/components/ui/Input.vue';
+import { handleChart } from '@/common/chart';
 
 const message: any = inject('message');
 const confirm: any = inject('confirm');
@@ -32,6 +33,10 @@ const { currentFont, onlyShowMain } = storeToRefs(useConfig);
 const customTime = [15, 30, 60, 120];
 
 const state = reactive({
+  typingChartSpeed: [] as number[],
+  lastTypingChartSpeed: [] as number[],
+  typingChartAccuracy: [] as number[],
+  lastTypingChartAccuracy: [] as number[],
   showDetail: false,
   showSetTime: false,
   isSpaceType: false,
@@ -78,6 +83,23 @@ watch(
               state.intervalId = null;
               state.showResult = true;
               state.typingRecord = wordInputRef.value?.getTypingRecord();
+              wordInputRef.value?.typingEnd();
+
+              // 处理图表数据
+              const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
+              const currentTitle = state.quote.title;
+              const {
+                typingChartSpeed,
+                lastTypingChartSpeed,
+                typingChartAccuracy,
+                lastTypingChartAccuracy
+              } = handleChart(typingChartRecord, currentTitle);
+
+              state.typingChartSpeed = typingChartSpeed;
+              state.lastTypingChartSpeed = lastTypingChartSpeed;
+              state.typingChartAccuracy = typingChartAccuracy;
+              state.lastTypingChartAccuracy = lastTypingChartAccuracy;
+
               // confirm({
               //   title: '时间到',
               //   content: '是否继续？',
@@ -275,6 +297,10 @@ async function changePunctuation() {
         @restart="restart"
         :total-time="state.selectTime"
         :is-positive="false"
+        :chart-speed="state.typingChartSpeed"
+        :last-chart-speed="state.lastTypingChartSpeed"
+        :chart-accuracy="state.typingChartAccuracy"
+        :last-chart-accuracy="state.lastTypingChartAccuracy"
       ></ResultContent>
     </template>
   </main>

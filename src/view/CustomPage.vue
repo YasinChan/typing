@@ -22,6 +22,9 @@ import Sentence from '@/files/Quote.json';
 import IcoChange from '@/assets/svg/change.svg';
 import IcoUpload from '@/assets/svg/upload.svg';
 
+// common
+import { handleChart } from '@/common/chart';
+
 const wordInputRef = ref<any>(null);
 const uploadFile = ref<any>(null);
 const detailModalRef = ref<any>(null);
@@ -29,6 +32,10 @@ const useConfig = useConfigStore();
 const { currentFont, onlyShowMain, isEscape } = storeToRefs(useConfig);
 
 const state = reactive({
+  typingChartSpeed: [] as number[],
+  lastTypingChartSpeed: [] as number[],
+  typingChartAccuracy: [] as number[],
+  lastTypingChartAccuracy: [] as number[],
   customInfo: '',
   isSpaceType: false,
   show: false,
@@ -80,6 +87,7 @@ watch(
         clearInterval(state.intervalId);
         state.intervalId = null;
       }
+      wordInputRef.value?.typingEnd();
     }
   }
 );
@@ -131,6 +139,17 @@ function finished() {
   }
   state.showResult = true;
   state.typingRecord = wordInputRef.value?.getTypingRecord();
+
+  // 处理图表数据
+  const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
+  const currentTitle = state.quotes.title;
+  const { typingChartSpeed, lastTypingChartSpeed, typingChartAccuracy, lastTypingChartAccuracy } =
+    handleChart(typingChartRecord, currentTitle);
+
+  state.typingChartSpeed = typingChartSpeed;
+  state.lastTypingChartSpeed = lastTypingChartSpeed;
+  state.typingChartAccuracy = typingChartAccuracy;
+  state.lastTypingChartAccuracy = lastTypingChartAccuracy;
 }
 
 function restart() {
@@ -263,6 +282,10 @@ async function changePunctuation() {
         @restart="restart"
         :total-time="state.time"
         :is-positive="true"
+        :chart-speed="state.typingChartSpeed"
+        :last-chart-speed="state.lastTypingChartSpeed"
+        :chart-accuracy="state.typingChartAccuracy"
+        :last-chart-accuracy="state.lastTypingChartAccuracy"
       ></ResultContent>
     </template>
   </main>

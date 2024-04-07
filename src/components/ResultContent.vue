@@ -4,6 +4,7 @@ import { reactive, computed, onMounted, onUnmounted, inject } from 'vue';
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
 import YButton from '@/components/ui/Button.vue';
+import Chart from '@/components/chart/Chart.vue';
 
 // types
 import type { TypingRecordType, TypingRecordItemType } from '@/types';
@@ -34,6 +35,10 @@ const props = defineProps<{
   isPositive?: boolean; // 是否是正向计时
   type?: string;
   showSaveRecord?: boolean;
+  chartSpeed?: number[];
+  lastChartSpeed?: number[];
+  chartAccuracy?: number[];
+  lastChartAccuracy?: number[];
 }>();
 const emit = defineEmits(['restart']);
 const state = reactive({
@@ -299,24 +304,41 @@ async function record() {
 }
 </script>
 <template>
-  <div class="result-content flex-center" :content="state.accuracyInfo">
-    准确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
-    <Tooltip class="cursor-pointer result-content__tips" :content="state.accuracyInfo">
-      <IcoTips></IcoTips>
-    </Tooltip>
+  <div class="y-result-content__info flex-center">
+    <div class="result-content flex-center" :content="state.accuracyInfo">
+      准确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
+      <Tooltip class="cursor-pointer result-content__tips" :content="state.accuracyInfo">
+        <IcoTips></IcoTips>
+      </Tooltip>
+    </div>
+    <div class="result-content flex-center">
+      速度：<span class="result-content--main-color">{{ state.speed }}</span>
+      <Tooltip
+        class="cursor-pointer result-content__tips"
+        content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。"
+      >
+        <IcoTips></IcoTips>
+      </Tooltip>
+    </div>
+    <div class="result-content flex-center">
+      时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
+    </div>
   </div>
-  <div class="result-content flex-center">
-    速度：<span class="result-content--main-color">{{ state.speed }}</span>
-    <Tooltip
-      class="cursor-pointer result-content__tips"
-      content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。"
-    >
-      <IcoTips></IcoTips>
-    </Tooltip>
-  </div>
-  <div class="result-content flex-center">
-    时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
-  </div>
+  <Chart
+    v-if="chartAccuracy && chartAccuracy.length"
+    class="y-result-content__chart"
+    :current-data="chartAccuracy"
+    :last-data="lastChartAccuracy"
+    y-name="准确率（%）"
+    title="准确率曲线"
+  ></Chart>
+  <Chart
+    v-if="chartSpeed && chartSpeed.length"
+    :current-data="chartSpeed"
+    :last-data="lastChartSpeed"
+    y-name="速度（字/每分钟）"
+    title="速度曲线"
+  ></Chart>
   <div class="result-content__toolbar flex-center">
     <YButton class="result-content__svg" size="large" @click="restart"
       ><IcoChange></IcoChange>重新开始</YButton
@@ -367,8 +389,19 @@ async function record() {
       >
     </span>
   </div>
+  <div class="y-result-content__bottom">
+    *提醒：
+    <ol>
+      <li>输入记录将会保留在本地，再次尝试同一篇文案时将会与上次对比。</li>
+      <li>「查看回放」可以回放整个过程，还可以加速播放。</li>
+      <li>为避免无意义的数据，「保存记录」需要满足时长大于 15 秒，同时准确率大于 80%。</li>
+    </ol>
+  </div>
 </template>
 <style lang="scss">
+.y-result-content__info {
+  margin-bottom: 40px;
+}
 .result-content__svg {
   &.result-content__svg--disabled {
     svg {
@@ -389,7 +422,7 @@ async function record() {
 .result-content {
   font-size: 20px;
   color: $gray-06;
-  margin-bottom: 40px;
+  margin: 0 20px;
   svg {
     width: 18px;
     height: 18px;
@@ -448,6 +481,18 @@ async function record() {
   word-wrap: break-word;
   .wrong {
     color: $main-red;
+  }
+}
+.y-result-content__chart {
+  margin-bottom: 40px;
+}
+
+.y-result-content__bottom {
+  margin: 50px 0 20px;
+  font-size: 14px;
+  color: $gray-04;
+  li {
+    margin-left: 20px;
   }
 }
 </style>

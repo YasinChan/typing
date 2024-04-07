@@ -5,6 +5,7 @@ import { reactive, nextTick, ref, watch, onMounted, onUnmounted, computed } from
 import WordInput from '@/components/WordInput.vue';
 import DetailModal from '@/components/DetailModal.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
+import ResultContent from '@/components/ResultContent.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -15,12 +16,14 @@ import Sentence from '@/files/Quote.json';
 
 // svg
 import IcoChange from '@/assets/svg/change.svg';
-import IcoTips from '@/assets/svg/tips.svg';
 
 // config
 import { KEY_CODE_ENUM } from '@/config/key';
 import type { TypingRecordType } from '@/types';
-import ResultContent from '@/components/ResultContent.vue';
+
+// common
+import YStorage from '@/common/YStorage';
+import { handleChart } from '@/common/chart';
 
 const wordInputRef = ref<any>(null);
 const wordInputShortRef = ref<any>(null);
@@ -44,6 +47,10 @@ const typeList = [
 ];
 
 const state = reactive({
+  typingChartSpeed: [] as number[],
+  lastTypingChartSpeed: [] as number[],
+  typingChartAccuracy: [] as number[],
+  lastTypingChartAccuracy: [] as number[],
   quotes: null as any, // [] 或 {}
   isTyping: false,
   isSpaceType: false,
@@ -95,6 +102,7 @@ watch(
         clearInterval(state.intervalId);
         state.intervalId = null;
       }
+      wordInputRef.value?.typingEnd();
     }
   }
 );
@@ -186,6 +194,17 @@ function finished() {
     state.typingRecordArr.push(wordInputShortRef.value?.getTypingRecord());
   } else {
     state.typingRecord = wordInputRef.value?.getTypingRecord();
+
+    // 处理图表数据
+    const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
+    const currentTitle = state.quotes.title;
+    const { typingChartSpeed, lastTypingChartSpeed, typingChartAccuracy, lastTypingChartAccuracy } =
+      handleChart(typingChartRecord, currentTitle);
+
+    state.typingChartSpeed = typingChartSpeed;
+    state.lastTypingChartSpeed = lastTypingChartSpeed;
+    state.typingChartAccuracy = typingChartAccuracy;
+    state.lastTypingChartAccuracy = lastTypingChartAccuracy;
   }
 }
 
@@ -360,6 +379,10 @@ async function changePunctuation() {
         @restart="restart"
         :total-time="state.time"
         :is-positive="true"
+        :chart-speed="state.typingChartSpeed"
+        :last-chart-speed="state.lastTypingChartSpeed"
+        :chart-accuracy="state.typingChartAccuracy"
+        :last-chart-accuracy="state.lastTypingChartAccuracy"
       ></ResultContent>
     </template>
   </main>

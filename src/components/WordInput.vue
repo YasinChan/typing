@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref, unref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, unref, watch } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useScroll } from '@vueuse/core';
 // @ts-ignore
@@ -41,6 +41,10 @@ const props = withDefaults(
 
 const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished', 'typingInfo']);
 
+interface ITypingFinalWordsRecord {
+  [key: string]: string | number;
+}
+
 const state = reactive({
   currentAreaHeight: LINE_HEIGHT,
   isComposing: false,
@@ -50,9 +54,14 @@ const state = reactive({
   quoteArr: [] as SentenceArrItem[],
   isTyping: false,
   timeout: null as null | number,
+  interval: null as null | number,
   startTime: 0,
   typingRecordRealTime: [] as TypingRecordItemType[], // 记录实时输入的字符
   typingRecord: {} as TypingRecordType, // 每 100ms 记录一次 typingRecordRealTime
+  typingFinalWordsAccuracyRecord: {} as number[], // 实时记录输入的字符的准确度，composition 状态下的不记录
+  typingFinalWordsSpeedRecord: {} as number[], // 实时记录输入的字符的速度，composition 状态下的不记录
+  wrongLength: 0,
+  wordLength: 0,
   currentComposition: '' // 当处于 isComposing 状态时输入的字符
 });
 
@@ -60,6 +69,10 @@ onMounted(async () => {
   await nextTick();
   if (!inputAreaRef.value) return;
   // inputAreaRef.value.focus();
+});
+
+onUnmounted(() => {
+  clear();
 });
 
 /**
@@ -270,6 +283,8 @@ watch(
       // 开始输入
       emit('is-typing');
       state.startTime = new Date().getTime();
+      console.log('----------', '1', 1, '----------cyy log');
+      setChartData();
     } else {
       state.startTime = 0;
     }
@@ -352,6 +367,8 @@ watch(
     });
     const wrongLength = wrongPos.length;
     const wordLength = inputTextArr.length;
+    state.wrongLength = wrongLength;
+    state.wordLength = wordLength;
     const accuracy =
       wordLength === 0 ? '0%' : (((wordLength - wrongLength) / wordLength) * 100).toFixed(0) + '%';
     emit('typingInfo', {
@@ -375,6 +392,62 @@ watch(
     });
   }
 );
+
+function setChartData() {
+  // 图标需要的数据
+  state.typingFinalWordsAccuracyRecord = [];
+  state.typingFinalWordsSpeedRecord = [];
+  let relativeTime = 0;
+  state.interval = setInterval(() => {
+    if (state.wordLength) {
+      state.typingFinalWordsAccuracyRecord.push(
+        Math.round(((state.wordLength - state.wrongLength) / state.wordLength) * 100)
+      );
+    } else {
+      state.typingFinalWordsAccuracyRecord.push(0);
+    }
+    if (relativeTime) {
+      console.log('----------', 'state.wordLength', state.wordLength, '----------cyy log');
+      console.log('----------', 'state.wrongLength', state.wrongLength, '----------cyy log');
+      console.log(
+        '----------',
+        'speed',
+        (state.wordLength - state.wrongLength) / relativeTime,
+        '----------cyy log'
+      );
+      state.typingFinalWordsSpeedRecord.push(
+        Math.round(((state.wordLength - state.wrongLength) / relativeTime) * 60)
+      );
+    } else {
+      state.typingFinalWordsSpeedRecord = [0];
+    }
+    relativeTime++;
+  }, 1000);
+}
+
+function typingEnd() {
+  // 用这个组件的地方结束的时候要通过这里通知里面结束了。
+  console.log(
+    '----------',
+    'typingFinalWordsAccuracyRecord',
+    state.typingFinalWordsAccuracyRecord,
+    '----------cyy log'
+  );
+  console.log(
+    '----------',
+    'typingFinalWordsSpeedRecord',
+    state.typingFinalWordsSpeedRecord,
+    '----------cyy log'
+  );
+  clear();
+}
+
+function clear() {
+  if (state.interval) {
+    clearInterval(state.interval);
+    state.interval = null;
+  }
+}
 
 function reset() {
   state.inputText = '';
@@ -524,6 +597,13 @@ function getTypingRecord() {
   return state.typingRecord;
 }
 
+function getTypingChartRecord() {
+  return {
+    accuracy: state.typingFinalWordsAccuracyRecord,
+    speed: state.typingFinalWordsSpeedRecord
+  };
+}
+
 function shortenString(str: string) {
   // 如果字符串长度小于等于3，则不需要截断，直接返回原字符串
   if (str.length <= 3) {
@@ -539,7 +619,9 @@ function shortenString(str: string) {
 defineExpose({
   focusInput,
   blurInput,
-  getTypingRecord
+  getTypingRecord,
+  getTypingChartRecord,
+  typingEnd
 });
 </script>
 
