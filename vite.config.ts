@@ -4,10 +4,11 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import svgLoader from 'vite-svg-loader';
+import viteCompression from 'vite-plugin-compression'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vueJsx(), svgLoader()],
+  plugins: [vue(), vueJsx(), svgLoader(), viteCompression()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
