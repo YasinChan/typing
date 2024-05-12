@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { reactive, watch, inject, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import dayjs from 'dayjs';
 
 // api
-import { getUserInfo, setPersonalInfo, updatePassword } from '@/request';
+import { getUserInfo, setPersonalInfo, updatePassword, getLeaderBoardByUserId } from '@/request';
+
+// type
+import type { LeaderBoardType } from '@/types';
 
 // components
 import YModal from '@/components/ui/Modal.vue';
@@ -42,7 +46,9 @@ const state = reactive({
   newPassword: '' as any,
   confirmNewPassword: '' as any,
   newPasswordError: '' as any,
-  confirmNewPasswordError: '' as any
+  confirmNewPasswordError: '' as any,
+  userTimeLeaderBoardInfo: [] as LeaderBoardType[],
+  userCountdownLeaderBoardInfo: [] as LeaderBoardType[]
 });
 
 const router = useRouter();
@@ -57,6 +63,17 @@ watch(
     state.paramsId = val.id;
     getUserInfo({ userId: String(state.paramsId) }).then((res) => {
       state.info = res.data?.result;
+    });
+    getLeaderBoardByUserId({ id: String(state.paramsId) }).then((res) => {
+      const userLeaderBoardInfo = res.data?.result?.leaderboard;
+      state.userTimeLeaderBoardInfo = userLeaderBoardInfo.filter(
+        (item: any) => item.type === 'time'
+      );
+      state.userCountdownLeaderBoardInfo = userLeaderBoardInfo.filter(
+        (item: any) => item.type === 'countdown'
+      );
+      console.log('state.userTimeLeaderBoardInfo', state.userTimeLeaderBoardInfo);
+      console.log('state.userCountdownLeaderBoardInfo', state.userCountdownLeaderBoardInfo);
     });
   },
   {
@@ -196,6 +213,75 @@ const setResetAvatar = () => {
         <div class="y-user__setting-set-item" @click="resetAvatar">重置密码</div>
       </div>
     </div>
+    <div
+      class="y-user__leaderboard"
+      v-if="state.userTimeLeaderBoardInfo || state.userCountdownLeaderBoardInfo"
+    >
+      <div class="y-user__leaderboard-title">打字记录</div>
+      <div class="y-user__leaderboard-info">
+        <div class="y-user__leaderboard-info-item" v-if="state.userTimeLeaderBoardInfo?.length">
+          <div class="y-user__leaderboard-info-item-title">限时模式</div>
+          <div class="y-user__leaderboard-info-item-list">
+            <table class="y-user__leaderboard-info-item-table">
+              <thead>
+                <tr>
+                  <td>速度</td>
+                  <td>准确率</td>
+                  <td>时长</td>
+                  <td class="y-leader-board__header-finish-time">完成时间</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="y-leader-board-item"
+                  v-for="item in state.userTimeLeaderBoardInfo"
+                  :key="item.objectId"
+                >
+                  <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
+                  <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
+                  <td class="y-leader-board-item__duration">{{ item.duration }}</td>
+                  <td class="y-leader-board-item__created-at">
+                    {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          class="y-user__leaderboard-info-item"
+          v-if="state.userCountdownLeaderBoardInfo?.length"
+        >
+          <div class="y-user__leaderboard-info-item-title">计时模式</div>
+          <div class="y-user__leaderboard-info-item-list">
+            <table class="y-user__leaderboard-info-item-table">
+              <thead>
+                <tr>
+                  <td>速度</td>
+                  <td>准确率</td>
+                  <td>时长</td>
+                  <td class="y-leader-board__header-finish-time">完成时间</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="y-leader-board-item"
+                  v-for="item in state.userCountdownLeaderBoardInfo"
+                  :key="item.objectId"
+                >
+                  <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
+                  <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
+                  <td class="y-leader-board-item__duration">{{ item.duration }}</td>
+                  <td class="y-leader-board-item__created-at">
+                    {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <YModal
     :show="state.showPasswordQuestion"
@@ -262,6 +348,9 @@ const setResetAvatar = () => {
 </template>
 
 <style lang="scss">
+.y-user {
+  margin: 100px 0 !important;
+}
 .y-user__info {
   display: flex;
 }
@@ -287,10 +376,12 @@ const setResetAvatar = () => {
   vertical-align: middle;
 }
 
-.y-user__setting {
+.y-user__setting,
+.y-user__leaderboard {
   margin-top: 30px;
 }
-.y-user__setting-title {
+.y-user__setting-title,
+.y-user__leaderboard-title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 10px;
@@ -320,6 +411,30 @@ const setResetAvatar = () => {
 .y-user-reset-password__container {
   .y-input {
     padding-bottom: 10px;
+  }
+}
+
+.y-user__leaderboard-info-item-title {
+  color: $gray-06;
+  margin: 20px 0 10px;
+  font-weight: bold;
+}
+.y-user__leaderboard-info-item-table {
+  width: 100%;
+  max-width: 800px;
+  font-size: 14px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  td {
+    padding: 4px 6px;
+    white-space: nowrap;
+    border-radius: 2px;
+  }
+  tbody {
+    position: relative;
+    tr:nth-child(2n + 1) {
+      background-color: $layout-background-gray;
+    }
   }
 }
 </style>

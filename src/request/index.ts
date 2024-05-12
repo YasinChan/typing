@@ -76,6 +76,12 @@ export const getTodo = () => {
 export const getLeaderBoard = () => {
   return axios.get('/api/leaderboard');
 };
+
+// 获取某个用户的记录
+export const getLeaderBoardByUserId = (params?: { id: string }) => {
+  return axios.get('/api/leaderboard/by-user-id', { params });
+};
+
 // 保存记录
 export const saveLeaderBoard = (params: any) => {
   return axios.post('/api/leaderboard/save', params);
