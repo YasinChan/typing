@@ -125,6 +125,7 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
           速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。
         </li>
         <li>排行榜仅保留同一用户或同一 IP 下速度最快的记录。</li>
+        <li>过于离谱的数据会被删除。</li>
       </ol>
     </div>
   </main>
