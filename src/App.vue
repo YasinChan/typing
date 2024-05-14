@@ -90,6 +90,10 @@ provide('suggestClick', (obj: any) => {
   suggestClick(obj);
 });
 
+provide('changeTheme', (obj: any) => {
+  changeTheme(obj);
+});
+
 provide('triggerShowLogin', () => {
   authRef.value?.triggerShowLogin();
 });

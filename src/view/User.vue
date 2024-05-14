@@ -4,15 +4,23 @@ import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
 // api
-import { getUserInfo, setPersonalInfo, updatePassword, getLeaderBoardByUserId } from '@/request';
+import {
+  getUserInfo,
+  setPersonalInfo,
+  updatePassword,
+  getLeaderBoardByUserId,
+  getSuggestByUserId
+} from '@/request';
 
 // type
-import type { LeaderBoardType } from '@/types';
+import type { LeaderBoardType, SuggestItem } from '@/types';
 
 // components
 import YModal from '@/components/ui/Modal.vue';
 import YInput from '@/components/ui/Input.vue';
 import YImage from '@/components/ui/Image.vue';
+import YTag from '@/components/ui/Tag.vue';
+import ThemeLabel from '@/components/ThemeLabel.vue';
 
 // config
 import { EMAIL_REG, PASSWORD_REG } from '@/common/reg';
@@ -24,10 +32,15 @@ import { useUserStore } from '@/store/user';
 // utils
 import { generateAvatar } from '@/utils/generate-avatar';
 
+// common
+import { setCustomTheme, getCustomTheme } from '@/common/theme';
+
 const userStore = useUserStore();
 const { profile, myUserId } = storeToRefs(userStore);
 
 const message: any = inject('message');
+const suggestClick: any = inject('suggestClick');
+const changeTheme: any = inject('changeTheme');
 
 const state = reactive({
   info: {
@@ -48,7 +61,9 @@ const state = reactive({
   newPasswordError: '' as any,
   confirmNewPasswordError: '' as any,
   userTimeLeaderBoardInfo: [] as LeaderBoardType[],
-  userCountdownLeaderBoardInfo: [] as LeaderBoardType[]
+  userCountdownLeaderBoardInfo: [] as LeaderBoardType[],
+  suggestList: [] as SuggestItem[],
+  themeList: [] as SuggestItem[]
 });
 
 const router = useRouter();
@@ -72,8 +87,12 @@ watch(
       state.userCountdownLeaderBoardInfo = userLeaderBoardInfo.filter(
         (item: any) => item.type === 'countdown'
       );
-      console.log('state.userTimeLeaderBoardInfo', state.userTimeLeaderBoardInfo);
-      console.log('state.userCountdownLeaderBoardInfo', state.userCountdownLeaderBoardInfo);
+    });
+    getSuggestByUserId({ id: String(state.paramsId) }).then((res) => {
+      const userSuggestInfo = res.data?.result?.suggest;
+      console.log('userSuggestInfo', userSuggestInfo);
+      state.suggestList = userSuggestInfo.filter((item: any) => !item.isTheme);
+      state.themeList = userSuggestInfo.filter((item: any) => item.isTheme);
     });
   },
   {
@@ -213,12 +232,12 @@ const setResetAvatar = () => {
         <div class="y-user__setting-set-item" @click="resetAvatar">重置密码</div>
       </div>
     </div>
-    <div
-      class="y-user__leaderboard"
-      v-if="state.userTimeLeaderBoardInfo || state.userCountdownLeaderBoardInfo"
-    >
+    <div class="y-user__leaderboard">
       <div class="y-user__leaderboard-title">打字记录</div>
-      <div class="y-user__leaderboard-info">
+      <div
+        class="y-user__leaderboard-info"
+        v-if="state.userTimeLeaderBoardInfo?.length || state.userCountdownLeaderBoardInfo?.length"
+      >
         <div class="y-user__leaderboard-info-item" v-if="state.userTimeLeaderBoardInfo?.length">
           <div class="y-user__leaderboard-info-item-title">限时模式</div>
           <div class="y-user__leaderboard-info-item-list">
@@ -281,6 +300,58 @@ const setResetAvatar = () => {
           </div>
         </div>
       </div>
+      <div v-else class="gray-04">无记录</div>
+    </div>
+    <div class="y-user__suggest">
+      <div class="y-user__suggest-title">
+        反馈记录
+        <span class="y-user__suggest-action" @click="suggestClick">反馈</span>
+      </div>
+      <div class="y-user__suggest-content" v-if="state.suggestList?.length">
+        <div
+          v-for="item in state.suggestList"
+          :key="item.id"
+          class="y-user__suggest-list-content"
+          :class="[item.isTheme ? 'flex-center--y' : '']"
+        >
+          <YTag v-if="item.canShow" text="已展示"></YTag>
+          <YTag v-if="item.accept" text="已采纳"></YTag>
+          <YTag v-if="item.done" text="已完成"></YTag>
+          {{ item.content }}
+        </div>
+      </div>
+      <div v-else class="gray-04">无记录</div>
+    </div>
+    <div class="y-user__suggest">
+      <div class="y-user__suggest-title">
+        定制的主题
+        <span class="y-user__suggest-action" @click="changeTheme('custom')">定制</span>
+      </div>
+      <div class="y-user__suggest-content" v-if="state.themeList?.length">
+        <div
+          v-for="item in state.themeList"
+          :key="item.id"
+          class="y-user__suggest-list-content"
+          :class="[item.isTheme ? 'flex-center--y' : '']"
+        >
+          <YTag v-if="item.accept" text="已采纳"></YTag>
+          <YTag v-if="item.done" text="已完成"></YTag>
+          <YTag :text="`主题色：${getCustomTheme(item.content)?.['THEME_INPUT']}`"></YTag>
+
+          <ThemeLabel
+            style="margin-left: 4px"
+            :custom-theme-obj="getCustomTheme(item.content)"
+          ></ThemeLabel>
+          <span
+            @click="setCustomTheme(item.content)"
+            class="gray-06 y-user__suggest-content-set flex-center--y"
+            style="margin-left: 4px; cursor: pointer"
+          >
+            点击设置该主题
+          </span>
+        </div>
+      </div>
+      <div v-else class="gray-04">无记录</div>
     </div>
   </div>
   <YModal
@@ -349,7 +420,7 @@ const setResetAvatar = () => {
 
 <style lang="scss">
 .y-user {
-  margin: 100px 0 !important;
+  width: 600px;
 }
 .y-user__info {
   display: flex;
@@ -377,14 +448,28 @@ const setResetAvatar = () => {
 }
 
 .y-user__setting,
-.y-user__leaderboard {
-  margin-top: 30px;
+.y-user__leaderboard,
+.y-user__suggest {
+  margin-top: 40px;
 }
 .y-user__setting-title,
-.y-user__leaderboard-title {
+.y-user__setting-title,
+.y-user__leaderboard-title,
+.y-user__suggest-title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 10px;
+}
+.y-user__suggest-action {
+  font-size: 18px;
+  color: $main-color;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.y-user__suggest-list-content {
+  font-size: 14px;
+  margin-bottom: 20px;
+  color: $gray-06;
 }
 .y-user__setting-set {
   display: flex;

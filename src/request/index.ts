@@ -52,6 +52,11 @@ export const getSuggest = (params?: { sort?: 'time' | 'hot' | 'theme' }) => {
   return axios.get('/api/suggest', { params });
 };
 
+// 获取某人的建议
+export const getSuggestByUserId = (params?: { id: string }) => {
+  return axios.get('/api/suggest/by-user-id', { params });
+};
+
 // 提出建议
 export const createSuggest = (params: {
   content: string;

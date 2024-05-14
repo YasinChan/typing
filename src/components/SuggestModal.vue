@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, reactive, onMounted, inject, watch, ref } from 'vue';
+import { computed, inject, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
@@ -10,7 +10,6 @@ import YButton from '@/components/ui/Button.vue';
 import YTag from '@/components/ui/Tag.vue';
 import YLoading from '@/components/ui/Loading.vue';
 import ThemeLabel from '@/components/ThemeLabel.vue';
-import Tooltip from '@/components/ui/Tooltip.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 
 // stores
@@ -18,20 +17,18 @@ import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/store/user';
 
 // apis
-import { getSuggest, createSuggest, voteSuggest } from '@/request';
+import { createSuggest, getSuggest, voteSuggest } from '@/request';
 
 // svg
 import IcoUp from '@/assets/svg/up.svg';
 import IcoFilter from '@/assets/svg/filter.svg';
-import IcoTips from '@/assets/svg/tips.svg';
 import IcoStar from '@/assets/svg/star.svg';
 
 // types
-import type { SuggestItem, COLOR_TYPE } from '@/types';
-import { COLOR_ENUM } from '@/types';
+import type { COLOR_TYPE, SuggestItem } from '@/types';
 
 // common
-import { removeAllCustomCssValue, setCustomCssValue } from '@/common/color';
+import { setCustomTheme, getCustomTheme } from '@/common/theme';
 
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
@@ -255,60 +252,16 @@ function setTheme() {
   emit('openThemeModal');
 }
 
-function getTheme(ct: string) {
-  const reg = /%(.*?)%/;
-  const is = reg.test(ct);
-  if (is) {
-    const content = ct.match(reg)?.[1];
-    if (!content) return ct;
-    const obj = JSON.parse(content);
-
-    return obj;
-  }
-  return ct;
-}
-function getThemeName(ct: string) {
-  const reg = /%(.*?)%/;
-  const is = reg.test(ct);
-  if (is) {
-    const content = ct.match(reg)?.[1];
-    if (!content) return ct;
-    const obj = JSON.parse(content);
-
-    state.customObj = obj;
-    const themeName = obj['THEME_INPUT'];
-    return themeName;
+function getCustomThemeFunc(ct: string) {
+  if (!ct) return '';
+  state.customObj = getCustomTheme(ct);
+  if (state.customObj) {
+    return state.customObj?.['THEME_INPUT'];
   }
   return ct;
 }
 function activeSetFirstSuggest(info: SuggestItem) {
   state.activeSuggest = info;
-}
-function setCustomTheme(info?: string) {
-  let customObj;
-  if (info) {
-    const reg = /%(.*?)%/;
-    const is = reg.test(info);
-    if (is) {
-      const content = info.match(reg)?.[1];
-      if (!content) return;
-      customObj = JSON.parse(content);
-    }
-  } else {
-    customObj = state.customObj;
-  }
-
-  removeAllCustomCssValue();
-  setCustomCssValue(COLOR_ENUM['LAYOUT_BACKGROUND_COLOR'], customObj['LAYOUT_BACKGROUND_COLOR']);
-  setCustomCssValue(COLOR_ENUM['MAIN_COLOR'], customObj['MAIN_COLOR']);
-  setCustomCssValue(COLOR_ENUM['MAIN_RED'], customObj['MAIN_RED']);
-  setCustomCssValue(COLOR_ENUM['LABEL_WHITE'], customObj['LABEL_WHITE']);
-  setCustomCssValue(COLOR_ENUM['BACKGROUND_COLOR'], customObj['BACKGROUND_COLOR']);
-  setCustomCssValue(COLOR_ENUM['LAYOUT_BACKGROUND_COLOR'], customObj['LAYOUT_BACKGROUND_COLOR']);
-  setCustomCssValue(COLOR_ENUM['GRAY_08'], customObj['GRAY_08']);
-  setCustomCssValue(COLOR_ENUM['GRAY_06'], customObj['GRAY_06']);
-  setCustomCssValue(COLOR_ENUM['GRAY_04'], customObj['GRAY_04']);
-  setCustomCssValue(COLOR_ENUM['GRAY_02'], customObj['GRAY_02']);
 }
 defineExpose({
   showSuggest,
@@ -391,7 +344,7 @@ defineExpose({
             <YTag v-if="state.activeSuggest.accept" text="已采纳"></YTag>
             <YTag
               v-if="state.activeSuggest.isTheme"
-              :text="`主题色：${getThemeName(state.activeSuggest.content)}`"
+              :text="`主题色：${getCustomThemeFunc(state.activeSuggest.content)}`"
             ></YTag>
             <ThemeLabel
               v-if="state.activeSuggest.isTheme"
@@ -406,7 +359,7 @@ defineExpose({
               {{ state.activeSuggest.content }}
             </template>
             <span
-              @click="setCustomTheme(undefined)"
+              @click="setCustomTheme(undefined, state.customObj)"
               class="gray-06 list-content__set flex-center--y"
               style="margin-left: 4px; cursor: pointer"
             >
@@ -425,7 +378,14 @@ defineExpose({
             <div>
               <span class="main-color cursor-pointer" @click="setTheme">点击定制你的主题</span>
               <span> · </span>
-              <span v-if="state.activeSuggest.userName" class="gray-08">{{
+              <router-link
+                :to="{ name: 'User', params: { id: state.activeSuggest.userId } }"
+                v-if="state.activeSuggest.userName && state.activeSuggest.userId"
+                target="_blank"
+                class="gray-08"
+                >{{ state.activeSuggest.userName }}</router-link
+              >
+              <span v-else-if="state.activeSuggest.userName" class="gray-08">{{
                 state.activeSuggest.userName
               }}</span>
               <span v-if="state.activeSuggest.userName"> · </span>
@@ -449,20 +409,20 @@ defineExpose({
             <YTag v-if="item.accept" text="已采纳"></YTag>
             <YTag
               v-if="item.isTheme"
-              :text="`主题色：${getTheme(item.content)?.['THEME_INPUT']}`"
+              :text="`主题色：${getCustomTheme(item.content)?.['THEME_INPUT']}`"
             ></YTag>
 
             <ThemeLabel
               v-if="item.isTheme"
               style="margin-left: 4px"
-              :custom-theme-obj="getTheme(item.content)"
+              :custom-theme-obj="getCustomTheme(item.content)"
             ></ThemeLabel>
             <template v-else>
               {{ item.content }}
             </template>
             <span
               v-if="item.isTheme"
-              @click="setCustomTheme(item.content)"
+              @click="setCustomTheme(item.content, state.customObj)"
               class="gray-06 list-content__set flex-center--y"
               style="margin-left: 4px; cursor: pointer"
             >
@@ -493,7 +453,14 @@ defineExpose({
                 >点击定制你的主题</span
               >
               <span v-if="item.isTheme"> · </span>
-              <span v-if="item.userName" class="gray-08">{{ item.userName }}</span>
+              <router-link
+                :to="{ name: 'User', params: { id: item.userId } }"
+                v-if="item.userName && item.userId"
+                target="_blank"
+                class="gray-08"
+                >{{ item.userName }}</router-link
+              >
+              <span v-else-if="item.userName" class="gray-08">{{ item.userName }}</span>
               <span v-if="item.userName"> · </span>
               <span class="gray-06">{{ dayjs(item.createdAt).format('YY/MM/DD HH:mm') }}</span>
             </div>
@@ -563,6 +530,7 @@ defineExpose({
   position: sticky;
   top: 0;
   background: $layout-background-gray;
+  z-index: 1;
 }
 .y-submit-suggest__filter {
   cursor: pointer;
