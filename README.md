@@ -1,7 +1,7 @@
 # Typing
 > [https://typing.yasinchan.com](https://typing.yasinchan.com)
 
-> 技术分析 [https://yasinchan.com/tags/typing/](https://yasinchan.com/tags/typing/)
+> 技术分享 [https://yasinchan.com/tags/typing/](https://yasinchan.com/tags/typing/)
 
 > 这是一个简约风格的可自定义主题的打字记录和键盘测试网站，可以用来测试打字速度，统计打字错误率，支持回放打字过程，支持排行榜，同时也支持自定义主题，切换字体，以及登录记录数据等等功能。网站也包含一套用户反馈系统记录反馈信息，后续也将以此持续迭代优化，继续开发更多有趣的功能，欢迎体验，也欢迎贡献你的想法或者代码~
 
