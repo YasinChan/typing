@@ -291,9 +291,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">计时模式</router-link>
           <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
-          <router-link to="/keyboard" class="y-menu__item y-menu__keyboard-test"
-            >键盘测试</router-link
-          >
+          <a href="/keyboard" class="y-menu__item y-menu__keyboard-test">键盘测试</a>
           <router-link to="/leaderboard" class="y-menu__item">排行榜</router-link>
           <YDropDown>
             <template #title>
