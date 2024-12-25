@@ -24,7 +24,7 @@ const i18n = createI18n({
 });
 
 function detectUserLanguage() {
-  const browserLang = navigator.language || navigator.userLanguage;
+  const browserLang = navigator.language;
   return browserLang.startsWith('zh') ? 'zh' : 'en';
 }
 
