@@ -464,7 +464,9 @@ defineExpose({
               :error-text="obj.newPasswordError"
               placeholder="新的密码"
             ></YInput>
-            <y-button :disable="obj.upDisable" size="small" @click="updatePassword">确定</y-button>
+            <y-button :disable="obj.upDisable" size="small" @click="updatePassword">{{
+              $t('confirm')
+            }}</y-button>
           </div>
         </template>
       </div>

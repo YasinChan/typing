@@ -66,7 +66,7 @@ function clickMask() {
 
           <div class="y-modal__footer">
             <slot name="footer">
-              <YButton @click="emit('confirm')">确定</YButton>
+              <YButton @click="emit('confirm')">{{ $t('confirm') }}</YButton>
               <YButton
                 v-if="showCancel"
                 style="margin-left: 20px"

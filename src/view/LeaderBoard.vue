@@ -54,10 +54,12 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
 <template>
   <main :class="'y-font--' + currentFont" class="y-leader-board">
     <div class="y-leader-board__wrap-title flex-center">
-      <span>排行榜</span>
+      <span>{{ $t('leaderboard') }}</span>
       <Tooltip
         style="cursor: pointer"
-        html="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。<br>排行榜仅保留速度最快的记录。"
+        :html="`<div style='width: 634px; white-space: pre-wrap'>${$t(
+          'sentence.leaderboard_rule1'
+        )}<br>${$t('sentence.leaderboard_rule2')}</div>`"
       >
         <IcoTips></IcoTips>
       </Tooltip>
@@ -65,17 +67,17 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
     <div class="y-leader-board__wrap">
       <div class="y-leader-board__item y-leader-board__time">
         <div class="y-leader-board__title flex-center--y">
-          <span>限时排行</span>
+          <span>{{ $t('limit_ranking') }}</span>
         </div>
         <table class="y-leader-board__header">
           <thead>
             <tr>
-              <td>排行</td>
-              <td>昵称</td>
-              <td>速度</td>
-              <td>准确率</td>
-              <td>时长</td>
-              <td class="y-leader-board__header-finish-time">完成时间</td>
+              <td>{{ $t('ranking') }}</td>
+              <td>{{ $t('nickname') }}</td>
+              <td>{{ $t('speed') }}</td>
+              <td>{{ $t('accuracy') }}</td>
+              <td>{{ $t('duration') }}</td>
+              <td class="y-leader-board__header-finish-time">{{ $t('completion') }}</td>
             </tr>
           </thead>
           <tbody>
@@ -92,16 +94,16 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
         </table>
       </div>
       <div class="y-leader-board__item y-leader-board__countdown">
-        <div class="y-leader-board__title">计时排行</div>
+        <div class="y-leader-board__title">{{ $t('time_ranking') }}</div>
         <table class="y-leader-board__header">
           <thead>
             <tr>
-              <td>排行</td>
-              <td>昵称</td>
-              <td>速度</td>
-              <td>准确率</td>
-              <td>时长</td>
-              <td class="y-leader-board__header-finish-time">完成时间</td>
+              <td>{{ $t('ranking') }}</td>
+              <td>{{ $t('nickname') }}</td>
+              <td>{{ $t('speed') }}</td>
+              <td>{{ $t('accuracy') }}</td>
+              <td>{{ $t('duration') }}</td>
+              <td class="y-leader-board__header-finish-time">{{ $t('completion') }}</td>
             </tr>
           </thead>
           <tbody>
@@ -119,13 +121,12 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
       </div>
     </div>
     <div class="y-leader-board__bottom">
-      *注：
+      *{{ $t('note') }}
       <ol>
-        <li>
-          速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。
+        <li style="margin-bottom: 8px">
+          {{ $t('sentence.leaderboard_rule1') }}
         </li>
-        <li>排行榜仅保留同一用户或同一 IP 下速度最快的记录。</li>
-        <li>过于离谱的数据会被删除。</li>
+        <li>{{ $t('sentence.leaderboard_rule3') }}</li>
       </ol>
     </div>
   </main>

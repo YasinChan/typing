@@ -75,7 +75,7 @@ defineExpose({
       </div>
     </template>
     <template #footer>
-      <YButton @click="confirm">确定</YButton>
+      <YButton @click="confirm">{{ $t('confirm') }}</YButton>
       <YButton @click="login" theme="secondary" style="margin-left: 20px">登录/注册</YButton>
     </template>
   </YModal>

@@ -176,9 +176,9 @@ watch(
     <!--    <h1 style="margin-bottom: 20px">-->
     <!--      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦~-->
     <!--    </h1>-->
-    <div class="y-game__rule y-game__rule-title">游戏规则：</div>
+    <div class="y-game__rule y-game__rule-title">{{ $t('game_rules') }}</div>
     <ul class="y-game__rule">
-      <li>在这里你可以创建比一比，并邀请好友一起参加。游戏是基于「限时模式」倒计时的方式。</li>
+      <li>{{ $t('sentence.game_rule1') }}</li>
       <li v-if="!isLogin">
         由于目前服务器资源有限，为限制人数，暂时需要<span
           class="main-color cursor-pointer"
@@ -189,9 +189,9 @@ watch(
       <li>
         创建的房间如果<strong>五分钟</strong>内没有任何操作，则会自动关闭。不过当还剩五秒会关闭时，会有弹框提示，任何操作都可以避免关闭。
       </li>
-      <li>遇到任何问题欢迎点击右下角按钮反馈。</li>
+      <li>{{ $t('sentence.game_rule2') }}</li>
     </ul>
-    <YButton @click="clickCreate">{{ isLogin ? '创建比一比' : '点击登录/注册' }}</YButton>
+    <YButton @click="clickCreate">{{ isLogin ? $t('create_game') : '点击登录/注册' }}</YButton>
     <div class="y-game__current flex-center--y">
       <div>
         当前比一比人数：<span class="y-game__current-count">{{ currentPlayerLen }} 人</span>
@@ -290,7 +290,7 @@ watch(
           </YDropDown>
         </div>
         <div class="y-game__setting-item flex-center--y" style="white-space: nowrap">
-          <span>设置倒计时：</span>
+          <span>{{ $t('custom_countdown') }}：</span>
           <YInput
             :error-text="state.errorText"
             v-model="state.setCountDown"

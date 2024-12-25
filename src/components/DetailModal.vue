@@ -21,7 +21,7 @@ defineExpose({
 <template>
   <YModal class-name="more-detail" :show="state.showDetail" @close="state.showDetail = false">
     <template #header>
-      <h3>全文</h3>
+      <h3>{{ $t('full_text') }}</h3>
     </template>
     <template #body>
       <div class="gray-06 more-detail__content">
@@ -34,6 +34,11 @@ defineExpose({
   </YModal>
 </template>
 <style lang="scss">
+.more-detail {
+  .y-modal__footer {
+    padding: 0;
+  }
+}
 .more-detail.y-modal__container {
   width: 800px;
   max-height: 80vh;

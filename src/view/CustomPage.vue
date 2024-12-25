@@ -232,7 +232,7 @@ async function changePunctuation() {
               class="y-custom-page__setting-item y-custom-page__set-time"
               @click="changePunctuation"
             >
-              {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
+              {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -315,7 +315,9 @@ async function changePunctuation() {
       </div>
     </template>
     <template #footer>
-      <YButton :disable="!state.customInfo?.length" size="small" @click="confirmSet">确定</YButton>
+      <YButton :disable="!state.customInfo?.length" size="small" @click="confirmSet">{{
+        $t('confirm')
+      }}</YButton>
     </template>
   </YModal>
 </template>

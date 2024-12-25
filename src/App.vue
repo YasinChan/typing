@@ -2,6 +2,7 @@
 import { reactive, provide, onMounted, ref, nextTick } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import FontFaceObserver from 'fontfaceobserver';
 
@@ -24,6 +25,7 @@ import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
 
 // svg
+import IcoTranslate from '@/assets/svg/translate.svg';
 import IcoMessage from '@/assets/svg/message.svg';
 import IcoCapsLock from '@/assets/svg/caps-lock.svg';
 import IcoClose from '@/assets/svg/close.svg';
@@ -50,6 +52,7 @@ userStore.setProfile();
 userStore.setConfig();
 const useConfig = useConfigStore();
 const router = useRouter();
+const { locale, t } = useI18n();
 
 const { config } = storeToRefs(userStore);
 const { onlyShowMain, capsLockOn } = storeToRefs(useConfig);
@@ -72,8 +75,8 @@ const obj = reactive({
   showConfirm: false,
   confirmTitle: '',
   confirmContent: '',
-  confirmOk: '确定',
-  confirmCancel: '取消',
+  confirmOk: t('confirm'),
+  confirmCancel: t('cancel'),
   confirmClose: () => {},
   confirm: () => {}
 });
@@ -212,8 +215,8 @@ function showMessage({ message = '', type = 'success', timeout = 3000 }) {
 function showConfirmModal({
   title = '',
   content = '',
-  ok = '确定',
-  cancel = '取消',
+  ok = t('confirm'),
+  cancel = t('cancel'),
   confirmClose = () => true,
   confirm = () => true
 }) {
@@ -244,6 +247,15 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
     if (info) {
       suggestModalRef.value.activeSetFirstSuggest(info as SuggestItem);
     }
+  }
+}
+
+function changeLocale() {
+  const l = locale.value;
+  if (l === 'zh') {
+    locale.value = 'en';
+  } else {
+    locale.value = 'zh';
   }
 }
 </script>
@@ -285,14 +297,14 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
               'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom',
               'y-menu__item--blink': $route.name !== 'Game' && $route.name !== 'GameRoom'
             }"
-            >比一比</router-link
+            >{{ $t('game_mode') }}</router-link
           >
-          <router-link to="/" class="y-menu__item">限时模式</router-link>
+          <router-link to="/" class="y-menu__item">{{ $t('limit_mode') }}</router-link>
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
-          <router-link to="/quote" class="y-menu__item">计时模式</router-link>
-          <router-link to="/custom" class="y-menu__item">自定义模式</router-link>
-          <a href="/keyboard" class="y-menu__item y-menu__keyboard-test">键盘测试</a>
-          <router-link to="/leaderboard" class="y-menu__item">排行榜</router-link>
+          <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
+          <router-link to="/custom" class="y-menu__item">{{ $t('custom_mode') }}</router-link>
+          <a href="/keyboard" class="y-menu__item y-menu__keyboard-test">{{ $t('keyboard') }}</a>
+          <router-link to="/leaderboard" class="y-menu__item">{{ $t('leaderboard') }}</router-link>
           <YDropDown>
             <template #title>
               <div class="y-menu__item flex-center--y">
@@ -301,12 +313,21 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
             </template>
             <template #menu>
               <div class="y-auth__menu">
-                <div class="y-menu__change y-menu__change-font" @click="changeFont">切换字体</div>
-                <div class="y-menu__change" @click="changeTheme('normal')">切换主题</div>
-                <div class="y-menu__change" @click="suggestClick">建议与反馈</div>
+                <div class="y-menu__change y-menu__change-font" @click="changeFont">
+                  {{ $t('change_font') }}
+                </div>
+                <div class="y-menu__change" @click="changeTheme('normal')">
+                  {{ $t('change_theme') }}
+                </div>
+                <div class="y-menu__change" @click="suggestClick">
+                  {{ $t('suggestions_and_feedback') }}
+                </div>
               </div>
             </template>
           </YDropDown>
+          <div class="y-menu__item" @click="changeLocale">
+            <IcoTranslate></IcoTranslate>
+          </div>
           <div class="y-menu__item y-menu__item-auth">
             <auth ref="authRef"></auth>
           </div>
@@ -324,7 +345,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           target="_blank"
         >
           <IcoGithub></IcoGithub>
-          <span>源码</span>
+          <span>{{ $t('source_code') }}</span>
         </a>
         <a
           class="flex-center--y y-app__footer"
@@ -332,7 +353,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           target="_blank"
         >
           <IcoDocument></IcoDocument>
-          <span>技术</span>
+          <span>{{ $t('technology') }}</span>
         </a>
         <a
           class="flex-center--y y-app__footer"
@@ -340,27 +361,27 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
           target="_blank"
         >
           <IcoIntroduce></IcoIntroduce>
-          <span>介绍</span>
+          <span>{{ $t('introduction') }}</span>
         </a>
         <router-link to="/statement" class="flex-center--y cursor-pointer y-app__footer">
           <IcoStatement></IcoStatement>
-          <span>声明</span>
+          <span>{{ $t('statement') }}</span>
         </router-link>
         <router-link to="/log" class="flex-center--y cursor-pointer y-app__footer">
           <IcoLog></IcoLog>
-          <span>日志</span>
+          <span>{{ $t('log') }}</span>
         </router-link>
         <span class="flex-center--y cursor-pointer y-app__footer" @click="changeTheme('normal')">
           <IcoTheme></IcoTheme>
-          <span>主题</span>
+          <span>{{ $t('theme') }}</span>
         </span>
         <span class="flex-center--y cursor-pointer y-app__footer" @click="changeFont">
           <IcoFont></IcoFont>
-          <span>字体</span>
+          <span>{{ $t('font') }}</span>
         </span>
         <span class="flex-center--y cursor-pointer y-app__footer" @click="suggestClick">
           <IcoMessage></IcoMessage>
-          <span>建议与反馈</span>
+          <span>{{ $t('suggestions_and_feedback') }}</span>
         </span>
       </footer>
     </Transition>
@@ -374,7 +395,11 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
   </Transition>
 
   <Transition name="menu">
-    <Tooltip v-if="!onlyShowMain" class="y-submit-suggest" content="建议与反馈">
+    <Tooltip
+      v-if="!onlyShowMain"
+      class="y-submit-suggest"
+      :content="$t('suggestions_and_feedback')"
+    >
       <IcoMessage @click="suggestClick" class="y-submit-suggest__svg"></IcoMessage>
     </Tooltip>
   </Transition>
@@ -391,7 +416,7 @@ async function suggestClick(info?: SuggestItem | MouseEvent) {
     @confirm="obj.showChangeFontModal = false"
   >
     <template #header>
-      <h3>选择字体</h3>
+      <h3>{{ $t('select_theme') }}</h3>
     </template>
     <template #body>
       <div class="y-change__container gray-08">
@@ -551,6 +576,9 @@ footer {
   color: $gray-08;
 }
 .y-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-left: 12px;
   cursor: pointer;
   letter-spacing: 1px;

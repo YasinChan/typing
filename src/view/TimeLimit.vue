@@ -221,7 +221,7 @@ async function changePunctuation() {
             :class="[state.showCountDown ? 'y-time-limit__time--active' : '']"
             @click="state.showCountDown = !state.showCountDown"
           >
-            显示倒计时
+            {{ $t('display_countdown') }}
           </div>
         </Transition>
         <Transition name="menu">
@@ -230,7 +230,7 @@ async function changePunctuation() {
             class="y-time-limit__setting-item y-time-limit__set-time"
             @click="changePunctuation"
           >
-            {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
+            {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
           </div>
         </Transition>
         <Transition name="menu">
@@ -246,7 +246,7 @@ async function changePunctuation() {
         </Transition>
         <Transition name="menu">
           <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__time">
-            <Tooltip content="选择倒计时">
+            <Tooltip :content="$t('select_countdown')">
               <span
                 v-for="item in customTime"
                 :key="item"
@@ -256,7 +256,7 @@ async function changePunctuation() {
                 >{{ item }}</span
               >
             </Tooltip>
-            <Tooltip class="y-time-limit__time-svg" content="自定义倒计时">
+            <Tooltip class="y-time-limit__time-svg" :content="$t('custom_countdown')">
               <IcoSetting
                 :class="{
                   'y-time-limit__time-item--active': !customTime.includes(state.selectTime)
@@ -285,7 +285,7 @@ async function changePunctuation() {
       </div>
       <Transition name="menu">
         <div v-show="!onlyShowMain" class="y-time-limit__detail">
-          <span @click="detailModalRef?.setShowDetail()">查看全文</span>
+          <span @click="detailModalRef?.setShowDetail()">{{ $t('view_full') }}</span>
         </div>
       </Transition>
     </template>
@@ -306,7 +306,7 @@ async function changePunctuation() {
   </main>
   <YModal :show="state.showSetTime" @close="state.showSetTime = false" @confirm="setTime">
     <template #header>
-      <h3>设置倒计时</h3>
+      <h3>{{ $t('custom_countdown') }}</h3>
     </template>
     <template #body>
       <div class="time-limit__container">
@@ -314,7 +314,7 @@ async function changePunctuation() {
           :error-text="state.errorText"
           class="time-limit__q"
           v-model="state.setCountDown"
-          placeholder="请输入倒计时 单位：秒"
+          :placeholder="$t('enter_countdown')"
         ></YInput>
       </div>
     </template>

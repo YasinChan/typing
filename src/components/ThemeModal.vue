@@ -287,7 +287,11 @@ defineExpose({
     :class-name="state.selectThemeType === '自定义' ? 'y-modal__theme' : ''"
   >
     <template #header>
-      <h3>{{ state.selectThemeType === '自定义' ? '主题自定义' : '预设主题选择' }}</h3>
+      <h3>
+        {{
+          state.selectThemeType === '自定义' ? $t('customize_theme') : $t('select_pre_set_theme')
+        }}
+      </h3>
     </template>
     <template #body>
       <div class="y-modal__theme-setting" v-if="state.selectThemeType === '自定义'">
@@ -539,7 +543,7 @@ defineExpose({
           "
           >{{ state.selectThemeType === '自定义' ? '预设' : '自定义' }}</YButton
         >
-        <YButton @click="state.show = false">确定</YButton>
+        <YButton @click="state.show = false">{{ $t('confirm') }}</YButton>
       </div>
     </template>
   </YModal>

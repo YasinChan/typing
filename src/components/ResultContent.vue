@@ -315,7 +315,7 @@ async function record() {
       速度：<span class="result-content--main-color">{{ state.speed }}</span>
       <Tooltip
         class="cursor-pointer result-content__tips"
-        content="速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。"
+        :content="$t('sentence.leaderboard_rule1')"
       >
         <IcoTips></IcoTips>
       </Tooltip>

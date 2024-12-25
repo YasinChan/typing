@@ -487,7 +487,7 @@ defineExpose({
           style="margin-top: 10px"
           size="small"
           @click="confirmSuggest"
-          >确定</YButton
+          >{{ $t('confirm') }}</YButton
         >
         <span class="y-submit-suggest__reply-tips">
           *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~

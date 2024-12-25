@@ -266,7 +266,7 @@ async function changePunctuation() {
               class="y-quote-limit__setting-item y-quote-limit__set-time"
               @click="changePunctuation"
             >
-              {{ state.isSpaceType ? '空格转标点符号' : '标点符号转空格' }}
+              {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -358,7 +358,7 @@ async function changePunctuation() {
             class="y-quote-limit__detail"
             @click="detailModalRef?.setShowDetail()"
           >
-            查看全文
+            {{ $t('view_full') }}
           </div>
         </Transition>
         <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
