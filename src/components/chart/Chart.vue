@@ -11,6 +11,7 @@ import {
   LegendComponent
 } from 'echarts/components';
 import VChart, { THEME_KEY } from 'vue-echarts';
+import { useI18n } from 'vue-i18n';
 
 // common
 import { getCustomCssValue, addOpacityToHex } from '@/common/color';
@@ -27,6 +28,7 @@ use([
 
 provide(THEME_KEY, 'dark');
 
+const { t } = useI18n();
 const option = ref();
 
 const props = defineProps({
@@ -99,7 +101,7 @@ onMounted(() => {
       top: 0
     },
     xAxis: {
-      name: '秒',
+      name: t('sec'),
       boundaryGap: false,
       type: 'category',
       nameTextStyle: {

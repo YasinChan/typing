@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { reactive, computed, onMounted, onUnmounted, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -23,6 +24,7 @@ import IcoTips from '@/assets/svg/tips.svg';
 import { useUserStore } from '@/store/user';
 import { storeToRefs } from 'pinia';
 
+const { t } = useI18n();
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
 
@@ -111,7 +113,7 @@ onMounted(() => {
   state.speedInfo = props.totalTime
     ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0)
     : '';
-  state.speed = state.speedInfo ? state.speedInfo + ' 字/分钟' : '';
+  state.speed = state.speedInfo ? state.speedInfo + (' ' + t('wpm')) : '';
 });
 
 onUnmounted(() => {
@@ -306,13 +308,15 @@ async function record() {
 <template>
   <div class="y-result-content__info flex-center">
     <div class="result-content flex-center" :content="state.accuracyInfo">
-      准确率：<span class="result-content--main-color">{{ state.accuracy }}</span>
+      {{ $t('accuracy') }}:&nbsp;<span class="result-content--main-color">{{
+        state.accuracy
+      }}</span>
       <Tooltip class="cursor-pointer result-content__tips" :content="state.accuracyInfo">
         <IcoTips></IcoTips>
       </Tooltip>
     </div>
     <div class="result-content flex-center">
-      速度：<span class="result-content--main-color">{{ state.speed }}</span>
+      {{ $t('speed') }}:&nbsp;<span class="result-content--main-color">{{ state.speed }}</span>
       <Tooltip
         class="cursor-pointer result-content__tips"
         :content="$t('sentence.leaderboard_rule1')"
@@ -321,7 +325,9 @@ async function record() {
       </Tooltip>
     </div>
     <div class="result-content flex-center">
-      时长：<span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span> 秒
+      {{ $t('duration') }}:&nbsp;
+      <span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span
+      >&nbsp;{{ $t('sec') }}
     </div>
   </div>
   <Chart
@@ -329,22 +335,22 @@ async function record() {
     class="y-result-content__chart"
     :current-data="chartAccuracy"
     :last-data="lastChartAccuracy"
-    y-name="准确率（%）"
-    title="准确率曲线"
+    :y-name="$t('accuracy_unit')"
+    :title="$t('accuracy_curve')"
   ></Chart>
   <Chart
     v-if="chartSpeed && chartSpeed.length"
     :current-data="chartSpeed"
     :last-data="lastChartSpeed"
-    y-name="速度（字/每分钟）"
-    title="速度曲线"
+    :y-name="$t('speed_unit')"
+    :title="$t('speed_curve')"
   ></Chart>
   <div class="result-content__toolbar flex-center">
     <YButton class="result-content__svg" size="large" @click="restart"
-      ><IcoChange></IcoChange>重新开始</YButton
+      ><IcoChange></IcoChange> {{ $t('restart') }}</YButton
     >
     <YButton class="result-content__svg" v-if="!isShort" size="large" @click="replay"
-      ><IcoReplay></IcoReplay>查看回放</YButton
+      ><IcoReplay></IcoReplay> {{ $t('review_playback') }}</YButton
     >
     <Tooltip
       v-if="showSaveRecord"
@@ -353,7 +359,7 @@ async function record() {
       :content="state.hadRecord ? '记录已保存' : '保存本次记录，将会在排行榜中展示。'"
     >
       <YButton class="flex-center--y" :disable="state.hadRecord" size="large" @click="record"
-        ><IcoRecord></IcoRecord> 保存记录</YButton
+        ><IcoRecord></IcoRecord> {{ $t('save_records') }}</YButton
       >
     </Tooltip>
   </div>
@@ -390,11 +396,11 @@ async function record() {
     </span>
   </div>
   <div class="y-result-content__bottom">
-    *提醒：
+    *{{ $t('reminder') }}：
     <ol>
-      <li>输入记录将会保留在本地，再次尝试同一篇文案时将会与上次对比。</li>
-      <li>「查看回放」可以回放整个过程，还可以加速播放。</li>
-      <li>为避免无意义的数据，「保存记录」需要满足时长大于 15 秒，同时准确率大于 80%。</li>
+      <li>{{ $t('sentence.reminder1') }}</li>
+      <li>{{ $t('sentence.reminder2') }}</li>
+      <li>{{ $t('sentence.reminder3') }}</li>
     </ol>
   </div>
 </template>

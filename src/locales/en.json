@@ -40,11 +40,29 @@
     "full_text": "Full Text",
     "game_rules": "Game Rules:",
     "create_game": "Create Game",
+    "short_sentence": "Short",
+    "medium_sentence": "Medium",
+    "long_sentence": "Long",
+    "display_timer": "Display Timer",
+    "reminder": "Reminder",
+    "review_playback": "Review Playback",
+    "save_records": "Save Records",
+    "restart": "Restart",
+    "sec": "sec",
+    "wpm": "WPM",
+    "accuracy_curve": "Accuracy Curve",
+    "speed_curve": "Speed Curve",
+    "speed_unit": "Speed (WPM)",
+    "accuracy_unit": "Accuracy (%)",
     "sentence": {
         "leaderboard_rule1": "The rule for calculating speed is 'Total characters / Total time (seconds) * 60', which represents the number of characters typed per minute, including punctuation but excluding spaces.",
         "leaderboard_rule2": "The ranking only retains the fastest record.",
         "leaderboard_rule3": "The leaderboard only retains the fastest record under the same user or IP.",
         "game_rule1": "Here, you can create a competition and invite friends to join. The game is based on the countdown method of 'Limit' mode.",
-        "game_rule2": "If you encounter any issues, please feel free to click the button in the bottom right corner to provide feedback."
+        "game_rule2": "If you encounter any issues, please feel free to click the button in the bottom right corner to provide feedback.",
+        "word_tip": "During typing, pressing the Esc key in the top left corner of the keyboard can end input progress at any time.",
+        "reminder1": "Input records will be saved locally, and when attempting the same copy again, it will be compared with the last attempt.",
+        "reminder2": "\"Review Playback\" allows you to replay the entire process and also offers fast-forward playback.",
+        "reminder3": "To avoid meaningless data, \"Save Records\" need to meet a duration greater than 15 seconds and an accuracy rate greater than 80%."
     }
 }

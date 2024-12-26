@@ -885,7 +885,7 @@ watch(
         <thead>
           <tr>
             <th scope="col">玩家</th>
-            <th scope="col">准确率</th>
+            <th scope="col">{{ $t('accuracy') }}</th>
             <th scope="col">字符数</th>
           </tr>
         </thead>

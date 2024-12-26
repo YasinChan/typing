@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, nextTick, ref, watch, onMounted, onUnmounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -22,29 +23,29 @@ import { KEY_CODE_ENUM } from '@/config/key';
 import type { TypingRecordType } from '@/types';
 
 // common
-import YStorage from '@/common/YStorage';
 import { handleChart } from '@/common/chart';
 
+const { t } = useI18n();
 const wordInputRef = ref<any>(null);
 const wordInputShortRef = ref<any>(null);
 const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
 const { currentFont, onlyShowMain, isEscape } = storeToRefs(useConfig);
 const quoteLength = [5, 10];
-const typeList = [
+const typeList = computed(() => [
   {
     type: 'short',
-    name: '短句'
+    name: t('short_sentence')
   },
   {
     type: 'medium',
-    name: '中句'
+    name: t('medium_sentence')
   },
   {
     type: 'long',
-    name: '长句'
+    name: t('long_sentence')
   }
-];
+]);
 
 const state = reactive({
   typingChartSpeed: [] as number[],
@@ -256,7 +257,7 @@ async function changePunctuation() {
               :class="[state.showTime ? 'y-quote-limit__time--active' : '']"
               @click="state.showTime = !state.showTime"
             >
-              显示计时
+              {{ $t('display_timer') }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -289,6 +290,7 @@ async function changePunctuation() {
                   v-for="item in typeList"
                   :key="item.type"
                   class="y-quote-limit__time-item"
+                  style="width: auto"
                   :class="{ 'y-quote-limit__time-item--active': state.type === item.type }"
                   @click="selectType(item.type)"
                   >{{ item.name }}</span
@@ -365,7 +367,7 @@ async function changePunctuation() {
       </template>
       <Transition name="menu">
         <div v-show="!onlyShowMain" class="y-quote-limit__tips">
-          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
+          <p>*{{ $t('sentence.word_tip') }}</p>
           <p v-if="state.type === 'short'">*短句模式下回车则会切换到下一条。</p>
         </div>
       </Transition>

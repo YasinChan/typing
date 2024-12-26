@@ -222,7 +222,7 @@ async function changePunctuation() {
               :class="[state.showTime ? 'y-custom-page__time--active' : '']"
               @click="state.showTime = !state.showTime"
             >
-              显示计时
+              {{ $t('display_timer') }}
             </div>
           </Transition>
           <Transition name="menu">
@@ -271,7 +271,7 @@ async function changePunctuation() {
       <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       <Transition name="menu">
         <div v-show="!onlyShowMain" class="y-custom-page__tips">
-          <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
+          <p>*{{ $t('sentence.word_tip') }}</p>
         </div>
       </Transition>
     </template>

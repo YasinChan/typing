@@ -40,11 +40,28 @@
     "full_text": "全文",
     "game_rules": "游戏规则：",
     "create_game": "创建比一比",
+    "short_sentence": "短句",
+    "medium_sentence": "中句",
+    "long_sentence": "长句",
+    "display_timer": "显示计时",
+    "reminder": "提醒",
+    "review_playback": "查看回放",
+    "restart": "重新开始",
+    "sec": "秒",
+    "wpm": "字/分钟",
+    "accuracy_curve": "准确率曲线",
+    "speed_curve": "速度曲线",
+    "speed_unit": "速度（字/每分钟）",
+    "accuracy_unit": "准确率（%）",
     "sentence": {
         "leaderboard_rule1": "速度的计算规则为「总字数/总时间(秒)*60」，即每分钟输入的字数，其中总字数包含标点符号，不包括空格。",
         "leaderboard_rule2": "排行榜仅保留速度最快的记录。",
         "leaderboard_rule3": "排行榜仅保留同一用户或同一 IP 下速度最快的记录。",
         "game_rule1": "在这里你可以创建比一比，并邀请好友一起参加。游戏是基于「限时模式」倒计时的方式。",
-        "game_rule2": "遇到任何问题欢迎点击右下角按钮反馈。"
+        "game_rule2": "遇到任何问题欢迎点击右下角按钮反馈。",
+        "word_tip": "键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。",
+        "reminder1": "输入记录将会保留在本地，再次尝试同一篇文案时将会与上次对比。",
+        "reminder2": "「查看回放」可以回放整个过程，还可以加速播放。",
+        "reminder3": "为避免无意义的数据，「保存记录」需要满足时长大于 15 秒，同时准确率大于 80%。"
     }
 }

@@ -244,8 +244,8 @@ const setResetAvatar = () => {
             <table class="y-user__leaderboard-info-item-table">
               <thead>
                 <tr>
-                  <td>速度</td>
-                  <td>准确率</td>
+                  <td>{{ $t('speed') }}</td>
+                  <td>{{ $t('accuracy') }}</td>
                   <td>时长</td>
                   <td class="y-leader-board__header-finish-time">完成时间</td>
                 </tr>
@@ -276,8 +276,8 @@ const setResetAvatar = () => {
             <table class="y-user__leaderboard-info-item-table">
               <thead>
                 <tr>
-                  <td>速度</td>
-                  <td>准确率</td>
+                  <td>{{ $t('speed') }}</td>
+                  <td>{{ $t('accuracy') }}</td>
                   <td>时长</td>
                   <td class="y-leader-board__header-finish-time">完成时间</td>
                 </tr>

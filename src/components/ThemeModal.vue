@@ -504,7 +504,7 @@ defineExpose({
                 <span>迟子建</span>
               </div>
               <div class="theme-content__word-tips" style="margin-top: 100px">
-                <p>*键入过程中，按下键盘左上角 Esc 键可随时结束输入进度。</p>
+                <p>*{{ $t('sentence.word_tip') }}</p>
               </div>
             </div>
           </div>
