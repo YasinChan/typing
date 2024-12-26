@@ -4,6 +4,7 @@ import './assets/main.scss';
 
 import { createApp } from 'vue';
 import { createI18n } from 'vue-i18n';
+import YStorage from '@/common/YStorage';
 import App from './App.vue';
 import router from './router';
 import { createPinia } from 'pinia';
@@ -24,6 +25,11 @@ const i18n = createI18n({
 });
 
 function detectUserLanguage() {
+  const yStorage = YStorage.get('Y_STORAGE') || {};
+  const locale = yStorage.locale;
+  if (locale) {
+    return locale;
+  }
   const browserLang = navigator.language;
   return browserLang.startsWith('zh') ? 'zh' : 'en';
 }

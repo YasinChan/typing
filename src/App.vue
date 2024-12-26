@@ -44,6 +44,9 @@ import IcoDocument from '@/assets/svg/document.svg';
 import type { SuggestItem } from '@/types';
 import YButton from '@/components/ui/Button.vue';
 
+// common
+import YStorage from '@/common/YStorage';
+
 const suggestModalRef = ref<InstanceType<typeof SuggestModal>>();
 const themeModalRef = ref<InstanceType<typeof ThemeModal>>();
 const authRef = ref<InstanceType<typeof Auth>>();
@@ -257,6 +260,9 @@ function changeLocale() {
   } else {
     locale.value = 'zh';
   }
+  YStorage.set('Y_STORAGE', {
+    locale: locale.value
+  });
 }
 </script>
 
