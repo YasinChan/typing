@@ -490,7 +490,7 @@ defineExpose({
           >{{ $t('confirm') }}</YButton
         >
         <span class="y-submit-suggest__reply-tips">
-          *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~ 也可以加入QQ群 1028763853 反馈～
+          *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~ 也可以加入QQ群 <b>1028763853</b> 反馈～
         </span>
       </div>
     </template>
