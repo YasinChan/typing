@@ -571,6 +571,9 @@ function keyDownEvent(e: KeyboardEvent) {
 function inputEvent(e: Event) {
   const input = e.target as HTMLElement;
   if (!state.isComposing) {
+    if (input.innerText.trim() === '') {
+      input.innerHTML = '';
+    }
     handlerInput(input?.innerText);
   }
 }
