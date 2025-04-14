@@ -199,7 +199,12 @@ function setTime() {
     state.errorText = '请输入数字';
     return;
   }
-  refresh();
+  state.isTyping = false;
+  if (id) {
+    state.quote = Sentence.long.find((item) => item.id === Number(id));
+  } else {
+    state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+  }
   state.showSetTime = false;
   state.selectTime = Number(state.setCountDown);
 }
