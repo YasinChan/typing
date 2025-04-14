@@ -25,6 +25,7 @@ import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
 
 // svg
+import IcoDonate from '@/assets/svg/donate.svg';
 import IcoTranslate from '@/assets/svg/translate.svg';
 import IcoMessage from '@/assets/svg/message.svg';
 import IcoCapsLock from '@/assets/svg/caps-lock.svg';
@@ -67,6 +68,7 @@ const obj = reactive({
   showSuggest: false,
   showThemeSelect: false,
   showChangeFontModal: false,
+  showDonate: false,
   userName: '',
   password: '',
   userNameError: '',
@@ -389,6 +391,10 @@ function changeLocale() {
           <IcoMessage></IcoMessage>
           <span>{{ $t('suggestions_and_feedback') }}</span>
         </span>
+        <span class="flex-center--y cursor-pointer y-app__footer" @click="obj.showDonate = true">
+          <IcoDonate></IcoDonate>
+          <span>{{ $t('appreciate') }}</span>
+        </span>
       </footer>
     </Transition>
   </div>
@@ -416,6 +422,29 @@ function changeLocale() {
   ></SuggestModal>
   <ThemeModal ref="themeModalRef" v-if="obj.showThemeSelect"></ThemeModal>
 
+  <YModal :show="obj.showDonate" @close="obj.showDonate = false">
+    <template #header>
+      <h3>{{ $t('appreciate') }}</h3>
+    </template>
+    <template #body>
+      <div class="y-change__container gray-08">
+        <div class="y-donate__text">
+          {{ $t('appreciate_text') }}
+        </div>
+        <img
+          style="width: 100%"
+          src="https://file.yasinchan.com/io7449MA6D2hjrzuh1Y8fAaqSP9imTi6/mm_facetoface_collect_qrcode_1744639832578.png"
+          alt=""
+        />
+      </div>
+    </template>
+    <template #footer>
+      <YButton @click="obj.showDonate = false">{{ $t('pay') }}</YButton>
+      <YButton theme="secondary" style="margin-left: 20px" @click="obj.showDonate = false; suggestClick()">{{
+        $t('not_good')
+      }}</YButton>
+    </template>
+  </YModal>
   <YModal
     :show="obj.showChangeFontModal"
     @close="obj.showChangeFontModal = false"
@@ -686,6 +715,9 @@ main {
       fill: $main-color;
     }
   }
+}
+.y-donate__text {
+  margin-bottom: 8px;
 }
 
 .menu-enter-active,

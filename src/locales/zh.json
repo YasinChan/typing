@@ -1,4 +1,5 @@
 {
+    "reset": "重置",
     "home": "首页",
     "game_mode": "比一比",
     "limit_mode": "限时模式",
@@ -23,6 +24,10 @@
     "theme": "主题",
     "font": "字体",
     "suggestions_and_feedback": "建议与反馈",
+    "appreciate": "赞赏",
+    "pay": "付好啦",
+    "appreciate_text": "如果您觉得这个项目对您有帮助，可以请我喝杯咖啡，谢谢！",
+    "not_good": "不够好，我要提建议",
     "change_font": "切换字体",
     "change_theme": "切换主题",
     "select_theme": "选择字体",

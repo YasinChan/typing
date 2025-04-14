@@ -177,7 +177,12 @@ function getRandomNonRepeatingElement(arr: any[]) {
 function selectTime(time: number) {
   console.log('选择的时间：', time);
   state.selectTime = time;
-  refresh();
+  state.isTyping = false;
+  if (id) {
+    state.quote = Sentence.long.find((item) => item.id === Number(id));
+  } else {
+    state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+  }
 }
 
 function isTypingFunc() {
@@ -209,6 +214,11 @@ async function changePunctuation() {
   }
   await nextTick();
   state.isSpaceType = !state.isSpaceType;
+}
+
+function reset() {
+  router.push('/');
+  refresh();
 }
 </script>
 <template>
@@ -272,6 +282,14 @@ async function changePunctuation() {
                 @click="state.showSetTime = true"
               ></IcoSetting>
             </Tooltip>
+            <div
+              class="y-time-limit__time-item"
+              v-if="router.currentRoute?.value?.query?.id"
+              style="cursor: pointer; white-space: nowrap; margin-left: 10px"
+              @click="reset"
+            >
+              {{ $t('reset') }}
+            </div>
           </div>
         </Transition>
       </div>

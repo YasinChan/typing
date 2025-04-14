@@ -1,4 +1,5 @@
 {
+    "reset": "Reset",
     "home": "Home",
     "game_mode": "Game",
     "limit_mode": "Limit",
@@ -23,6 +24,10 @@
     "theme": "Theme",
     "font": "Font",
     "suggestions_and_feedback": "Suggestions and Feedback",
+    "appreciate": "Appreciate",
+    "pay": "Pay",
+    "appreciate_text": "If you think this project is helpful to you, you can buy me a cup of coffee, thank you!",
+    "not_good": "Not Good, Give Feedback",
     "change_font": "Change Font",
     "change_theme": "Change Theme",
     "select_theme": "Select Theme",
