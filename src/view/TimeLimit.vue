@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { inject, reactive, watch, ref, onUnmounted, nextTick, onMounted } from 'vue';
+import { reactive, watch, ref, onUnmounted, nextTick, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 // components
 import WordInput from '@/components/WordInput.vue';
@@ -24,8 +25,8 @@ import IcoChange from '@/assets/svg/change.svg';
 import YInput from '@/components/ui/Input.vue';
 import { handleChart } from '@/common/chart';
 
-const message: any = inject('message');
-const confirm: any = inject('confirm');
+const router = useRouter();
+
 const wordInputRef = ref<any>(null);
 const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
@@ -52,7 +53,14 @@ const state = reactive({
   showResult: false,
   typingRecord: {} as TypingRecordType
 });
-state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+
+const id = router.currentRoute?.value?.query?.id;
+
+if (id) {
+  state.quote = Sentence.long.find((item) => item.id === Number(id));
+} else {
+  state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+}
 
 onMounted(async () => {
   await nextTick();
