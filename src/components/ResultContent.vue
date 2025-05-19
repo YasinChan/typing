@@ -307,33 +307,14 @@ async function record() {
 
 const typingRecord = props.typingRecord || {};
 
-// 添加 tooltipFormatter 函数
-const accuracyTooltipFormatter = (params: any[]) => {
-  const time = params[0].dataIndex;
-  let result = `${time} ${t('sec')}<br/>`;
-  
-  // 添加准确率数据
-  params.forEach(param => {
-    result += `${param.seriesName}: ${param.value}%<br/>`;
-  });
+const getTypingContentAtTime = (time: number) => {
+  if (!props.typingRecord) return '';
 
-  // 添加这一秒的打字内容
-  if (props.typingRecord) {
-    // 找到这一秒内最后一条记录
-    const timeStart = time * 10; // 转换为 100ms 为单位
-    const timeEnd = (time + 1) * 10;
-    let lastRecord: TypingRecordItemType[] = [];
-    
-    // 找到这一秒内的最后一个时间点的记录
-    for (let t = timeEnd - 1; t >= timeStart; t--) {
-      if (props.typingRecord[t]) {
-        lastRecord = props.typingRecord[t];
-        break;
-      }
-    }
-
-    if (lastRecord.length > 0) {
-      const typingContent = lastRecord
+  // 从当前时间往前找，直到找到有输入内容的记录
+  for (let t = time * 10; t >= 0; t--) {
+    if (props.typingRecord[t]) {
+      const record = props.typingRecord[t];
+      const typingContent = record
         .filter(item => item.isInput)
         .map(item => {
           if (item.wrongPos && item.wrongPos.length > 0) {
@@ -348,9 +329,26 @@ const accuracyTooltipFormatter = (params: any[]) => {
         })
         .join('');
       if (typingContent) {
-        result += `${t('typing_content')}: ${typingContent}`;
+        return typingContent;
       }
     }
+  }
+  return '';
+};
+
+const accuracyTooltipFormatter = (params: any[]) => {
+  const time = params[0].dataIndex;
+  let result = `${time} ${t('sec')}<br/>`;
+  
+  // 添加准确率数据
+  params.forEach(param => {
+    result += `${param.seriesName}: ${param.value}%<br/>`;
+  });
+
+  // 添加这一秒的打字内容（如果当前秒没有输入，则显示上一秒的内容）
+  const typingContent = getTypingContentAtTime(time);
+  if (typingContent) {
+    result += `${t('typing_content')}: ${typingContent}`;
   }
   
   return result;
@@ -365,40 +363,10 @@ const speedTooltipFormatter = (params: any[]) => {
     result += `${param.seriesName}: ${param.value} ${t('wpm')}<br/>`;
   });
 
-  // 添加这一秒的打字内容
-  if (props.typingRecord) {
-    // 找到这一秒内最后一条记录
-    const timeStart = time * 10; // 转换为 100ms 为单位
-    const timeEnd = (time + 1) * 10;
-    let lastRecord: TypingRecordItemType[] = [];
-    
-    // 找到这一秒内的最后一个时间点的记录
-    for (let t = timeEnd - 1; t >= timeStart; t--) {
-      if (props.typingRecord[t]) {
-        lastRecord = props.typingRecord[t];
-        break;
-      }
-    }
-
-    if (lastRecord.length > 0) {
-      const typingContent = lastRecord
-        .filter(item => item.isInput)
-        .map(item => {
-          if (item.wrongPos && item.wrongPos.length > 0) {
-            const chars = item.word?.split('') || [];
-            return chars.map((char, index) => 
-              item.wrongPos?.includes(index) ? 
-                `<span style="color: #ff4d4f">${char}</span>` : 
-                char
-            ).join('');
-          }
-          return item.word;
-        })
-        .join('');
-      if (typingContent) {
-        result += `${t('typing_content')}: ${typingContent}`;
-      }
-    }
+  // 添加这一秒的打字内容（如果当前秒没有输入，则显示上一秒的内容）
+  const typingContent = getTypingContentAtTime(time);
+  if (typingContent) {
+    result += `${t('typing_content')}: ${typingContent}`;
   }
   
   return result;
