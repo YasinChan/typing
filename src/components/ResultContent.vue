@@ -304,6 +304,105 @@ async function record() {
     }
   });
 }
+
+const typingRecord = props.typingRecord || {};
+
+// 添加 tooltipFormatter 函数
+const accuracyTooltipFormatter = (params: any[]) => {
+  const time = params[0].dataIndex;
+  let result = `${time} ${t('sec')}<br/>`;
+  
+  // 添加准确率数据
+  params.forEach(param => {
+    result += `${param.seriesName}: ${param.value}%<br/>`;
+  });
+
+  // 添加这一秒的打字内容
+  if (props.typingRecord) {
+    // 找到这一秒内最后一条记录
+    const timeStart = time * 10; // 转换为 100ms 为单位
+    const timeEnd = (time + 1) * 10;
+    let lastRecord: TypingRecordItemType[] = [];
+    
+    // 找到这一秒内的最后一个时间点的记录
+    for (let t = timeEnd - 1; t >= timeStart; t--) {
+      if (props.typingRecord[t]) {
+        lastRecord = props.typingRecord[t];
+        break;
+      }
+    }
+
+    if (lastRecord.length > 0) {
+      const typingContent = lastRecord
+        .filter(item => item.isInput)
+        .map(item => {
+          if (item.wrongPos && item.wrongPos.length > 0) {
+            const chars = item.word?.split('') || [];
+            return chars.map((char, index) => 
+              item.wrongPos?.includes(index) ? 
+                `<span style="color: #ff4d4f">${char}</span>` : 
+                char
+            ).join('');
+          }
+          return item.word;
+        })
+        .join('');
+      if (typingContent) {
+        result += `${t('typing_content')}: ${typingContent}`;
+      }
+    }
+  }
+  
+  return result;
+};
+
+const speedTooltipFormatter = (params: any[]) => {
+  const time = params[0].dataIndex;
+  let result = `${time} ${t('sec')}<br/>`;
+  
+  // 添加速度数据
+  params.forEach(param => {
+    result += `${param.seriesName}: ${param.value} ${t('wpm')}<br/>`;
+  });
+
+  // 添加这一秒的打字内容
+  if (props.typingRecord) {
+    // 找到这一秒内最后一条记录
+    const timeStart = time * 10; // 转换为 100ms 为单位
+    const timeEnd = (time + 1) * 10;
+    let lastRecord: TypingRecordItemType[] = [];
+    
+    // 找到这一秒内的最后一个时间点的记录
+    for (let t = timeEnd - 1; t >= timeStart; t--) {
+      if (props.typingRecord[t]) {
+        lastRecord = props.typingRecord[t];
+        break;
+      }
+    }
+
+    if (lastRecord.length > 0) {
+      const typingContent = lastRecord
+        .filter(item => item.isInput)
+        .map(item => {
+          if (item.wrongPos && item.wrongPos.length > 0) {
+            const chars = item.word?.split('') || [];
+            return chars.map((char, index) => 
+              item.wrongPos?.includes(index) ? 
+                `<span style="color: #ff4d4f">${char}</span>` : 
+                char
+            ).join('');
+          }
+          return item.word;
+        })
+        .join('');
+      if (typingContent) {
+        result += `${t('typing_content')}: ${typingContent}`;
+      }
+    }
+  }
+  
+  return result;
+};
 </script>
 <template>
   <div class="y-result-content__info flex-center">
@@ -337,6 +436,7 @@ async function record() {
     :last-data="lastChartAccuracy"
     :y-name="$t('accuracy_unit')"
     :title="$t('accuracy_curve')"
+    :tooltip-formatter="accuracyTooltipFormatter"
   ></Chart>
   <Chart
     v-if="chartSpeed && chartSpeed.length"
@@ -344,6 +444,7 @@ async function record() {
     :last-data="lastChartSpeed"
     :y-name="$t('speed_unit')"
     :title="$t('speed_curve')"
+    :tooltip-formatter="speedTooltipFormatter"
   ></Chart>
   <div class="result-content__toolbar flex-center">
     <YButton class="result-content__svg" size="large" @click="restart"
