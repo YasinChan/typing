@@ -304,6 +304,73 @@ async function record() {
     }
   });
 }
+
+const typingRecord = props.typingRecord || {};
+
+const getTypingContentAtTime = (time: number) => {
+  if (!props.typingRecord) return '';
+
+  // 从当前时间往前找，直到找到有输入内容的记录
+  for (let t = time * 10; t >= 0; t--) {
+    if (props.typingRecord[t]) {
+      const record = props.typingRecord[t];
+      const typingContent = record
+        .filter(item => item.isInput)
+        .map(item => {
+          if (item.wrongPos && item.wrongPos.length > 0) {
+            const chars = item.word?.split('') || [];
+            return chars.map((char, index) => 
+              item.wrongPos?.includes(index) ? 
+                `<span style="color: #ff4d4f">${char}</span>` : 
+                char
+            ).join('');
+          }
+          return item.word;
+        })
+        .join('');
+      if (typingContent) {
+        return typingContent;
+      }
+    }
+  }
+  return '';
+};
+
+const accuracyTooltipFormatter = (params: any[]) => {
+  const time = params[0].dataIndex;
+  let result = `${time} ${t('sec')}<br/>`;
+  
+  // 添加准确率数据
+  params.forEach(param => {
+    result += `${param.seriesName}: ${param.value}%<br/>`;
+  });
+
+  // 添加这一秒的打字内容（如果当前秒没有输入，则显示上一秒的内容）
+  const typingContent = getTypingContentAtTime(time);
+  if (typingContent) {
+    result += `${t('typing_content')}: ${typingContent}`;
+  }
+  
+  return result;
+};
+
+const speedTooltipFormatter = (params: any[]) => {
+  const time = params[0].dataIndex;
+  let result = `${time} ${t('sec')}<br/>`;
+  
+  // 添加速度数据
+  params.forEach(param => {
+    result += `${param.seriesName}: ${param.value} ${t('wpm')}<br/>`;
+  });
+
+  // 添加这一秒的打字内容（如果当前秒没有输入，则显示上一秒的内容）
+  const typingContent = getTypingContentAtTime(time);
+  if (typingContent) {
+    result += `${t('typing_content')}: ${typingContent}`;
+  }
+  
+  return result;
+};
 </script>
 <template>
   <div class="y-result-content__info flex-center">
@@ -337,6 +404,7 @@ async function record() {
     :last-data="lastChartAccuracy"
     :y-name="$t('accuracy_unit')"
     :title="$t('accuracy_curve')"
+    :tooltip-formatter="accuracyTooltipFormatter"
   ></Chart>
   <Chart
     v-if="chartSpeed && chartSpeed.length"
@@ -344,6 +412,7 @@ async function record() {
     :last-data="lastChartSpeed"
     :y-name="$t('speed_unit')"
     :title="$t('speed_curve')"
+    :tooltip-formatter="speedTooltipFormatter"
   ></Chart>
   <div class="result-content__toolbar flex-center">
     <YButton class="result-content__svg" size="large" @click="restart"
