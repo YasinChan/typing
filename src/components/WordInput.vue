@@ -308,7 +308,9 @@ watch(
     if (props.isSpaceType) {
       state.content = replacePunctuationWithSpace(val);
     }
-    state.quoteLength = val.length;
+    debugger;
+    console.log('----------', 'val', val, '----------cyy log');
+    state.quoteLength = val.length || 0;
     setTimeout(() => {
       reset();
     });
