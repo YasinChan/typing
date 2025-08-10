@@ -47,6 +47,10 @@ const props = defineProps({
   title: {
     type: String,
     default: '速度'
+  },
+  tooltipFormatter: {
+    type: Function,
+    default: null
   }
 });
 
@@ -87,7 +91,8 @@ onMounted(() => {
       borderColor: 'rgba(0, 0, 0, 0.8)',
       textStyle: {
         color: '#fff'
-      }
+      },
+      formatter: props.tooltipFormatter || undefined 
       // formatter: '{a0}: {b0} {c0} <br>{a1}: {b1} {c1} '
     },
     // visualMap: {
