@@ -30,6 +30,16 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Deploy to server
+        uses: easingthemes/ssh-deploy@v5
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+          REMOTE_USER: ${{ secrets.SERVER_USER }}
+          SOURCE: "dist/"
+          TARGET: "/data/typing-test"
+          ARGS: "-avz --delete"
+
       - name: Deploy to build branch
         run: |
           git config --global user.name "Yasinchan"
