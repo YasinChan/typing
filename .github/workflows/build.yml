@@ -40,7 +40,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           SOURCE: "dist/"
-          TARGET: "/data/typing-test"
+          TARGET: "/data/typing"
           ARGS: "-avz --delete"
 
       - name: Deploy to build branch
