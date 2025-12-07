@@ -31,7 +31,7 @@ jobs:
         run: pnpm build
 
       - name: Deploy to server
-        uses: easingthemes/ssh-deploy@v5
+        uses: easingthemes/ssh-deploy@v4
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
