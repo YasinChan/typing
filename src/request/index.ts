@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { LeaderBoardSaveParams } from '@/types';
 
 export const getMe = () => {
   return axios.get('/api/users/me');
@@ -88,8 +89,23 @@ export const getLeaderBoardByUserId = (params?: { id: string }) => {
 };
 
 // 保存记录
-export const saveLeaderBoard = (params: any) => {
-  return axios.post('/api/leaderboard/save', params);
+function generateLeaderBoardSign(
+  params: LeaderBoardSaveParams
+): { sign: string; timestamp: number } {
+  const timestamp = Date.now();
+  const raw = JSON.stringify(params) + ':' + timestamp + ':' + params.userId;
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const chr = raw.charCodeAt(i);
+    hash = (hash << 5) - hash + chr;
+    hash = hash & hash;
+  }
+  return { sign: Math.abs(hash).toString(36) + timestamp.toString(36), timestamp };
+}
+
+export const saveLeaderBoard = (params: LeaderBoardSaveParams) => {
+  const { sign, timestamp } = generateLeaderBoardSign(params);
+  return axios.post('/api/leaderboard/save', { ...params, sign, timestamp });
 };
 
 export const getGame = (params?: { id: string }) => {

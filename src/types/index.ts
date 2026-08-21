@@ -66,6 +66,16 @@ export type LeaderBoardType = {
   createdAt: string;
 };
 
+export type LeaderBoardSaveParams = {
+  accuracy: string;
+  duration: number;
+  type: string;
+  userId: string;
+  userName: string;
+  wpm: string;
+  objectId: string;
+};
+
 export type SuggestItem = {
   id: string;
   content: string;
