@@ -484,31 +484,32 @@ defineExpose({
   }
 }
 .y-auth__login {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
 }
 .y-auth__login-img-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 .y-auth__login-img-wrap--login {
-  width: 18px;
-  height: 18px;
-  border-radius: 10px;
-  box-shadow: 0px 0px 5px $main-color;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px $main-color;
   overflow: hidden;
   .y-auth__login-img {
     width: 100%;
     height: 100%;
-    opacity: 0.6;
+    opacity: 0.9;
   }
 }
 .y-auth__login-img {
-  width: 16px;
-  height: 16px;
-  opacity: 0.6;
-  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+  opacity: 0.85;
+  border-radius: 50%;
 }
 .y-auth__footer {
   justify-content: space-between;
@@ -521,12 +522,13 @@ defineExpose({
   }
 }
 .y-auth__menu-item {
-  border-radius: 2px;
-  padding: 10px 15px;
+  border-radius: $radius-sm;
+  padding: 8px 12px;
   display: block;
-  transition: color 0.2s;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
     color: $main-color;
+    background: $background-gray;
   }
 }
 .y-auth__footer-change {

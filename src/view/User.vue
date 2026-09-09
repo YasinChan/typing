@@ -427,7 +427,7 @@ const setResetAvatar = () => {
 .y-user__image {
   width: 100px;
   height: 100px;
-  border-radius: 2px;
+  border-radius: $radius-lg;
   overflow: hidden;
 }
 .y-user__name-info {
@@ -439,8 +439,8 @@ const setResetAvatar = () => {
 }
 .y-user__user-status {
   font-size: 12px;
-  border-radius: 2px;
-  padding: 2px 5px;
+  border-radius: $radius-full;
+  padding: 2px 8px;
   margin-left: 4px;
   border: 1px solid $gray-04;
   vertical-align: middle;
