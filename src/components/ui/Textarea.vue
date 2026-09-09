@@ -57,19 +57,23 @@ watch(
     position: relative;
     display: inline-block;
     width: 100%;
-    padding: 4px 30px 4px 10px;
+    padding: 10px 32px 10px 12px;
     color: $gray-08;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
     height: 60px;
     background-color: $background-gray;
     border: 1px solid $gray-02;
-    border-radius: 4px;
-    transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    border-radius: $radius-md;
+    transition: border-color 0.2s $ease-out, box-shadow 0.2s $ease-out;
     resize: none;
+    &:hover {
+      border-color: $gray-06;
+    }
     &:focus {
       outline: none;
       border-color: $main-color;
+      box-shadow: 0 0 0 3px rgba(21, 197, 206, 0.16);
     }
   }
 }

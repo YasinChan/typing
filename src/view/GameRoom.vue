@@ -947,11 +947,11 @@ watch(
 
 .y-game-room__setting {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 36px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 24px;
+  min-height: 40px;
 }
 
 .y-game-room__count-down {
@@ -960,8 +960,11 @@ watch(
   left: 0;
   transform: translateY(-50%);
   color: $gray-04;
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 44px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
   &.y-game-room__count-down--active {
     color: $main-color;
   }

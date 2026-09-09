@@ -8,6 +8,7 @@ import {
   type TypingRecordItemType,
   type TypingRecordType
 } from '@/types';
+import { useI18n } from 'vue-i18n';
 
 // common
 import { replacePunctuationWithSpace } from '@/common/string';
@@ -22,6 +23,12 @@ const { y } = useScroll(el, { behavior: 'smooth' });
 const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单，这些字符不会被标记为错误
 const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’']; // composition 状态下的字符
 const inputAreaRef = ref<HTMLElement | null>(null);
+const isFocused = ref(false);
+const showStartHint = ref(false);
+let hintTimer: number | null = null;
+const hasOpenModal = ref(false);
+let modalObserver: MutationObserver | null = null;
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -71,12 +78,25 @@ const chartSampler = useTypingChartSampler({
 
 onMounted(async () => {
   await nextTick();
-  if (!inputAreaRef.value) return;
-  // inputAreaRef.value.focus();
+  window.addEventListener('keydown', onWindowKeyDown, true);
+  // 等页面自动聚焦完成后再决定是否展示提示，避免首屏闪一下
+  hintTimer = window.setTimeout(() => {
+    showStartHint.value = true;
+  }, 400);
+  syncOpenModal();
+  modalObserver = new MutationObserver(syncOpenModal);
+  modalObserver.observe(document.body, { childList: true });
 });
 
 onUnmounted(() => {
   chartSampler.stop();
+  window.removeEventListener('keydown', onWindowKeyDown, true);
+  if (hintTimer) {
+    clearTimeout(hintTimer);
+    hintTimer = null;
+  }
+  modalObserver?.disconnect();
+  modalObserver = null;
 });
 
 const { grouped: progressInfoComputed, keys: progressInfoKeys } = useProgressInfo(
@@ -374,10 +394,41 @@ function focusInput() {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.focus();
   moveCaretToEnd(inputAreaRef.value);
+  isFocused.value = true;
 }
 function blurInput() {
   if (!inputAreaRef.value) return;
   inputAreaRef.value.blur();
+}
+
+function syncOpenModal() {
+  hasOpenModal.value = !!document.querySelector('.y-modal__mask');
+}
+
+/** 点击文案区域时把光标拉回输入层，避免点到上层字母却无法继续打 */
+function onWrapMouseDown(e: MouseEvent) {
+  if (hasOpenModal.value) return;
+  const target = e.target as HTMLElement | null;
+  if (target?.closest('.y-word-input__input-area')) {
+    return;
+  }
+  e.preventDefault();
+  focusInput();
+}
+
+/** 弹窗未打开时，任意可输入按键重新聚焦，避免点到空白后键盘失灵 */
+function onWindowKeyDown(e: KeyboardEvent) {
+  if (state.isComposing) return;
+  if (document.querySelector('.y-modal__mask')) return;
+  const target = e.target as HTMLElement | null;
+  if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === 'Escape' || e.code === 'Tab' || e.code === 'Enter') return;
+  if (e.key.length === 1 || e.code === 'Space' || e.code === 'Backspace') {
+    // 只拉回焦点，拦截这次按键，避免英文字母直接写入、IME 进不了 composition
+    e.preventDefault();
+    focusInput();
+  }
 }
 
 function moveCaretToEnd(element: HTMLElement) {
@@ -503,16 +554,32 @@ defineExpose({
 </script>
 
 <template>
-  <div class="y-word-input__wrap" :class="className">
+  <div
+    class="y-word-input__wrap"
+    :class="[className, { 'is-focused': isFocused, 'is-typing': state.isTyping }]"
+    @mousedown="onWrapMouseDown"
+  >
     <Transition name="mask">
       <div v-if="y > 0" class="y-word-input__mask"></div>
     </Transition>
     <div class="y-word-input__mask-bottom" v-if="showMask"></div>
+    <Transition name="mask">
+      <div
+        v-if="showStartHint && !isFocused && !state.isTyping && !hasOpenModal"
+        class="y-word-input__hint"
+      >
+        {{ t('click_to_start') }}
+      </div>
+    </Transition>
     <div class="y-word-input" ref="el">
       <div class="y-word-input__quote">
         <span
           v-for="(item, index) in state.quoteArr"
-          :class="['letter', item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
+          :class="[
+            'letter',
+            item.isWrong ? 'is-wrong' : '',
+            item.isInput ? 'is-input' : '',
+          ]"
           :key="item.id"
           >{{ item.word
           }}<template v-if="progressInfoKeys.includes(index)"
@@ -539,6 +606,8 @@ defineExpose({
         @compositionstart="compositionStartEvent"
         @compositionupdate="compositionUpdateEvent"
         @compositionend="compositionEndEvent"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
         class="y-word-input__input-area"
         contenteditable="true"
       ></div>
@@ -552,6 +621,16 @@ defineExpose({
   width: 100%;
   min-height: 150px;
   overflow: hidden;
+  cursor: text;
+  /* 把 hint 的 z-index 限制在打字区内，避免盖住 Teleport 到 body 的弹框 */
+  isolation: isolate;
+  &:not(.is-focused):not(.is-typing) {
+    .y-word-input__quote,
+    .y-word-input__input-area {
+      opacity: 0.42;
+      transition: opacity 0.25s $ease-out;
+    }
+  }
 }
 
 .y-word-input__mask {
@@ -599,12 +678,15 @@ defineExpose({
   white-space: normal;
   .letter {
     position: relative;
+    transition: color 0.08s linear;
   }
   .is-input {
-    color: $gray-06;
+    color: $gray-08;
   }
   .is-wrong {
     color: $main-red;
+    text-decoration: underline;
+    text-underline-offset: 6px;
   }
 }
 .y-word-input__input-area {
@@ -615,23 +697,42 @@ defineExpose({
   display: inline-block;
   width: 100%;
   color: $gray-08;
-  transition: all 0.3s;
+  caret-color: $main-color;
+  transition: opacity 0.25s $ease-out;
   outline: 0;
   &:after {
     content: '';
     position: absolute;
     display: block;
     width: 100%;
-    height: 1px;
-    bottom: 20px;
-    background: $gray-06;
+    height: 2px;
+    bottom: 18px;
+    border-radius: 2px;
+    background: $gray-02;
+    opacity: 0.7;
+    transition: background-color 0.2s $ease-out, opacity 0.2s $ease-out;
   }
   &:hover,
   &:focus {
     &:after {
       background: $main-color;
+      opacity: 1;
     }
   }
+}
+
+.y-word-input__hint {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $main-color;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  pointer-events: none;
 }
 
 .mask-enter-active,

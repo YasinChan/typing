@@ -56,30 +56,31 @@ const blurHandler = (event: any): any => {
     position: relative;
     display: inline-block;
     width: 100%;
-    padding: 4px 11px;
+    padding: 8px 12px;
     color: $gray-08;
     font-size: 14px;
-    background-color: $layout-background-gray;
+    background-color: $background-gray;
     background-image: none;
-    border: 1px solid $gray-06;
-    border-radius: 2px;
-    transition: all 0.3s;
+    border: 1px solid $gray-02;
+    border-radius: $radius-md;
+    transition: border-color 0.2s $ease-out, box-shadow 0.2s $ease-out;
     outline: 0;
-    &:hover,
+    &:hover {
+      border-color: $gray-06;
+    }
     &:focus {
       border-color: $main-color;
-      border-right-width: 1px;
-      outline: 0;
+      box-shadow: 0 0 0 3px rgba(21, 197, 206, 0.16);
     }
   }
 }
 .y-input--err {
   input {
-    border: 1px solid $main-red;
+    border-color: $main-red;
     &:hover,
     &:focus {
       border-color: $main-red;
-      border-right-width: 1px;
+      box-shadow: 0 0 0 3px rgba(246, 76, 76, 0.16);
     }
   }
 }
@@ -87,7 +88,7 @@ const blurHandler = (event: any): any => {
   font-size: 12px;
   color: $main-red;
   left: 0;
-  top: 25px;
+  top: calc(100% + 2px);
   position: absolute;
 }
 </style>

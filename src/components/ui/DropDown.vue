@@ -35,23 +35,27 @@ defineExpose({
   position: relative;
 }
 .y-drop-down__menu {
-  z-index: 1;
+  z-index: 2;
   position: absolute;
   right: 0;
-  top: 28px;
+  top: 36px;
+  min-width: 140px;
+  padding: 6px;
   background: $layout-background-gray;
-  border-radius: 2px;
-  box-shadow: 0px 0px 5px $layout-background-gray;
+  border-radius: $radius-md;
+  box-shadow: $shadow-md;
   color: $gray-06;
+  overflow: hidden;
 }
 
 .drop-down-enter-active,
 .drop-down-leave-active {
-  transition: all 0.1s ease;
+  transition: opacity 0.16s $ease-out, transform 0.16s $ease-out;
 }
 
 .drop-down-enter-from,
 .drop-down-leave-to {
   opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

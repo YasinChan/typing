@@ -47,44 +47,60 @@ const handlerClick = () => {
 <style lang="scss">
 .y-button {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   white-space: nowrap;
   border: none;
-  box-shadow: 0 2px #00000004;
   cursor: pointer;
   user-select: none;
   touch-action: manipulation;
-  padding: 6px 12px;
+  padding: 8px 16px;
   font-size: 14px;
-  border-radius: 2px;
+  font-weight: 600;
+  border-radius: $radius-md;
   color: $label-white;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   background: $main-color;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s $ease-out, box-shadow 0.2s $ease-out, background-color 0.2s $ease-out,
+    color 0.2s $ease-out, opacity 0.2s $ease-out;
   &:hover {
-    background: $main-color;
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: $shadow-sm;
   }
 }
 .y-button--small {
   padding: 4px 10px;
   font-size: 12px;
+  border-radius: $radius-sm;
 }
 .y-button--large {
-  padding: 6px 12px;
+  padding: 10px 18px;
   font-size: 16px;
 }
 .y-button--disabled {
   cursor: not-allowed;
-  opacity: 0.3 !important;
+  opacity: 0.35 !important;
+  box-shadow: none;
+  transform: none !important;
   &:hover {
-    opacity: 0.3 !important;
+    opacity: 0.35 !important;
+    transform: none !important;
+    box-shadow: none;
   }
 }
 .y-button--secondary {
-  background: $label-white;
-  opacity: 0.8;
+  background: transparent;
   color: $main-color;
+  box-shadow: inset 0 0 0 1px $main-color;
   &:hover {
-    background: $label-white;
-    color: $main-color;
+    background: $main-color;
+    color: $label-white;
+    box-shadow: $shadow-sm;
   }
 }
 </style>

@@ -394,12 +394,13 @@ watch(
   fill: $gray-08;
 }
 .y-game__list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
   font-size: 14px;
-  justify-content: space-between;
   margin-top: 20px;
   position: relative;
+  font-weight: 400;
   .y-loading {
     position: absolute;
     left: 50%;
@@ -407,15 +408,24 @@ watch(
   }
 }
 .y-game__list-item--empty {
-  width: 30%;
-  padding: 10px;
-  margin-bottom: 20px;
+  &:not(.y-game__list-item) {
+    display: none;
+  }
 }
 .y-game__list-item {
-  border-radius: 2px;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  display: block;
+  padding: 16px;
+  border-radius: $radius-md;
+  background: $layout-background-gray;
+  box-shadow: $shadow-sm;
+  transition: transform 0.2s $ease-out, box-shadow 0.2s $ease-out;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
 }
 .y-game__list-item-title {
   margin-bottom: 10px;
+  font-weight: 700;
 }
 </style>

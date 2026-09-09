@@ -237,79 +237,64 @@ async function changePunctuation() {
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
-    <template v-if="!state.showResult">
+    <div v-if="!state.showResult" class="y-typing-stage">
       <div class="y-quote-limit__setting-wrap">
         <div
           v-if="state.showTime"
-          class="y-quote-limit__start"
-          :class="[timeFormat ? 'y-quote-limit__start--active' : '']"
+          class="y-typing-timer"
+          :class="{ 'is-active': !!timeFormat }"
         >
           {{ timeFormat || 0 }}
         </div>
         <div
-          class="y-quote-limit__setting"
-          :class="state.type !== 'short' ? 'y-quote-limit__setting--disabled' : ''"
+          class="y-quote-limit__setting y-typing-setting"
         >
           <Transition name="menu">
-            <div
-              v-show="!onlyShowMain"
-              class="y-quote-limit__setting-item y-quote-limit__set-time"
-              :class="[state.showTime ? 'y-quote-limit__time--active' : '']"
-              @click="state.showTime = !state.showTime"
-            >
-              {{ $t('display_timer') }}
-            </div>
-          </Transition>
-          <Transition name="menu">
-            <div
-              v-show="!onlyShowMain"
-              v-if="state.type !== 'short'"
-              class="y-quote-limit__setting-item y-quote-limit__set-time"
-              @click="changePunctuation"
-            >
-              {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
-            </div>
-          </Transition>
-          <Transition name="menu">
-            <div
-              v-show="!onlyShowMain"
-              class="y-quote-limit__setting-item y-quote-limit__refresh"
-              @click="refresh"
-            >
-              <div class="y-quote-limit__time-svg">
-                <Tooltip content="刷新">
+            <div v-show="!onlyShowMain" class="y-typing-toolbar">
+              <div
+                class="y-typing-chip"
+                :class="{ 'is-active': state.showTime }"
+                @click="state.showTime = !state.showTime"
+              >
+                {{ $t('display_timer') }}
+              </div>
+              <div
+                v-if="state.type !== 'short'"
+                class="y-typing-chip"
+                :class="{ 'is-active': state.isSpaceType }"
+                @click="changePunctuation"
+              >
+                {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
+              </div>
+              <div class="y-typing-icon" @click="refresh">
+                <Tooltip :content="$t('refresh')">
                   <IcoChange></IcoChange>
                 </Tooltip>
               </div>
-            </div>
-          </Transition>
-          <Transition name="menu">
-            <div v-show="!onlyShowMain" class="y-quote-limit__setting-item y-quote-limit__time">
+              <span class="y-typing-toolbar__divider"></span>
               <Tooltip content="选择句子类型">
                 <span
                   v-for="item in typeList"
                   :key="item.type"
-                  class="y-quote-limit__time-item"
-                  style="width: auto"
-                  :class="{ 'y-quote-limit__time-item--active': state.type === item.type }"
+                  class="y-typing-chip"
+                  :class="{ 'is-active': state.type === item.type }"
                   @click="selectType(item.type)"
                   >{{ item.name }}</span
                 >
               </Tooltip>
-            </div>
-          </Transition>
-          <Transition name="menu">
-            <div v-show="!onlyShowMain" class="y-quote-limit__setting-item y-quote-limit__time">
-              <Tooltip content="选择数量">
+              <template v-if="state.type === 'short'">
+                <span class="y-typing-toolbar__divider"></span>
+                <Tooltip content="选择数量">
                 <span
                   v-for="item in quoteLength"
                   :key="item"
-                  class="y-quote-limit__time-item"
-                  :class="{ 'y-quote-limit__time-item--active': state.len === item }"
+                  class="y-typing-chip"
+                  :class="{ 'is-active': state.len === item }"
                   @click="selectLen(item)"
                   >{{ item }}</span
                 >
               </Tooltip>
+              </template>
             </div>
           </Transition>
         </div>
@@ -344,7 +329,7 @@ async function changePunctuation() {
           @is-finished="finished"
           class-name="y-quote-limit__word-input"
         ></WordInput>
-        <div class="y-quote-limit__info">
+        <div class="y-quote-limit__info y-quote-meta">
           ——
           <span class="y-quote-limit__info-title">
             {{ state.quotes?.title }}
@@ -357,7 +342,7 @@ async function changePunctuation() {
         <Transition name="menu">
           <div
             v-show="!onlyShowMain"
-            class="y-quote-limit__detail"
+            class="y-quote-limit__detail y-quote-more"
             @click="detailModalRef?.setShowDetail()"
           >
             {{ $t('view_full') }}
@@ -366,12 +351,12 @@ async function changePunctuation() {
         <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       </template>
       <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-quote-limit__tips">
+        <div v-show="!onlyShowMain" class="y-quote-limit__tips y-typing-tips">
           <p>*{{ $t('sentence.word_tip') }}</p>
           <p v-if="state.type === 'short'">*短句模式下回车则会切换到下一条。</p>
         </div>
       </Transition>
-    </template>
+    </div>
     <template v-else>
       <ResultContent
         type="countdown"
@@ -395,103 +380,8 @@ async function changePunctuation() {
     width: 100%;
   }
 }
-.y-quote-limit__set-time {
-  display: inline-flex;
-  align-items: center;
-  color: $gray-04;
-  font-size: 14px;
-  line-height: 24px;
-  height: 24px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  &:hover {
-    color: $main-color;
-  }
-  &.y-quote-limit__time--active {
-    color: $main-color;
-  }
-}
-.y-quote-limit__refresh {
-  cursor: pointer;
-}
 .y-quote-limit__setting-wrap {
   position: relative;
-  overflow: hidden;
-  padding-top: 50px;
-  margin-top: -50px;
-}
-.y-quote-limit__setting {
-  margin-bottom: 30px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 24px;
-  transition: transform 0.2s ease;
-}
-.y-quote-limit__setting--disabled {
-  transform: translateX(110px);
-}
-.y-quote-limit__setting-item:not(:last-child) {
-  position: relative;
-  margin-right: 30px;
-  &::after {
-    content: '';
-    position: absolute;
-    width: 1px;
-    height: 12px;
-    background: $gray-02;
-    right: -15px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
-.y-quote-limit__start {
-  position: absolute;
-  top: 42px;
-  left: 0;
-  color: $gray-04;
-  font-size: 40px;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  transition: color 0.2s ease;
-  &.y-quote-limit__start--active {
-    color: $main-color;
-  }
-}
-.y-quote-limit__time-svg {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  svg {
-    width: 18px;
-    height: 18px;
-    fill: $gray-06;
-    cursor: pointer;
-  }
-}
-.y-quote-limit__time {
-  display: inline-flex;
-  align-items: center;
-  color: $gray-06;
-  font-size: 16px;
-  line-height: 24px;
-  height: 24px;
-}
-.y-quote-limit__time-item {
-  margin-right: 10px;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  word-break: keep-all;
-}
-.y-quote-limit__time-item--active {
-  color: $main-color;
 }
 .y-quote-limit__word-input.y-word-input__wrap {
   height: 280px;
@@ -499,25 +389,13 @@ async function changePunctuation() {
     height: 280px;
   }
 }
-.y-quote-limit__info {
-  margin-top: 30px;
-  text-align: right;
-  color: $gray-04;
-}
-.y-quote-limit__detail {
-  text-align: right;
-  color: $gray-04;
-  font-size: 14px;
-  font-weight: normal;
-  margin-top: 20px;
-  cursor: pointer;
-}
-.y-quote-limit__tips {
-  margin-top: 60px;
-  color: $gray-02;
-  font-size: 16px;
-  line-height: 30px;
-  height: 24px;
-  text-align: center;
+.y-quote-limit__content {
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.8;
+  p + p {
+    margin-top: 8px;
+  }
 }
 </style>

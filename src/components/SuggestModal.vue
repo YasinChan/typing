@@ -495,11 +495,22 @@ defineExpose({
 <style lang="scss">
 .y-submit-suggest.tooltip {
   position: fixed;
-  right: 60px;
-  bottom: 20px;
+  right: 24px;
+  bottom: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: $layout-background-gray;
+  box-shadow: $shadow-md;
+  justify-content: center;
+  transition: transform 0.2s $ease-out, box-shadow 0.2s $ease-out;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
   .y-submit-suggest__svg {
-    width: 30px;
-    height: 30px;
+    width: 22px;
+    height: 22px;
     fill: $main-color;
     cursor: pointer;
     z-index: 999;

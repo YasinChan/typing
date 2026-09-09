@@ -349,27 +349,23 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
 </script>
 <template>
   <div class="y-result-content__info flex-center">
-    <div class="result-content flex-center" :content="state.accuracyInfo">
-      {{ $t('accuracy') }}:&nbsp;<span class="result-content--main-color">{{
-        state.accuracy
-      }}</span>
-      <Tooltip class="cursor-pointer result-content__tips" :content="state.accuracyInfo">
+    <div class="y-result-stat">
+      <div class="y-result-stat__label">{{ $t('accuracy') }}</div>
+      <div class="y-result-stat__value">{{ state.accuracy }}</div>
+      <Tooltip class="cursor-pointer y-result-stat__tips" :content="state.accuracyInfo">
         <IcoTips></IcoTips>
       </Tooltip>
     </div>
-    <div class="result-content flex-center">
-      {{ $t('speed') }}:&nbsp;<span class="result-content--main-color">{{ state.speed }}</span>
-      <Tooltip
-        class="cursor-pointer result-content__tips"
-        :content="$t('sentence.leaderboard_rule1')"
-      >
+    <div class="y-result-stat">
+      <div class="y-result-stat__label">{{ $t('speed') }}</div>
+      <div class="y-result-stat__value">{{ state.speed || '—' }}</div>
+      <Tooltip class="cursor-pointer y-result-stat__tips" :content="$t('sentence.leaderboard_rule1')">
         <IcoTips></IcoTips>
       </Tooltip>
     </div>
-    <div class="result-content flex-center">
-      {{ $t('duration') }}:&nbsp;
-      <span class="result-content--main-color">{{ totalTime.toFixed(1) }}</span
-      >&nbsp;{{ $t('sec') }}
+    <div class="y-result-stat">
+      <div class="y-result-stat__label">{{ $t('duration') }}</div>
+      <div class="y-result-stat__value">{{ totalTime.toFixed(1) }}<span class="y-result-stat__unit">{{ $t('sec') }}</span></div>
     </div>
   </div>
   <Chart
@@ -450,7 +446,52 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
 </template>
 <style lang="scss">
 .y-result-content__info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
   margin-bottom: 40px;
+}
+.y-result-stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 22px 18px;
+  background: $layout-background-gray;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+.y-result-stat__label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: $gray-06;
+}
+.y-result-stat__value {
+  color: $main-color;
+  font-size: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+.y-result-stat__unit {
+  margin-left: 6px;
+  font-size: 14px;
+  color: $gray-06;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.y-result-stat__tips {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: $gray-04;
+  }
 }
 .result-content__svg {
   &.result-content__svg--disabled {
@@ -463,59 +504,49 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   svg {
     width: 18px;
     height: 18px;
-    fill: $label-white;
+    fill: currentColor;
     cursor: pointer;
-    margin-right: 4px;
   }
-  margin: 0 20px;
-}
-.result-content {
-  font-size: 20px;
-  color: $gray-06;
-  margin: 0 20px;
-  svg {
-    width: 18px;
-    height: 18px;
-    fill: $gray-04;
-    margin-left: 6px;
-    margin-top: 2px;
-  }
-}
-.result-content--main-color {
-  color: $main-color;
+  margin: 0 8px;
 }
 .result-content__toolbar {
-  margin-top: 60px;
+  margin-top: 48px;
+  gap: 8px;
 }
 .result-content__replay {
   line-height: 28px;
   margin-top: 60px;
   position: relative;
+  padding: 48px 20px 20px;
+  background: $layout-background-gray;
+  border-radius: $radius-lg;
 }
 .result-content__replay-item--underline {
   text-decoration: underline;
 }
 .result-content__count-down {
   position: absolute;
-  top: -40px;
-  left: 0;
+  top: 16px;
+  left: 20px;
   color: $main-color;
   font-size: 22px;
   font-weight: bold;
+  font-variant-numeric: tabular-nums;
 }
 .result-content__speed-up {
   user-select: none;
   position: absolute;
-  top: -40px;
-  left: 60px;
+  top: 18px;
+  left: 84px;
   color: $gray-04;
   font-size: 14px;
   font-weight: bold;
   svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     fill: $gray-06;
     cursor: pointer;
+    &:hover,
     &:active {
       fill: $main-color;
     }
@@ -524,7 +555,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
     margin-left: 4px;
   }
   &.result-content__speed-again {
-    left: 150px;
+    left: 180px;
   }
 }
 .result-content__replay-item {
@@ -541,6 +572,8 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   margin: 50px 0 20px;
   font-size: 14px;
   color: $gray-04;
+  font-weight: 400;
+  letter-spacing: 0;
   li {
     margin-left: 20px;
   }

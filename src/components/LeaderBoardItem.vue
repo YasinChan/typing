@@ -42,7 +42,7 @@ const props = defineProps<{
 </template>
 <style lang="scss">
 .y-leader-board-item {
-  font-size: 12px;
+  font-size: 13px;
 }
 .y-leader-board-item__rank {
   svg {

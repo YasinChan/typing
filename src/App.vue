@@ -292,12 +292,15 @@ function changeLocale() {
     <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
       <a href="/" class="y-info__title main-color"><span class="y-info__cap">T</span>yping</a>
     </div>
-    <h1>一个简约风格的可自定义主题、可切换字体的打字记录和键盘测试网站。</h1>
-    <h2>欢迎使用电脑端访问该页面，体验 Typing 的更多功能！</h2>
-    <img src="https://file.yasinchan.com/MCOD5rboejy8aB14T97iybJsYbPt2oAV/2272970956.png" alt="" />
-    <img src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png" alt="" />
-    <img src="https://file.yasinchan.com/mWeNzOLyIAIqhDdjxeOWdIoKvbQIBmfo/2343042681.png" alt="" />
-    <img src="https://file.yasinchan.com/3mJW6cYdhhonSKsrLNIrPRescfb9202i/1757293763.png" alt="" />
+    <h1>简约可玩的打字练习与键盘测试</h1>
+    <p class="y-mobile-show__lead">
+      限时、计时、自定义文本、键盘测试和多人 PK，实时统计速度与准确率。
+    </p>
+    <p class="y-mobile-show__hint">建议使用电脑端打开，获得完整打字体验。</p>
+    <div class="y-mobile-show__shots">
+      <img src="https://file.yasinchan.com/MCOD5rboejy8aB14T97iybJsYbPt2oAV/2272970956.png" alt="Typing 界面预览" />
+      <img src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png" alt="打字结果预览" />
+    </div>
   </div>
   <div class="y-app">
     <header>
@@ -307,6 +310,7 @@ function changeLocale() {
 
       <Transition name="menu">
         <div class="y-menu" v-show="!onlyShowMain">
+          <nav class="y-menu__nav">
           <router-link
             to="/game"
             class="y-menu__item"
@@ -321,11 +325,18 @@ function changeLocale() {
           <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
           <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
           <router-link to="/custom" class="y-menu__item">{{ $t('custom_mode') }}</router-link>
-          <a href="/keyboard" class="y-menu__item y-menu__keyboard-test">{{ $t('keyboard') }}</a>
+          <a
+            href="/keyboard"
+            class="y-menu__item y-menu__keyboard-test"
+            :class="{ 'y-menu__item--active': $route.name === 'TypingKeyboard' }"
+            >{{ $t('keyboard') }}</a
+          >
           <router-link to="/leaderboard" class="y-menu__item">{{ $t('leaderboard') }}</router-link>
+          </nav>
+          <div class="y-menu__tools">
           <YDropDown>
             <template #title>
-              <div class="y-menu__item flex-center--y">
+              <div class="y-menu__icon flex-center--y">
                 <IcoSetting></IcoSetting>
               </div>
             </template>
@@ -343,11 +354,14 @@ function changeLocale() {
               </div>
             </template>
           </YDropDown>
-          <div class="y-menu__item" @click="changeLocale">
-            <IcoTranslate></IcoTranslate>
-          </div>
-          <div class="y-menu__item y-menu__item-auth">
+          <Tooltip :content="locale === 'zh' ? 'English' : '中文'">
+            <div class="y-menu__icon" @click="changeLocale">
+              <IcoTranslate></IcoTranslate>
+            </div>
+          </Tooltip>
+          <div class="y-menu__icon y-menu__item-auth">
             <auth ref="authRef"></auth>
+          </div>
           </div>
         </div>
       </Transition>
@@ -466,7 +480,7 @@ function changeLocale() {
     @confirm="obj.showChangeFontModal = false"
   >
     <template #header>
-      <h3>{{ $t('select_theme') }}</h3>
+      <h3>{{ $t('select_font') }}</h3>
     </template>
     <template #body>
       <div class="y-change__container gray-08">
@@ -491,7 +505,7 @@ function changeLocale() {
   <Message :type="obj.type" :message="obj.message" :visible="obj.visible"></Message>
   <YModal
     :show="obj.showConfirm"
-    :z-index="10"
+    :z-index="1100"
     @close="obj.confirmClose"
     @confirm="obj.confirm"
     :show-cancel="true"
@@ -520,8 +534,8 @@ function changeLocale() {
   top: 0;
   left: 0;
   width: 100%;
-  height: 30px;
-  line-height: 30px;
+  height: 32px;
+  line-height: 32px;
   text-align: center;
   color: $label-white;
   font-weight: bold;
@@ -536,84 +550,106 @@ function changeLocale() {
 .y-app {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 44px);
 }
 .y-mobile-show {
   color: $gray-08;
   h1 {
-    margin-top: 30px;
-    font-size: 22px;
+    margin-top: 28px;
+    font-size: 24px;
+    line-height: 1.4;
   }
-  h2 {
+  .y-mobile-show__lead {
+    margin-top: 12px;
     color: $gray-06;
-    font-size: 20px;
-    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .y-mobile-show__hint {
+    margin-top: 10px;
+    color: $main-color;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .y-mobile-show__shots {
+    margin-top: 28px;
+    display: grid;
+    gap: 16px;
   }
   img {
     width: 100%;
-    margin-top: 40px;
+    border-radius: $radius-md;
+    box-shadow: $shadow-md;
   }
 }
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 38px;
+  min-height: 56px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 main,
 .y-main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 footer {
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: 8px 0 4px;
   svg {
     width: 14px;
     height: 14px;
-    fill: $gray-02;
+    fill: $gray-04;
     margin-right: 4px;
   }
   span {
-    color: $gray-02;
+    color: $gray-04;
   }
 }
 .y-app__footer-group {
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 .y-app__footer-divider {
   width: 1px;
-  height: 14px;
+  height: 12px;
   background: $gray-02;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .y-app__caps-lock {
   position: fixed;
-  z-index: 1;
-  top: 100px;
+  z-index: 2;
+  top: 88px;
   left: 50%;
   transform: translateX(-50%);
   color: $label-white;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 700;
   background: $main-color;
-  border-radius: 2px;
-  cursor: pointer;
-  padding: 0 8px;
+  border-radius: $radius-full;
+  padding: 6px 12px;
+  box-shadow: $shadow-md;
   svg {
     margin-right: 4px;
     fill: $label-white;
-    width: 20px;
+    width: 18px;
   }
 }
 .y-info {
   display: flex;
   align-items: center;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s $ease-out;
 }
 .y-info__disabled {
   opacity: 0.3;
@@ -624,10 +660,9 @@ footer {
 }
 .y-info__title {
   font-family: zhankugaoduanhei-min;
-  margin-left: 6px;
   display: inline-block;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 30px;
 }
 .y-info__cap {
@@ -636,11 +671,11 @@ footer {
   padding: 0 4px;
   margin-right: 3px;
   border: 1.5px solid currentColor;
-  border-radius: 4px;
+  border-radius: 6px;
   line-height: 1.1;
   text-align: center;
   box-shadow: inset 0 -2px 0 0 currentColor;
-  transition: box-shadow 0.12s ease, transform 0.12s ease;
+  transition: box-shadow 0.12s $ease-out, transform 0.12s $ease-out;
 }
 .y-info__title:hover .y-info__cap {
   box-shadow: inset 0 0 0 0 currentColor;
@@ -650,59 +685,69 @@ footer {
 .y-menu {
   display: flex;
   align-items: center;
+  gap: 12px;
   color: $gray-08;
 }
+.y-menu__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: $layout-background-gray;
+  border-radius: $radius-full;
+  box-shadow: $shadow-sm;
+}
+.y-menu__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .y-menu__item {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 12px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: $radius-full;
   cursor: pointer;
-  letter-spacing: 1px;
-  transition: color 0.5s;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $gray-06;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
+  &:hover {
+    color: $main-color;
+  }
+  &.router-link-exact-active,
+  &.y-menu__item--active {
+    color: $label-white;
+    background: $main-color;
+  }
+}
+.y-menu__icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  cursor: pointer;
+  color: $gray-06;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   svg {
-    transition: all 0.5s;
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
   }
   &:hover {
     color: $main-color;
-    svg {
-      fill: $main-color;
-    }
-  }
-  svg {
-    fill: $gray-08;
-    width: 18px;
-    height: 18px;
-  }
-  &:not(.y-menu__item--no-line)::after {
-    transition: all 0.1s;
-    position: absolute;
-    content: '';
-    width: 0;
-    height: 2px;
-    border-radius: 2px;
-    background: $main-color;
-    bottom: -5px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  &.router-link-active {
-    color: $main-color;
-    position: relative;
-    svg {
-      fill: $main-color;
-    }
-    &::after {
-      width: 100%;
-      left: 0;
-      transform: none;
-    }
+    background: $layout-background-gray;
   }
   &.y-menu__item-auth {
-    padding: 0;
-  }
-  &.y-menu__item--active {
-    color: $main-color;
+    width: auto;
+    min-width: 32px;
+    padding: 0 2px;
   }
 }
 .y-menu__item--blink {
@@ -710,10 +755,10 @@ footer {
 }
 .y-menu__change {
   cursor: pointer;
-  border-radius: 2px;
-  padding: 10px 15px;
+  border-radius: $radius-sm;
+  padding: 8px 12px;
   display: block;
-  transition: all 0.2s;
+  transition: background-color 0.2s $ease-out, color 0.2s $ease-out;
   color: inherit;
   &:hover {
     background-color: $main-color;
@@ -726,15 +771,14 @@ footer {
 }
 
 main {
-  margin: 100px;
-  //font-family: $font-en;
+  margin: 12px 8px;
   font-weight: 600;
   color: $gray-08;
-  font-size: 18px;
-  letter-spacing: 1px;
+  font-size: 20px;
+  letter-spacing: 0.4px;
 }
 .y-main {
-  margin: 100px auto;
+  margin: 12px auto;
   color: $gray-08;
 }
 
@@ -746,10 +790,10 @@ main {
 
 .y-app__footer {
   span {
-    transition: all 0.2s ease;
+    transition: color 0.2s $ease-out;
   }
   svg {
-    transition: all 0.2s ease;
+    transition: fill 0.2s $ease-out;
   }
   &:hover {
     span {
@@ -766,12 +810,13 @@ main {
 
 .menu-enter-active,
 .menu-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity 0.22s $ease-out, transform 0.22s $ease-out;
 }
 
 .menu-enter-from,
 .menu-leave-to {
   opacity: 0;
+  transform: translateY(-6px);
 }
 
 @keyframes title-blink {

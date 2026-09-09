@@ -9,12 +9,15 @@ const emit = defineEmits(['click']);
 <style lang="scss">
 .y-list-item {
   cursor: pointer;
-  font-size: 16px;
-  line-height: 20px;
-  margin: 8px 0;
-  transition: color 0.3s;
+  font-size: 15px;
+  line-height: 22px;
+  margin: 4px 0;
+  padding: 8px 10px;
+  border-radius: $radius-sm;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
     color: $main-color;
+    background: $background-gray;
   }
 }
 </style>

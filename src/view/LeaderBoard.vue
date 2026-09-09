@@ -134,14 +134,16 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
 <style lang="scss">
 .y-leader-board {
   color: $gray-08;
-  margin: 40px 6px;
+  margin: 8px 6px 40px;
+  font-weight: 500;
+  letter-spacing: 0;
   svg {
     fill: $gray-08;
   }
 }
 .y-leader-board__wrap-title {
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 22px;
+  margin-bottom: 24px;
   svg {
     width: 20px;
     height: 20px;
@@ -152,10 +154,16 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
 .y-leader-board__wrap {
   display: flex;
   justify-content: space-between;
+  gap: 24px;
   min-height: 40vh;
 }
 .y-leader-board__item {
-  width: 48%;
+  flex: 1;
+  min-width: 0;
+  padding: 20px;
+  background: $layout-background-gray;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
 }
 .y-leader-board__header {
   width: 100%;
@@ -163,14 +171,20 @@ function removeDuplicates<T extends Record<K, any>, K extends keyof any>(array: 
   border-collapse: collapse;
   border-spacing: 0;
   td {
-    padding: 4px 6px;
+    padding: 8px 8px;
     white-space: nowrap;
-    border-radius: 2px;
+    border-radius: $radius-sm;
   }
   tbody {
     position: relative;
     tr:nth-child(2n + 1) {
-      background-color: $layout-background-gray;
+      background-color: $background-gray;
+    }
+    tr {
+      transition: background-color 0.15s $ease-out;
+      &:hover {
+        background-color: $background-gray;
+      }
     }
   }
 }

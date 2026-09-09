@@ -57,22 +57,22 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
   <main>
     <div class="y-keyboard__setting-wrap">
       <Transition name="menu">
-        <div class="flex-center--y" style="justify-content: right" v-show="!onlyShowMain">
+        <div class="y-typing-toolbar" v-show="!onlyShowMain">
           <div
-            class="y-keyboard__setting-item"
+            class="y-typing-chip"
             v-if="state.currentSystem === 'win'"
             @click="state.currentSystem = 'mac'"
           >
             Windows
           </div>
           <div
-            class="y-keyboard__setting-item"
+            class="y-typing-chip"
             v-if="state.currentSystem === 'mac'"
             @click="state.currentSystem = 'win'"
           >
             Mac
           </div>
-          <div class="y-keyboard__setting-item" @click="state.keyboardModal = true">
+          <div class="y-typing-chip" @click="state.keyboardModal = true">
             切换键盘配列
           </div>
         </div>
@@ -187,7 +187,7 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 24px;
+  min-height: 40px;
   transition: transform 0.2s ease;
   font-size: 16px;
   color: $gray-06;
@@ -197,17 +197,7 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
 }
 .y-keyboard__setting-item:not(:last-child) {
   position: relative;
-  margin-right: 30px;
-  &::after {
-    content: '';
-    position: absolute;
-    width: 1px;
-    height: 12px;
-    background: $gray-02;
-    right: -15px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+  margin-right: 8px;
 }
 .y-main__selection-item {
   padding: 4px 8px;
