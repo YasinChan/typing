@@ -212,58 +212,53 @@ function reset() {
 </script>
 <template>
   <main class="y-time-limit" :class="'y-font--' + currentFont">
-    <template v-if="!state.showResult">
-      <div class="y-time-limit__setting">
+    <div v-if="!state.showResult" class="y-typing-stage">
+      <div class="y-time-limit__setting y-typing-setting">
         <div
           v-if="(state.countDown || state.selectTime) && state.showCountDown"
-          class="y-time-limit__count-down"
-          :class="[state.countDown ? 'y-time-limit__count-down--active' : '']"
+          class="y-typing-timer"
+          :class="{
+            'is-active': !!state.countDown,
+            'is-urgent': !!state.countDown && state.countDown <= 5
+          }"
         >
           {{ state.countDown || state.selectTime }}
         </div>
         <Transition name="menu">
-          <div
-            v-show="!onlyShowMain"
-            class="y-time-limit__setting-item y-time-limit__refresh"
-            @click="refresh"
-          >
-            <Tooltip class="y-time-limit__time-svg" content="刷新">
-              <IcoChange></IcoChange>
-            </Tooltip>
-          </div>
-        </Transition>
-        <Transition name="menu">
-          <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__time">
+          <div v-show="!onlyShowMain" class="y-typing-toolbar">
+            <div class="y-typing-icon" @click="refresh">
+              <Tooltip :content="$t('refresh')">
+                <IcoChange></IcoChange>
+              </Tooltip>
+            </div>
+            <span class="y-typing-toolbar__divider"></span>
             <Tooltip :content="$t('select_countdown')">
               <span
                 v-for="item in customTime"
                 :key="item"
-                class="y-time-limit__time-item"
-                :class="{ 'y-time-limit__time-item--active': state.selectTime === item }"
+                class="y-typing-chip"
+                :class="{ 'is-active': state.selectTime === item }"
                 @click="selectTime(item)"
                 >{{ item }}</span
               >
             </Tooltip>
             <div
-              class="y-time-limit__time-item"
+              class="y-typing-chip"
               v-if="router.currentRoute?.value?.query?.id"
-              style="cursor: pointer; white-space: nowrap; margin-left: 10px"
               @click="reset"
             >
               {{ $t('reset') }}
             </div>
-          </div>
-        </Transition>
-        <Transition name="menu">
-          <div v-show="!onlyShowMain" class="y-time-limit__setting-item y-time-limit__settings">
+            <span class="y-typing-toolbar__divider"></span>
             <YDropDown>
               <template #title>
-                <Tooltip class="y-time-limit__time-svg" content="设置">
-                  <IcoSetting
-                    :class="{
-                      'y-time-limit__time-item--active': !customTime.includes(state.selectTime)
-                    }"
-                  ></IcoSetting>
+                <Tooltip content="设置">
+                  <div
+                    class="y-typing-icon"
+                    :class="{ 'is-active': !customTime.includes(state.selectTime) }"
+                  >
+                    <IcoSetting></IcoSetting>
+                  </div>
                 </Tooltip>
               </template>
               <template #menu>
@@ -296,7 +291,7 @@ function reset() {
         :quote="state.quote?.content"
         @is-typing="isTypingFunc"
       ></WordInput>
-      <div class="y-time-limit__info">
+      <div class="y-time-limit__info y-quote-meta">
         ——
         <span class="y-time-limit__info-title">
           {{ state.quote?.title }}
@@ -307,11 +302,11 @@ function reset() {
         </span>
       </div>
       <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-time-limit__detail">
+        <div v-show="!onlyShowMain" class="y-time-limit__detail y-quote-more">
           <span @click="detailModalRef?.setShowDetail()">{{ $t('view_full') }}</span>
         </div>
       </Transition>
-    </template>
+    </div>
     <template v-else>
       <ResultContent
         type="time"
@@ -351,72 +346,20 @@ function reset() {
     height: 280px;
   }
 }
-.y-time-limit__setting {
-  position: relative;
-  margin-bottom: 30px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  height: 24px;
-}
-.y-time-limit__setting-item:not(:last-child) {
-  position: relative;
-  margin-right: 30px;
-  &::after {
-    content: '';
-    position: absolute;
-    width: 1px;
-    height: 12px;
-    background: $gray-02;
-    right: -15px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-}
-.y-time-limit__count-down {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  color: $gray-04;
-  font-size: 40px;
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  transition: color 0.2s ease;
-  &.y-time-limit__count-down--active {
-    color: $main-color;
-  }
-}
-.y-time-limit__set-time {
-  display: inline-flex;
-  align-items: center;
-  color: $gray-04;
-  font-size: 14px;
-  line-height: 24px;
-  height: 24px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  &:hover {
-    color: $main-color;
-  }
-  &.y-time-limit__time--active {
-    color: $main-color;
-  }
-}
 .y-time-limit__settings-menu {
-  min-width: 160px;
-  padding: 6px 0;
+  min-width: 180px;
+  padding: 4px 0;
   font-size: 14px;
 }
 .y-time-limit__settings-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 8px 10px;
+  border-radius: $radius-sm;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background 0.15s $ease-out, color 0.15s $ease-out;
   svg {
     width: 14px;
     height: 14px;
@@ -427,72 +370,8 @@ function reset() {
     color: $gray-08;
   }
 }
-.y-time-limit__time {
-  display: inline-flex;
-  align-items: center;
-  color: $gray-06;
-  font-size: 16px;
-  line-height: 24px;
-  height: 24px;
-}
-.y-time-limit__time-item {
-  margin-right: 10px;
-  cursor: pointer;
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  &:hover {
-    color: $main-color;
-  }
-}
-.y-time-limit__time-item--active {
-  color: $main-color;
-  fill: $main-color !important;
-}
-.y-time-limit__time-svg {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  svg {
-    width: 18px;
-    height: 18px;
-    fill: $gray-06;
-    cursor: pointer;
-  }
-}
-.y-time-limit__refresh {
-  cursor: pointer;
-  margin-right: 20px;
-  svg {
-    fill: $gray-06;
-    width: 18px;
-    height: 18px;
-  }
-}
-.y-time-limit__info {
-  margin-top: 30px;
-  text-align: right;
-  color: $gray-04;
-}
-.y-time-limit__detail {
-  text-align: right;
-  color: $gray-04;
-  font-size: 14px;
-  font-weight: normal;
-  margin-top: 20px;
-  span {
-    cursor: pointer;
-  }
-}
 .time-limit__container {
   color: $gray-04;
   font-size: 14px;
-}
-.time-limit__remind {
-  padding-bottom: 10px;
 }
 </style>
