@@ -6,20 +6,50 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: Quotes, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: $background-gray;
-  transition: background-color 0.3s, color 0.3s;
-  padding: 32px;
+  color: $gray-08;
+  transition: background-color 0.3s $ease-out, color 0.3s $ease-out;
+  padding: 20px 28px 24px;
+}
+
+::selection {
+  background: $main-color;
+  color: $label-white;
+}
+
+:focus-visible:not([contenteditable='true']) {
+  outline: 2px solid $main-color;
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: $gray-02;
+  border-radius: $radius-full;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .y-mobile-show {
   display: none;
 }
 @media only screen and (max-width: 767px) {
+  body {
+    padding: 16px;
+  }
   .y-mobile-show {
     display: block;
   }
@@ -108,7 +138,7 @@ a {
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -159,3 +189,5 @@ a {
 .vc-input-toggle {
   display: none !important;
 }
+
+@import './typing.scss';

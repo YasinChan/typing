@@ -13,11 +13,11 @@ defineProps<{
 .y-tag {
   display: inline-flex;
   align-items: center;
-  padding: 0 4px;
-  border-radius: 4px;
-  line-height: 20px;
+  padding: 0 8px;
+  border-radius: $radius-full;
+  line-height: 22px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: #fff;
   background-color: $main-color;
   margin-right: 4px;

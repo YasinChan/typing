@@ -17,4 +17,14 @@
   --main-red: #f64c4c;
   --main-color: #15c5ce;
   --main-orange: #ff8156;
+
+  /* 形状与层级，自定义主题不覆盖颜色时沿用 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.32);
+  --overlay: rgba(10, 12, 16, 0.56);
 }

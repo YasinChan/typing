@@ -1,0 +1,156 @@
+/* 打字页共用控件：计时、胶囊工具条、文案信息、提示 */
+
+/* 在页头页脚之间把打字区垂直居中；内容超出时 auto 边距收成 0，避免顶部被裁切 */
+.y-typing-stage {
+  width: 100%;
+  margin-block: auto;
+}
+
+.y-typing-setting {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 40px;
+  margin-bottom: 36px;
+}
+
+.y-typing-timer {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $gray-04;
+  font-size: 44px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  transition: color 0.2s $ease-out;
+  &.is-active {
+    color: $main-color;
+  }
+  &.is-urgent {
+    color: $main-red;
+    animation: typing-urgent 1s ease-in-out infinite;
+  }
+}
+
+.y-typing-toolbar {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 4px;
+  background: $layout-background-gray;
+  border-radius: $radius-full;
+  box-shadow: $shadow-sm;
+}
+
+.y-typing-toolbar__divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: $gray-02;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.y-typing-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: $radius-full;
+  color: $gray-06;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out, transform 0.2s $ease-out;
+  &:hover {
+    color: $main-color;
+  }
+  &.is-active {
+    color: $label-white;
+    background: $main-color;
+  }
+}
+
+.y-typing-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-full;
+  cursor: pointer;
+  color: $gray-06;
+  transition: background-color 0.2s $ease-out, color 0.2s $ease-out;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  &:hover {
+    color: $main-color;
+    background: $background-gray;
+  }
+  &.is-active {
+    color: $main-color;
+  }
+}
+
+.y-quote-meta {
+  margin-top: 28px;
+  text-align: right;
+  color: $gray-04;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.y-quote-more {
+  margin-top: 8px;
+  text-align: right;
+  color: $gray-04;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s $ease-out;
+  &:hover {
+    color: $main-color;
+  }
+}
+
+.y-typing-tips {
+  margin-top: 48px;
+  color: $gray-04;
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+  font-weight: 400;
+  letter-spacing: 0;
+  opacity: 0.75;
+}
+
+@keyframes typing-urgent {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .y-typing-timer.is-urgent {
+    animation: none;
+  }
+}

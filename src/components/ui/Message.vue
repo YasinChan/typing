@@ -26,15 +26,17 @@ defineProps({
 <style lang="scss">
 .y-message {
   position: fixed;
-  top: 20px;
+  top: 24px;
   left: 50%;
-  transform: translateX(-50%);
-  padding: 10px 20px;
-  border-radius: 4px;
+  transform: translate(-50%, 0);
+  padding: 10px 18px;
+  border-radius: $radius-full;
   color: #fff;
   font-size: 14px;
-  transition: opacity 0.3s;
+  font-weight: 600;
+  box-shadow: $shadow-md;
   z-index: 9999;
+  max-width: min(90vw, 520px);
 }
 
 .y-message--success {
@@ -50,12 +52,12 @@ defineProps({
 
 .message-enter-active,
 .message-leave-active {
-  transition: all 0.5s ease;
+  transition: opacity 0.28s $ease-out, transform 0.28s $ease-out;
 }
 
 .message-enter-from,
 .message-leave-to {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translate(-50%, -12px);
 }
 </style>

@@ -4,7 +4,7 @@ import { useElementHover } from '@vueuse/core';
 
 const tooltipRef = ref<HTMLElement | null>(null);
 const isHovered = useElementHover(tooltipRef);
-const props = withDefaults(
+withDefaults(
   defineProps<{
     placement?: string;
     trigger?: string;
@@ -44,26 +44,29 @@ const props = withDefaults(
   position: absolute;
   inset: 0;
   pointer-events: none;
+  z-index: 3;
 }
 .tooltip__content {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
-  padding: 4px 8px;
-  background-color: $main-color;
-  color: $label-white;
-  border-radius: 4px;
+  padding: 6px 10px;
+  background-color: $gray-08;
+  color: $background-gray;
+  border-radius: $radius-sm;
   font-size: 12px;
+  font-weight: 500;
   white-space: nowrap;
   line-height: 20px;
+  box-shadow: $shadow-md;
   &:after {
     content: '';
     position: absolute;
     width: 0;
     height: 0;
     border: 5px solid transparent;
-    border-top-color: $main-color;
+    border-top-color: $gray-08;
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);

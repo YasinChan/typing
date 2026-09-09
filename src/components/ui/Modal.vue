@@ -15,7 +15,7 @@ const props = withDefaults(
   >(),
   {
     show: false,
-    zIndex: 1,
+    zIndex: 1000,
     showCancel: false,
     closeOnClickMask: true,
     showCloseBtn: true
@@ -57,7 +57,7 @@ function clickMask() {
         <div class="y-modal__container" :class="className" @click.stop>
           <div class="y-modal__header flex-center--y">
             <slot name="header">default header</slot>
-            <IcoClose v-if="showCloseBtn" @click="emit('close')"></IcoClose>
+            <IcoClose v-if="showCloseBtn" class="y-modal__close" @click="emit('close')"></IcoClose>
           </div>
 
           <div class="y-modal__body">
@@ -69,7 +69,7 @@ function clickMask() {
               <YButton @click="emit('confirm')">{{ $t('confirm') }}</YButton>
               <YButton
                 v-if="showCancel"
-                style="margin-left: 20px"
+                style="margin-left: 12px"
                 theme="secondary"
                 @click="emit('close')"
               >
@@ -86,40 +86,50 @@ function clickMask() {
 <style lang="scss">
 .y-modal__mask {
   position: fixed;
-  z-index: 1;
+  z-index: 1000;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: $overlay;
+  backdrop-filter: blur(8px);
   display: flex;
-  transition: opacity 0.3s ease;
+  padding: 24px;
 }
 
 .y-modal__container {
-  width: 300px;
+  width: 380px;
+  max-width: 100%;
   margin: auto;
-  padding: 20px;
+  padding: 24px;
   background-color: $layout-background-gray;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
-  transition: all 0.3s ease;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
   position: relative;
-  padding-bottom: 72px;
+  padding-bottom: 80px;
 }
 
 .y-modal__header {
   color: $gray-08;
   justify-content: space-between;
   width: 100%;
+  gap: 12px;
   h3 {
     margin-top: 0;
+    font-size: 18px;
   }
-  svg {
+}
+.y-modal__close {
+  fill: $gray-06;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: $radius-sm;
+  transition: fill 0.2s $ease-out, transform 0.2s $ease-out;
+  &:hover {
     fill: $gray-08;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+    transform: rotate(90deg);
   }
 }
 
@@ -131,22 +141,29 @@ function clickMask() {
   position: absolute;
   left: 0;
   width: 100%;
-  padding: 20px;
+  padding: 16px 24px 24px;
   bottom: 0;
   background-color: $layout-background-gray;
+  border-radius: 0 0 $radius-lg $radius-lg;
 }
 
-.modal-enter-from {
-  opacity: 0;
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.22s $ease-out;
+}
+.modal-enter-active .y-modal__container,
+.modal-leave-active .y-modal__container {
+  transition: transform 0.22s $ease-out, opacity 0.22s $ease-out;
 }
 
+.modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
 
 .modal-enter-from .y-modal__container,
 .modal-leave-to .y-modal__container {
-  -webkit-transform: scale(0.5);
-  transform: scale(0.5);
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
 }
 </style>
