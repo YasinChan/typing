@@ -6,6 +6,12 @@ import { useRouter } from 'vue-router';
 import WordInput from '@/components/WordInput.vue';
 import YModal from '@/components/ui/Modal.vue';
 import ResultContent from '@/components/ResultContent.vue';
+import TypingChip from '@/components/typing/TypingChip.vue';
+import TypingToolbar, {
+  TypingChipGroup,
+  TypingToolbarDivider
+} from '@/components/typing/TypingToolbar.vue';
+import TypingToolbarIcon from '@/components/typing/TypingToolbarIcon.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import DetailModal from '@/components/DetailModal.vue';
 
@@ -34,7 +40,7 @@ const router = useRouter();
 const wordInputRef = ref<any>(null);
 const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
-const { currentFont, onlyShowMain } = storeToRefs(useConfig);
+const { currentFont, isEscape } = storeToRefs(useConfig);
 const customTime = [15, 30, 60, 120];
 
 const state = reactive({
@@ -78,6 +84,37 @@ onUnmounted(() => {
   }
 });
 
+function finishTyping() {
+  if (!state.isTyping && !state.showResult) return;
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  wordInputRef.value?.typingEnd();
+  state.typingRecord = wordInputRef.value?.getTypingRecord() || {};
+  const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
+  const currentTitle = state.quote.title;
+  const {
+    typingChartSpeed,
+    lastTypingChartSpeed,
+    typingChartAccuracy,
+    lastTypingChartAccuracy
+  } = handleChart(typingChartRecord, currentTitle);
+  state.typingChartSpeed = typingChartSpeed;
+  state.lastTypingChartSpeed = lastTypingChartSpeed;
+  state.typingChartAccuracy = typingChartAccuracy;
+  state.lastTypingChartAccuracy = lastTypingChartAccuracy;
+  state.isTyping = false;
+  state.showResult = true;
+}
+
+watch(
+  () => isEscape.value,
+  (val) => {
+    if (val && state.isTyping) finishTyping();
+  }
+);
+
 watch(
   () => state.isTyping,
   (val) => {
@@ -88,47 +125,7 @@ watch(
 
         if (state.countDown) {
           state.countDown -= 1;
-          if (state.countDown < 1) {
-            if (state.intervalId !== null) {
-              clearInterval(state.intervalId);
-              state.intervalId = null;
-              state.showResult = true;
-              state.typingRecord = wordInputRef.value?.getTypingRecord();
-              wordInputRef.value?.typingEnd();
-
-              // 处理图表数据
-              const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
-              const currentTitle = state.quote.title;
-              const {
-                typingChartSpeed,
-                lastTypingChartSpeed,
-                typingChartAccuracy,
-                lastTypingChartAccuracy
-              } = handleChart(typingChartRecord, currentTitle);
-
-              state.typingChartSpeed = typingChartSpeed;
-              state.lastTypingChartSpeed = lastTypingChartSpeed;
-              state.typingChartAccuracy = typingChartAccuracy;
-              state.lastTypingChartAccuracy = lastTypingChartAccuracy;
-
-              // confirm({
-              //   title: '时间到',
-              //   content: '是否继续？',
-              //   confirm: () => {
-              //     state.countDown = state.selectTime;
-              //   },
-              //   confirmText: '继续',
-              //   cancelText: '结束',
-              //   cancel: () => {
-              //     state.countDown = null;
-              //     if (state.intervalId !== null) {
-              //       clearInterval(state.intervalId);
-              //       state.intervalId = null;
-              //     }
-              //   }
-              // });
-            }
-          }
+          if (state.countDown < 1) finishTyping();
         }
       }, 1000);
     } else {
@@ -157,6 +154,7 @@ watch(
 function refresh() {
   state.isTyping = false;
   state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 
 function selectTime(time: number) {
@@ -167,6 +165,7 @@ function selectTime(time: number) {
   } else {
     state.quote = getRandomNonRepeatingElement(Object.values(Sentence.long));
   }
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 
 function isTypingFunc() {
@@ -191,18 +190,18 @@ function setTime() {
   }
   state.showSetTime = false;
   state.selectTime = Number(state.setCountDown);
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 function restart() {
   state.isTyping = false;
   state.showResult = false;
 }
 
-async function changePunctuation() {
-  if (state.isTyping) {
-    refresh();
-  }
-  await nextTick();
+function changePunctuation() {
+  // 与英文标点开关一致：同一篇就地切换，不换文、不重开计时
   state.isSpaceType = !state.isSpaceType;
+  if (state.isTyping) state.isTyping = false;
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 
 function reset() {
@@ -224,41 +223,41 @@ function reset() {
         >
           {{ state.countDown || state.selectTime }}
         </div>
-        <Transition name="menu">
-          <div v-show="!onlyShowMain" class="y-typing-toolbar">
-            <div class="y-typing-icon" @click="refresh">
+        <TypingToolbar>
+            <TypingChip :active="!state.isSpaceType" @click="changePunctuation">
+              @ {{ $t('punctuation') }}
+            </TypingChip>
+            <TypingToolbarDivider />
+            <Tooltip :content="$t('select_countdown')">
+              <TypingChipGroup>
+                <TypingChip
+                  v-for="item in customTime"
+                  :key="item"
+                  :active="state.selectTime === item"
+                  @click="selectTime(item)"
+                >
+                  {{ item }}
+                </TypingChip>
+              </TypingChipGroup>
+            </Tooltip>
+            <TypingToolbarDivider />
+            <TypingToolbarIcon @click="refresh">
               <Tooltip :content="$t('refresh')">
                 <IcoChange></IcoChange>
               </Tooltip>
-            </div>
-            <span class="y-typing-toolbar__divider"></span>
-            <Tooltip :content="$t('select_countdown')">
-              <span
-                v-for="item in customTime"
-                :key="item"
-                class="y-typing-chip"
-                :class="{ 'is-active': state.selectTime === item }"
-                @click="selectTime(item)"
-                >{{ item }}</span
-              >
-            </Tooltip>
-            <div
-              class="y-typing-chip"
+            </TypingToolbarIcon>
+            <TypingChip
               v-if="router.currentRoute?.value?.query?.id"
               @click="reset"
             >
               {{ $t('reset') }}
-            </div>
-            <span class="y-typing-toolbar__divider"></span>
+            </TypingChip>
             <YDropDown>
               <template #title>
-                <Tooltip content="设置">
-                  <div
-                    class="y-typing-icon"
-                    :class="{ 'is-active': !customTime.includes(state.selectTime) }"
-                  >
+                <Tooltip :content="$t('settings')">
+                  <TypingToolbarIcon :active="!customTime.includes(state.selectTime)">
                     <IcoSetting></IcoSetting>
-                  </div>
+                  </TypingToolbarIcon>
                 </Tooltip>
               </template>
               <template #menu>
@@ -270,26 +269,20 @@ function reset() {
                     <component :is="state.showCountDown ? IcoSelect : IcoUnSelect" />
                     <span>{{ $t('display_countdown') }}</span>
                   </div>
-                  <div class="y-time-limit__settings-item" @click="changePunctuation">
-                    <component :is="state.isSpaceType ? IcoSelect : IcoUnSelect" />
-                    <span>{{
-                      state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space')
-                    }}</span>
-                  </div>
                   <div class="y-time-limit__settings-item" @click="state.showSetTime = true">
                     <span>{{ $t('custom_countdown') }}</span>
                   </div>
                 </div>
               </template>
             </YDropDown>
-          </div>
-        </Transition>
+        </TypingToolbar>
       </div>
       <WordInput
         ref="wordInputRef"
         :is-space-type="state.isSpaceType"
         :quote="state.quote?.content"
         @is-typing="isTypingFunc"
+        @refresh="refresh"
       ></WordInput>
       <div class="y-time-limit__info y-quote-meta">
         ——
@@ -302,10 +295,13 @@ function reset() {
         </span>
       </div>
       <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-time-limit__detail y-quote-more">
+        <div class="y-time-limit__detail y-quote-more">
           <span @click="detailModalRef?.setShowDetail()">{{ $t('view_full') }}</span>
         </div>
       </Transition>
+      <div class="y-typing-tips">
+        <p>*{{ $t('sentence.word_tip') }}</p>
+      </div>
     </div>
     <template v-else>
       <ResultContent
@@ -340,12 +336,6 @@ function reset() {
   <DetailModal ref="detailModalRef" :quote="state.quote"></DetailModal>
 </template>
 <style lang="scss">
-.y-time-limit {
-  .y-word-input__wrap,
-  .y-word-input {
-    height: 280px;
-  }
-}
 .y-time-limit__settings-menu {
   min-width: 180px;
   padding: 4px 0;

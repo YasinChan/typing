@@ -845,8 +845,10 @@ watch(
 <style lang="scss">
 .y-game-room {
   .y-word-input__wrap,
-  .y-word-input {
-    height: 280px;
+  .y-word-input,
+  .y-en-wrap,
+  .y-en-window {
+    height: 420px;
   }
 }
 .y-game-room__remind {

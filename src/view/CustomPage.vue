@@ -5,6 +5,9 @@ import type { TypingRecordType } from '@/types';
 // components
 import WordInput from '@/components/WordInput.vue';
 import DetailModal from '@/components/DetailModal.vue';
+import TypingChip from '@/components/typing/TypingChip.vue';
+import TypingToolbar, { TypingToolbarDivider } from '@/components/typing/TypingToolbar.vue';
+import TypingToolbarIcon from '@/components/typing/TypingToolbarIcon.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import YModal from '@/components/ui/Modal.vue';
 import YTextarea from '@/components/ui/Textarea.vue';
@@ -29,7 +32,7 @@ const wordInputRef = ref<any>(null);
 const uploadFile = ref<any>(null);
 const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
-const { currentFont, onlyShowMain, isEscape } = storeToRefs(useConfig);
+const { currentFont, isEscape } = storeToRefs(useConfig);
 
 const state = reactive({
   typingChartSpeed: [] as number[],
@@ -102,11 +105,15 @@ const timeFormat = computed(() => {
 });
 
 async function refresh() {
+  // 自定义文稿确认后不再换篇
+  if (state.isSet) return;
   state.isTyping = false;
   state.time = 0;
   state.quotes = null;
   await nextTick();
   state.quotes = getRandom();
+  await nextTick();
+  wordInputRef.value?.focusInput();
 }
 
 function getRandom() {
@@ -195,12 +202,11 @@ function uploadFileFunc() {
   }
 }
 
-async function changePunctuation() {
-  if (state.isTyping) {
-    refresh();
-  }
-  await nextTick();
+function changePunctuation() {
+  // 与英文标点开关一致：同一篇就地切换，不换文、不重开计时
   state.isSpaceType = !state.isSpaceType;
+  if (state.isTyping) state.isTyping = false;
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 </script>
 <template>
@@ -215,32 +221,26 @@ async function changePunctuation() {
           {{ timeFormat || 0 }}
         </div>
         <div class="y-custom-page__setting y-typing-setting">
-          <Transition name="menu">
-            <div v-show="!onlyShowMain" class="y-typing-toolbar">
-              <div
-                class="y-typing-chip"
-                :class="{ 'is-active': state.showTime }"
-                @click="state.showTime = !state.showTime"
-              >
-                {{ $t('display_timer') }}
-              </div>
-              <div
+          <TypingToolbar>
+              <TypingChip
                 v-if="!state.isSet"
-                class="y-typing-chip"
-                :class="{ 'is-active': state.isSpaceType }"
+                :active="!state.isSpaceType"
                 @click="changePunctuation"
               >
-                {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
-              </div>
-              <div v-if="!state.isSet" class="y-typing-icon" @click="refresh">
+                @ {{ $t('punctuation') }}
+              </TypingChip>
+              <TypingToolbarDivider v-if="!state.isSet" />
+              <TypingChip @click="customClick">自定义</TypingChip>
+              <TypingToolbarDivider />
+              <TypingToolbarIcon v-if="!state.isSet" @click="refresh">
                 <Tooltip :content="$t('refresh')">
                   <IcoChange></IcoChange>
                 </Tooltip>
-              </div>
-              <span class="y-typing-toolbar__divider"></span>
-              <div class="y-typing-chip" @click="customClick">自定义</div>
-            </div>
-          </Transition>
+              </TypingToolbarIcon>
+              <TypingChip :active="state.showTime" @click="state.showTime = !state.showTime">
+                {{ $t('display_timer') }}
+              </TypingChip>
+          </TypingToolbar>
         </div>
       </div>
       <WordInput
@@ -251,11 +251,12 @@ async function changePunctuation() {
         :can-space="state.isSet"
         @is-typing="isTypingFunc"
         @is-finished="finished"
+        @refresh="refresh"
         class-name="y-custom-page__word-input"
       ></WordInput>
       <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-custom-page__tips y-typing-tips">
+        <div class="y-custom-page__tips y-typing-tips">
           <p>*{{ $t('sentence.word_tip') }}</p>
         </div>
       </Transition>
@@ -314,12 +315,6 @@ async function changePunctuation() {
 }
 .y-custom-page__setting-wrap {
   position: relative;
-}
-.y-custom-page__word-input.y-word-input__wrap {
-  height: 280px;
-  .y-word-input {
-    height: 280px;
-  }
 }
 .y-custom-page__modal {
   width: 800px;

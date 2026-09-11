@@ -5,6 +5,8 @@ import { KEY_PERMUTATION_68, KEY_PERMUTATION_STANDARD, KEY_PERMUTATION_MBP } fro
 // components
 import SingleKey from '@/components/key/SingleKey.vue';
 import KeyWrap from '@/components/key/KeyWrap.vue';
+import TypingChip from '@/components/typing/TypingChip.vue';
+import TypingToolbar from '@/components/typing/TypingToolbar.vue';
 import YModal from '@/components/ui/Modal.vue';
 import ListItem from '@/components/ui/ListItem.vue';
 
@@ -27,7 +29,7 @@ const state = reactive<{
 });
 
 const configStore = useConfigStore();
-const { printContent, currentCode, onlyShowMain } = storeToRefs(configStore);
+const { printContent, currentCode } = storeToRefs(configStore);
 
 let timeout: any = null;
 
@@ -56,27 +58,21 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
 <template>
   <main>
     <div class="y-keyboard__setting-wrap">
-      <Transition name="menu">
-        <div class="y-typing-toolbar" v-show="!onlyShowMain">
-          <div
-            class="y-typing-chip"
-            v-if="state.currentSystem === 'win'"
-            @click="state.currentSystem = 'mac'"
-          >
-            Windows
-          </div>
-          <div
-            class="y-typing-chip"
-            v-if="state.currentSystem === 'mac'"
-            @click="state.currentSystem = 'win'"
-          >
-            Mac
-          </div>
-          <div class="y-typing-chip" @click="state.keyboardModal = true">
-            切换键盘配列
-          </div>
-        </div>
-      </Transition>
+      <TypingToolbar>
+        <TypingChip
+          v-if="state.currentSystem === 'win'"
+          @click="state.currentSystem = 'mac'"
+        >
+          Windows
+        </TypingChip>
+        <TypingChip
+          v-if="state.currentSystem === 'mac'"
+          @click="state.currentSystem = 'win'"
+        >
+          Mac
+        </TypingChip>
+        <TypingChip @click="state.keyboardModal = true">切换键盘配列</TypingChip>
+      </TypingToolbar>
     </div>
     <div class="y-main__screen-wrap">
       <div class="y-main__screen" :class="[printContent ? 'y-main__screen--word' : '']">
