@@ -24,6 +24,7 @@ onMounted(async () => {
   - [得意黑](https://github.com/atelier-anchor/smiley-sans)
   - [阿里巴巴普惠体](https://fonts.alibabagroup.com/#/home)
 - 词句来源互联网
+- 英文练习文稿节选自 [Project Gutenberg](https://www.gutenberg.org/) 公版作品
 
 ## 参考
 - 模式参考
