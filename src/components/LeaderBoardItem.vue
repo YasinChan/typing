@@ -10,10 +10,15 @@ import IcoChampion from '@/assets/svg/champion.svg';
 const props = defineProps<{
   leaderBoardItem: LeaderBoardType;
   rank: number;
+  isMe?: boolean;
 }>();
 </script>
 <template>
-  <tr class="y-leader-board-item">
+  <tr
+    class="y-leader-board-item"
+    :class="{ 'y-leader-board-item--me': isMe }"
+    :data-object-id="leaderBoardItem.objectId"
+  >
     <td v-if="rank === 1" class="y-leader-board-item__rank">
       <IcoChampion></IcoChampion>
     </td>
@@ -43,6 +48,12 @@ const props = defineProps<{
 <style lang="scss">
 .y-leader-board-item {
   font-size: 13px;
+}
+.y-leader-board-item--me td:first-child {
+  box-shadow: inset 3px 0 0 $main-color;
+}
+.y-leader-board-item--me td {
+  color: $main-color;
 }
 .y-leader-board-item__rank {
   svg {

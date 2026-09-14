@@ -78,8 +78,12 @@ export const getTodo = () => {
 };
 
 // 获取排行榜
-export const getLeaderBoard = () => {
-  return axios.get('/api/leaderboard');
+export const getLeaderBoard = (params: {
+  type: 'time' | 'countdown';
+  page?: number;
+  pageSize?: number;
+}) => {
+  return axios.get('/api/leaderboard', { params });
 };
 
 // 获取某个用户的记录
@@ -87,8 +91,15 @@ export const getLeaderBoardByUserId = (params?: { id: string }) => {
   return axios.get('/api/leaderboard/by-user-id', { params });
 };
 
-// 保存记录
-export const saveLeaderBoard = (params: any) => {
+// 保存记录。身份由服务端按登录 cookie / IP 绑定，userId、userName 只兼容旧接口。
+export const saveLeaderBoard = (params: {
+  accuracy: string;
+  duration: number;
+  type?: string;
+  userId?: string;
+  userName?: string;
+  wpm: number;
+}) => {
   return axios.post('/api/leaderboard/save', params);
 };
 
