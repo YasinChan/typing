@@ -66,6 +66,23 @@ export type LeaderBoardType = {
   createdAt: string;
 };
 
+export type LeaderBoardMode = 'time' | 'countdown';
+
+export type LeaderBoardPageType = {
+  type: LeaderBoardMode;
+  list: LeaderBoardType[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pages: number;
+  mine?: LeaderBoardMineType | null;
+  mineResolved?: boolean;
+};
+
+export type LeaderBoardMineType = LeaderBoardType & {
+  rank: number;
+};
+
 export type SuggestItem = {
   id: string;
   content: string;

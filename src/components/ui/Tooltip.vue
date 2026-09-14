@@ -10,6 +10,7 @@ withDefaults(
     trigger?: string;
     content?: string;
     html?: string;
+    wrap?: boolean;
     delay?: number;
     offset?: number;
   }>(),
@@ -17,6 +18,7 @@ withDefaults(
     placement: 'top',
     trigger: 'hover',
     content: '',
+    wrap: false,
     delay: 0,
     offset: 0
   }
@@ -26,8 +28,16 @@ withDefaults(
   <span ref="tooltipRef" class="tooltip">
     <Transition name="menu">
       <div v-if="isHovered" class="tooltip__popover">
-        <span v-if="content" class="tooltip__content">{{ content }}</span>
-        <span v-if="html" class="tooltip__content" v-html="html"></span>
+        <span
+          v-if="content"
+          class="tooltip__content"
+          :class="{ 'tooltip__content--wrap': wrap }"
+          >{{ content }}</span
+        >
+        <span v-else-if="$slots.content" class="tooltip__content tooltip__content--wrap">
+          <slot name="content"></slot>
+        </span>
+        <span v-else-if="html" class="tooltip__content" v-html="html"></span>
       </div>
     </Transition>
     <slot></slot>
@@ -60,6 +70,11 @@ withDefaults(
   white-space: nowrap;
   line-height: 20px;
   box-shadow: $shadow-md;
+  &.tooltip__content--wrap {
+    white-space: pre-wrap;
+    line-height: 1.5;
+    text-align: left;
+  }
   &:after {
     content: '';
     position: absolute;

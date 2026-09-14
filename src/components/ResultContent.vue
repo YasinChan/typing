@@ -281,6 +281,7 @@ async function record() {
       },
       confirm: async () => {
         try {
+          // 成绩字段给服务端校验；userId/userName 会被新接口忽略，登录态走 cookie
           const res = await saveLeaderBoard({
             accuracy: state.accuracy,
             duration: Math.round(props.totalTime),
