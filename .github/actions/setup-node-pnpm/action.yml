@@ -1,0 +1,22 @@
+name: Setup Node.js and pnpm
+description: 安装 pnpm 9、Node 22，并严格按 lockfile 安装依赖
+
+runs:
+  using: composite
+  steps:
+    # 先装 pnpm，setup-node 的 cache: pnpm 才找得到
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v5
+      with:
+        # lockfileVersion 9.0 需要 pnpm >= 9；继续用 8 会直接忽略 lockfile
+        version: 9
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

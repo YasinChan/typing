@@ -5,6 +5,12 @@ import { useI18n } from 'vue-i18n';
 // components
 import WordInput from '@/components/WordInput.vue';
 import DetailModal from '@/components/DetailModal.vue';
+import TypingChip from '@/components/typing/TypingChip.vue';
+import TypingToolbar, {
+  TypingChipGroup,
+  TypingToolbarDivider
+} from '@/components/typing/TypingToolbar.vue';
+import TypingToolbarIcon from '@/components/typing/TypingToolbarIcon.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import ResultContent from '@/components/ResultContent.vue';
 
@@ -30,7 +36,7 @@ const wordInputRef = ref<any>(null);
 const wordInputShortRef = ref<any>(null);
 const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
-const { currentFont, onlyShowMain, isEscape } = storeToRefs(useConfig);
+const { currentFont, isEscape } = storeToRefs(useConfig);
 const quoteLength = [5, 10];
 const typeList = computed(() => [
   {
@@ -125,6 +131,9 @@ async function refresh() {
   state.typingRecordArr = [];
   await nextTick();
   state.quotes = getRandom();
+  await nextTick();
+  wordInputRef.value?.focusInput();
+  wordInputShortRef.value?.focusInput();
 }
 
 function getRandom() {
@@ -227,12 +236,11 @@ function restart() {
   state.currentIndex = 0;
 }
 
-async function changePunctuation() {
-  if (state.isTyping) {
-    refresh();
-  }
-  await nextTick();
+function changePunctuation() {
+  // 与英文标点开关一致：同一篇就地切换，不换文、不重开计时
   state.isSpaceType = !state.isSpaceType;
+  if (state.isTyping) state.isTyping = false;
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 </script>
 <template>
@@ -249,54 +257,52 @@ async function changePunctuation() {
         <div
           class="y-quote-limit__setting y-typing-setting"
         >
-          <Transition name="menu">
-            <div v-show="!onlyShowMain" class="y-typing-toolbar">
-              <div
-                class="y-typing-chip"
-                :class="{ 'is-active': state.showTime }"
-                @click="state.showTime = !state.showTime"
-              >
-                {{ $t('display_timer') }}
-              </div>
-              <div
+          <TypingToolbar>
+              <TypingChip
                 v-if="state.type !== 'short'"
-                class="y-typing-chip"
-                :class="{ 'is-active': state.isSpaceType }"
+                :active="!state.isSpaceType"
                 @click="changePunctuation"
               >
-                {{ state.isSpaceType ? $t('space_to_punctuation') : $t('punctuation_to_space') }}
-              </div>
-              <div class="y-typing-icon" @click="refresh">
+                @ {{ $t('punctuation') }}
+              </TypingChip>
+              <TypingToolbarDivider v-if="state.type !== 'short'" />
+              <Tooltip content="选择句子类型">
+                <TypingChipGroup>
+                  <TypingChip
+                    v-for="item in typeList"
+                    :key="item.type"
+                    :active="state.type === item.type"
+                    @click="selectType(item.type)"
+                  >
+                    {{ item.name }}
+                  </TypingChip>
+                </TypingChipGroup>
+              </Tooltip>
+              <template v-if="state.type === 'short'">
+                <TypingToolbarDivider />
+                <Tooltip content="选择数量">
+                  <TypingChipGroup>
+                    <TypingChip
+                      v-for="item in quoteLength"
+                      :key="item"
+                      :active="state.len === item"
+                      @click="selectLen(item)"
+                    >
+                      {{ item }}
+                    </TypingChip>
+                  </TypingChipGroup>
+                </Tooltip>
+              </template>
+              <TypingToolbarDivider />
+              <TypingToolbarIcon @click="refresh">
                 <Tooltip :content="$t('refresh')">
                   <IcoChange></IcoChange>
                 </Tooltip>
-              </div>
-              <span class="y-typing-toolbar__divider"></span>
-              <Tooltip content="选择句子类型">
-                <span
-                  v-for="item in typeList"
-                  :key="item.type"
-                  class="y-typing-chip"
-                  :class="{ 'is-active': state.type === item.type }"
-                  @click="selectType(item.type)"
-                  >{{ item.name }}</span
-                >
-              </Tooltip>
-              <template v-if="state.type === 'short'">
-                <span class="y-typing-toolbar__divider"></span>
-                <Tooltip content="选择数量">
-                <span
-                  v-for="item in quoteLength"
-                  :key="item"
-                  class="y-typing-chip"
-                  :class="{ 'is-active': state.len === item }"
-                  @click="selectLen(item)"
-                  >{{ item }}</span
-                >
-              </Tooltip>
-              </template>
-            </div>
-          </Transition>
+              </TypingToolbarIcon>
+              <TypingChip :active="state.showTime" @click="state.showTime = !state.showTime">
+                {{ $t('display_timer') }}
+              </TypingChip>
+          </TypingToolbar>
         </div>
       </div>
       <template v-if="state.type === 'short'">
@@ -308,6 +314,7 @@ async function changePunctuation() {
           @is-typing="isTypingFunc"
           @is-finished="next"
           @keydown-event="keyDownEvent"
+          @refresh="refresh"
         ></WordInput>
         <div class="y-quote-limit__content gray-04">
           <p
@@ -327,6 +334,7 @@ async function changePunctuation() {
           :quote="state.quotes?.content"
           @is-typing="isTypingFunc"
           @is-finished="finished"
+          @refresh="refresh"
           class-name="y-quote-limit__word-input"
         ></WordInput>
         <div class="y-quote-limit__info y-quote-meta">
@@ -341,7 +349,6 @@ async function changePunctuation() {
         </div>
         <Transition name="menu">
           <div
-            v-show="!onlyShowMain"
             class="y-quote-limit__detail y-quote-more"
             @click="detailModalRef?.setShowDetail()"
           >
@@ -351,9 +358,9 @@ async function changePunctuation() {
         <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
       </template>
       <Transition name="menu">
-        <div v-show="!onlyShowMain" class="y-quote-limit__tips y-typing-tips">
+        <div class="y-quote-limit__tips y-typing-tips">
           <p>*{{ $t('sentence.word_tip') }}</p>
-          <p v-if="state.type === 'short'">*短句模式下回车则会切换到下一条。</p>
+          <p v-if="state.type === 'short'">*{{ $t('sentence.short_enter_tip') }}</p>
         </div>
       </Transition>
     </div>
@@ -382,12 +389,6 @@ async function changePunctuation() {
 }
 .y-quote-limit__setting-wrap {
   position: relative;
-}
-.y-quote-limit__word-input.y-word-input__wrap {
-  height: 280px;
-  .y-word-input {
-    height: 280px;
-  }
 }
 .y-quote-limit__content {
   margin-top: 24px;

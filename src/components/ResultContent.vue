@@ -22,11 +22,13 @@ import IcoTips from '@/assets/svg/tips.svg';
 
 // stores
 import { useUserStore } from '@/store/user';
+import { useConfigStore } from '@/store/config';
 import { storeToRefs } from 'pinia';
 
 const { t } = useI18n();
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
+const { currentFont } = storeToRefs(useConfigStore());
 
 const confirm: any = inject('confirm');
 const message: any = inject('message');
@@ -41,6 +43,7 @@ const props = defineProps<{
   lastChartSpeed?: number[];
   chartAccuracy?: number[];
   lastChartAccuracy?: number[];
+  charsPerWord?: number; // 英文 WPM 按 5 字符/词，中文默认 1 字/词
 }>();
 const emit = defineEmits(['restart']);
 const state = reactive({
@@ -100,8 +103,10 @@ onMounted(() => {
     if (lastRecord.length > 0) {
       lastRecord.forEach((item) => {
         if (item.isInput) {
-          state.totalWord += item.word?.length ? item.word.replace(/\s+/g, '').length : 0;
-          state.wrongWord += item.wrongPos?.length ? item.wrongPos?.length : 0;
+          const raw = item.word || '';
+          // 英文回放要把空格计入字符，中文仍按原规则去掉空格
+          state.totalWord += props.type === 'english' ? raw.length : raw.replace(/\s+/g, '').length;
+          state.wrongWord += item.wrongPos?.length ? item.wrongPos.length : 0;
         }
       });
     }
@@ -110,10 +115,13 @@ onMounted(() => {
     ? '0%'
     : (((state.totalWord - state.wrongWord) / state.totalWord) * 100).toFixed(0) + '%';
   state.accuracyInfo = `${state.totalWord - state.wrongWord} 字正确 / ${state.wrongWord} 字错误`;
+  const divisor = props.charsPerWord && props.charsPerWord > 0 ? props.charsPerWord : 1;
+  const correctChars = state.totalWord - state.wrongWord;
   state.speedInfo = props.totalTime
-    ? (((state.totalWord - state.wrongWord) / props.totalTime) * 60).toFixed(0)
+    ? (((correctChars / props.totalTime) * 60) / divisor).toFixed(0)
     : '';
-  state.speed = state.speedInfo ? state.speedInfo + (' ' + t('wpm')) : '';
+  const unit = divisor === 5 ? 'WPM' : t('wpm');
+  state.speed = state.speedInfo ? state.speedInfo + ' ' + unit : '';
 });
 
 onUnmounted(() => {
@@ -359,7 +367,10 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
     <div class="y-result-stat">
       <div class="y-result-stat__label">{{ $t('speed') }}</div>
       <div class="y-result-stat__value">{{ state.speed || '—' }}</div>
-      <Tooltip class="cursor-pointer y-result-stat__tips" :content="$t('sentence.leaderboard_rule1')">
+      <Tooltip
+        class="cursor-pointer y-result-stat__tips"
+        :content="charsPerWord === 5 ? $t('sentence.english_wpm_rule') : $t('sentence.leaderboard_rule1')"
+      >
         <IcoTips></IcoTips>
       </Tooltip>
     </div>
@@ -403,7 +414,11 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
       >
     </Tooltip>
   </div>
-  <div class="result-content__replay" v-if="state.currentOperation">
+  <div
+    class="result-content__replay"
+    :class="['y-font--' + currentFont, { 'is-english': type === 'english' }]"
+    v-if="state.currentOperation"
+  >
     <div v-if="timeFormat !== null" class="result-content__count-down">
       {{ timeFormat }}
     </div>
@@ -520,6 +535,14 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   padding: 48px 20px 20px;
   background: $layout-background-gray;
   border-radius: $radius-lg;
+  &.is-english {
+    font-size: 22px;
+    line-height: 1.55;
+    letter-spacing: 0.2px;
+    .result-content__replay-item {
+      white-space: pre-wrap;
+    }
+  }
 }
 .result-content__replay-item--underline {
   text-decoration: underline;

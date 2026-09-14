@@ -4,6 +4,13 @@
 .y-typing-stage {
   width: 100%;
   margin-block: auto;
+  // 垂直居中后可以多露出几行，280px（约 4 行）偏矮
+  .y-word-input__wrap,
+  .y-word-input,
+  .y-en-wrap,
+  .y-en-window {
+    height: 420px;
+  }
 }
 
 .y-typing-setting {
@@ -36,76 +43,6 @@
   }
 }
 
-.y-typing-toolbar {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 2px;
-  padding: 4px;
-  background: $layout-background-gray;
-  border-radius: $radius-full;
-  box-shadow: $shadow-sm;
-}
-
-.y-typing-toolbar__divider {
-  width: 1px;
-  height: 16px;
-  margin: 0 4px;
-  background: $gray-02;
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
-.y-typing-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: $radius-full;
-  color: $gray-06;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1;
-  white-space: nowrap;
-  user-select: none;
-  transition: color 0.2s $ease-out, background-color 0.2s $ease-out, transform 0.2s $ease-out;
-  &:hover {
-    color: $main-color;
-  }
-  &.is-active {
-    color: $label-white;
-    background: $main-color;
-  }
-}
-
-.y-typing-icon {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-full;
-  cursor: pointer;
-  color: $gray-06;
-  transition: background-color 0.2s $ease-out, color 0.2s $ease-out;
-  svg {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
-  }
-  &:hover {
-    color: $main-color;
-    background: $background-gray;
-  }
-  &.is-active {
-    color: $main-color;
-  }
-}
-
 .y-quote-meta {
   margin-top: 28px;
   text-align: right;
@@ -122,13 +59,14 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s $ease-out;
+  transition: opacity 0.22s $ease-out, visibility 0.22s $ease-out, color 0.2s $ease-out;
   &:hover {
     color: $main-color;
   }
 }
 
 .y-typing-tips {
+  transition: opacity 0.22s $ease-out, visibility 0.22s $ease-out;
   margin-top: 48px;
   color: $gray-04;
   font-size: 13px;

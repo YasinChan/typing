@@ -302,14 +302,14 @@ function changeLocale() {
       <img src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png" alt="打字结果预览" />
     </div>
   </div>
-  <div class="y-app">
+  <div class="y-app" :class="{ 'is-focus': onlyShowMain }">
     <header>
       <div class="y-info" :class="[onlyShowMain ? 'y-info__disabled' : '']">
         <a href="/" class="y-info__title main-color"><span class="y-info__cap">T</span>yping</a>
       </div>
 
       <Transition name="menu">
-        <div class="y-menu" v-show="!onlyShowMain">
+        <div class="y-menu">
           <nav class="y-menu__nav">
           <router-link
             to="/game"
@@ -322,7 +322,7 @@ function changeLocale() {
             >{{ $t('game_mode') }}</router-link
           >
           <router-link to="/" class="y-menu__item">{{ $t('limit_mode') }}</router-link>
-          <!--        <router-link to="/words" class="y-menu__item">词/成语模式</router-link>-->
+          <router-link to="/words" class="y-menu__item">{{ $t('english_mode') }}</router-link>
           <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
           <router-link to="/custom" class="y-menu__item">{{ $t('custom_mode') }}</router-link>
           <a
@@ -370,7 +370,7 @@ function changeLocale() {
     <router-view></router-view>
 
     <Transition name="menu">
-      <footer v-show="!onlyShowMain" class="flex-center">
+      <footer class="flex-center">
         <div class="y-app__footer-group">
           <a
             class="flex-center--y y-app__footer"
@@ -551,6 +551,23 @@ function changeLocale() {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 44px);
+  // 开始输入后只淡出页头页脚，不抽走高度，避免垂直居中把打字区往下推
+  .y-menu,
+  footer {
+    transition: opacity 0.22s $ease-out, visibility 0.22s $ease-out;
+  }
+  &.is-focus {
+    .y-menu,
+    footer,
+    .y-typing-toolbar,
+    .y-typing-tips,
+    .y-quote-more,
+    .y-key-wrap__title {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
 }
 .y-mobile-show {
   color: $gray-08;

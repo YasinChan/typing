@@ -10,7 +10,11 @@ function read(v: SamplerSource['wordLength']): number {
   return v.value;
 }
 
-export function useTypingChartSampler(source: SamplerSource, intervalMs = 1000) {
+export function useTypingChartSampler(
+  source: SamplerSource,
+  intervalMs = 1000,
+  speedDivisor = 1
+) {
   const accuracyRecord = ref<number[]>([]);
   const speedRecord = ref<number[]>([]);
   let timer: number | null = null;
@@ -25,7 +29,8 @@ export function useTypingChartSampler(source: SamplerSource, intervalMs = 1000) 
       const wr = read(source.wrongLength);
       accuracyRecord.value.push(wl ? Math.round(((wl - wr) / wl) * 100) : 0);
       if (relativeTime) {
-        speedRecord.value.push(Math.round(((wl - wr) / relativeTime) * 60));
+        const divisor = speedDivisor || 1;
+        speedRecord.value.push(Math.round(((wl - wr) / relativeTime) * 60 / divisor));
       } else {
         speedRecord.value = [0];
       }

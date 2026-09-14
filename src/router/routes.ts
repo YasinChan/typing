@@ -14,8 +14,9 @@ export default [
     name: 'WordsLimit',
     component: () => import('@/view/WordsLimit.vue'),
     meta: {
-      title: '词组打字 - Typing',
-      description: '词组与短语打字练习模式。'
+      title: '英文打字（公版文学词流）- Typing',
+      description:
+        '用 Pride and Prejudice、Alice in Wonderland 等公版英文文稿练习打字，空格确认单词，可选练习标点，实时统计 WPM 与准确率。'
     }
   },
   {

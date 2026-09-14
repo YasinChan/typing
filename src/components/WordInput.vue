@@ -48,7 +48,7 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished', 'typingInfo']);
+const emit = defineEmits(['is-typing', 'keydown-event', 'is-finished', 'typingInfo', 'refresh']);
 
 interface ITypingFinalWordsRecord {
   [key: string]: string | number;
@@ -417,13 +417,24 @@ function onWrapMouseDown(e: MouseEvent) {
 }
 
 /** 弹窗未打开时，任意可输入按键重新聚焦，避免点到空白后键盘失灵 */
+function emitRefresh(e: KeyboardEvent) {
+  // 与英文模式一致：Tab 换一篇，不把焦点交给浏览器
+  e.preventDefault();
+  emit('refresh');
+}
+
 function onWindowKeyDown(e: KeyboardEvent) {
   if (state.isComposing) return;
   if (document.querySelector('.y-modal__mask')) return;
   const target = e.target as HTMLElement | null;
+  if (e.key === 'Tab' || e.code === KEY_CODE_ENUM['TAB']) {
+    if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+    emitRefresh(e);
+    return;
+  }
   if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.code === 'Escape' || e.code === 'Tab' || e.code === 'Enter') return;
+  if (e.code === 'Escape' || e.code === 'Enter') return;
   if (e.key.length === 1 || e.code === 'Space' || e.code === 'Backspace') {
     // 只拉回焦点，拦截这次按键，避免英文字母直接写入、IME 进不了 composition
     e.preventDefault();
@@ -467,6 +478,10 @@ function pasteEvent(e: ClipboardEvent) {
 }
 function keyDownEvent(e: KeyboardEvent) {
   emit('keydown-event', e);
+  if (e.key === 'Tab' || e.code === KEY_CODE_ENUM['TAB']) {
+    emitRefresh(e);
+    return;
+  }
   if (e.code === KEY_CODE_ENUM['ENTER']) {
     e.preventDefault();
   }

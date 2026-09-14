@@ -3,10 +3,8 @@ import { onMounted, onBeforeUnmount, reactive } from 'vue';
 
 import { CAN_PRINT_KEY } from '@/config/key';
 import { useConfigStore } from '@/store/config';
-import { storeToRefs } from 'pinia';
 
 const configStore = useConfigStore();
-const { onlyShowMain } = storeToRefs(configStore);
 
 defineProps({
   title: {
@@ -66,7 +64,7 @@ onBeforeUnmount(() => {
     <slot :keys-pressed="state.keysPressed"></slot>
   </div>
   <Transition name="menu">
-    <div class="y-key-wrap__title" v-show="!onlyShowMain">{{ title }}</div>
+    <div class="y-key-wrap__title">{{ title }}</div>
   </Transition>
 </template>
 <style lang="scss">
@@ -78,6 +76,7 @@ onBeforeUnmount(() => {
   text-align: center;
   color: $gray-04;
   font-size: 20px;
+  transition: opacity 0.22s $ease-out, visibility 0.22s $ease-out;
   font-weight: bold;
   margin-top: 20px;
 }
