@@ -10,6 +10,14 @@ $main-red: var(--main-red);
 $main-color: var(--main-color);
 $main-orange: var(--main-orange);
 
+/* 主色语义：$main-color 只做填充；文字一律用 $accent-text */
+$accent-ink: var(--accent-ink, #06282a);
+$accent-text: var(--accent-text, var(--main-color));
+$accent-soft: var(--accent-soft, rgba(21, 197, 206, 0.14));
+$error-fill: var(--error-fill, #b32626);
+$text-passage-muted: var(--text-passage-muted, var(--gray-06));
+$border-hairline: var(--border-hairline, rgba(255, 255, 255, 0.08));
+
 $key-box-shadow: var(--key-box-shadow);
 $box-shadow-color: var(--box-shadow-color);
 

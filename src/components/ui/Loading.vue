@@ -5,7 +5,7 @@
 <style lang="scss">
 .y-loading {
   border: 3px solid $gray-06;
-  border-top: 3px solid $main-color;
+  border-top: 3px solid $accent-text;
   border-radius: 50%;
   width: 30px;
   height: 30px;

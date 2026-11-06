@@ -579,7 +579,7 @@ defineExpose({
   font-size: 14px;
   font-weight: bold;
   margin-top: 10px;
-  color: $main-color;
+  color: $accent-text;
   cursor: pointer;
   &:hover {
     text-decoration: underline;
@@ -591,7 +591,7 @@ defineExpose({
   svg {
     width: 12px;
     height: 12px;
-    fill: $main-color;
+    fill: $accent-text;
   }
 }
 .theme-setting__second {
@@ -707,12 +707,12 @@ defineExpose({
   line-height: 20px;
   font-size: 12px;
   text-align: center;
-  color: $label-white;
-  font-weight: bold;
+  color: $accent-ink;
+  font-weight: 500;
   background: $main-color;
   cursor: pointer;
   svg {
-    fill: $label-white;
+    fill: $accent-ink;
     width: 16px;
     margin-left: 20px;
   }
@@ -726,7 +726,7 @@ defineExpose({
   line-height: 70px;
   user-select: none;
   font-size: 18px;
-  color: $gray-04;
+  color: $gray-06;
   margin: 30px 10px;
   .is-input {
     color: $gray-06;
@@ -754,7 +754,7 @@ defineExpose({
 }
 .theme-content__word-info {
   text-align: right;
-  color: $gray-04;
+  color: $gray-06;
   margin: 10px;
 }
 .theme-content__word-tips {

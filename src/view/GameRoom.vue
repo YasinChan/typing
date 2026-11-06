@@ -900,10 +900,10 @@ watch(
     margin-right: 4px;
   }
   &:hover {
-    background: $main-color;
-    color: $label-white;
+    background: $accent-soft;
+    color: $accent-text;
     svg {
-      fill: $label-white;
+      fill: $accent-text;
     }
   }
 }
@@ -921,17 +921,17 @@ watch(
   transition: all 0.2s;
   color: inherit;
   &:hover {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
   &.y-game-room__modal-content-item--active {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
 }
 .y-game-room__label {
   background: $main-color;
-  color: $gray-08;
+  color: $accent-ink;
   transform: scale(0.8);
   display: inline-block;
   line-height: 16px;
@@ -940,7 +940,7 @@ watch(
   border-radius: 4px;
 }
 .y-game-room__ready {
-  color: $main-color;
+  color: $accent-text;
   font-size: 12px;
 }
 .y-game-room__btn {
@@ -961,14 +961,14 @@ watch(
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  color: $gray-04;
+  color: $gray-06;
   font-size: 44px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   line-height: 1;
   &.y-game-room__count-down--active {
-    color: $main-color;
+    color: $accent-text;
   }
 }
 .y-game-room__loading {

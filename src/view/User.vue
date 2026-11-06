@@ -211,146 +211,150 @@ const setResetAvatar = () => {
 
 <template>
   <div class="y-user y-main">
-    <div class="y-user__info">
-      <y-image class="y-user__image" :src="avatarUrl"></y-image>
-      <div class="y-user__name-info">
-        <div class="y-user__user-name">
-          {{ state.info.userName }}
-          <span class="y-user__user-status" v-if="myUserId == state.paramsId">已登录</span>
-        </div>
-        <div v-if="myUserId == state.paramsId && 'email' in profile" class="y-user__user-email">
-          {{ profile.email }}
-        </div>
-      </div>
-    </div>
-    <div class="y-user__setting" v-if="myUserId == state.paramsId">
-      <div class="y-user__setting-title">设置</div>
-      <div class="y-user__setting-set">
-        <div class="y-user__setting-set-item" @click="setPasswordQuestion">设置密保问题</div>
-        <div class="y-user__setting-set-item" @click="setEmail">设置邮箱地址</div>
-        <div class="y-user__setting-set-item" @click="resetAvatar">重置密码</div>
-      </div>
-    </div>
-    <div class="y-user__leaderboard">
-      <div class="y-user__leaderboard-title">打字记录</div>
-      <div
-        class="y-user__leaderboard-info"
-        v-if="state.userTimeLeaderBoardInfo?.length || state.userCountdownLeaderBoardInfo?.length"
-      >
-        <div class="y-user__leaderboard-info-item" v-if="state.userTimeLeaderBoardInfo?.length">
-          <div class="y-user__leaderboard-info-item-title">限时模式</div>
-          <div class="y-user__leaderboard-info-item-list">
-            <table class="y-user__leaderboard-info-item-table">
-              <thead>
-                <tr>
-                  <td>{{ $t('speed') }}</td>
-                  <td>{{ $t('accuracy') }}</td>
-                  <td>时长</td>
-                  <td class="y-leader-board__header-finish-time">完成时间</td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="y-leader-board-item"
-                  v-for="item in state.userTimeLeaderBoardInfo"
-                  :key="item.objectId"
-                >
-                  <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
-                  <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
-                  <td class="y-leader-board-item__duration">{{ item.duration }}</td>
-                  <td class="y-leader-board-item__created-at">
-                    {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div class="y-user__profile">
+      <div class="y-user__info">
+        <y-image class="y-user__image" :src="avatarUrl"></y-image>
+        <div class="y-user__name-info">
+          <div class="y-user__user-name">
+            {{ state.info.userName }}
+            <span class="y-user__user-status" v-if="myUserId == state.paramsId">已登录</span>
           </div>
-        </div>
-        <div
-          class="y-user__leaderboard-info-item"
-          v-if="state.userCountdownLeaderBoardInfo?.length"
-        >
-          <div class="y-user__leaderboard-info-item-title">计时模式</div>
-          <div class="y-user__leaderboard-info-item-list">
-            <table class="y-user__leaderboard-info-item-table">
-              <thead>
-                <tr>
-                  <td>{{ $t('speed') }}</td>
-                  <td>{{ $t('accuracy') }}</td>
-                  <td>时长</td>
-                  <td class="y-leader-board__header-finish-time">完成时间</td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  class="y-leader-board-item"
-                  v-for="item in state.userCountdownLeaderBoardInfo"
-                  :key="item.objectId"
-                >
-                  <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
-                  <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
-                  <td class="y-leader-board-item__duration">{{ item.duration }}</td>
-                  <td class="y-leader-board-item__created-at">
-                    {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="myUserId == state.paramsId && 'email' in profile" class="y-user__user-email">
+            {{ profile.email }}
           </div>
         </div>
       </div>
-      <div v-else class="gray-04">无记录</div>
-    </div>
-    <div class="y-user__suggest">
-      <div class="y-user__suggest-title">
-        反馈记录
-        <span class="y-user__suggest-action" @click="suggestClick">反馈</span>
-      </div>
-      <div class="y-user__suggest-content" v-if="state.suggestList?.length">
-        <div
-          v-for="item in state.suggestList"
-          :key="item.id"
-          class="y-user__suggest-list-content"
-          :class="[item.isTheme ? 'flex-center--y' : '']"
-        >
-          <YTag v-if="item.canShow" text="已展示"></YTag>
-          <YTag v-if="item.accept" text="已采纳"></YTag>
-          <YTag v-if="item.done" text="已完成"></YTag>
-          {{ item.content }}
+      <div class="y-user__setting" v-if="myUserId == state.paramsId">
+        <div class="y-user__setting-title">设置</div>
+        <div class="y-user__setting-set">
+          <div class="y-user__setting-set-item" @click="setPasswordQuestion">设置密保问题</div>
+          <div class="y-user__setting-set-item" @click="setEmail">设置邮箱地址</div>
+          <div class="y-user__setting-set-item" @click="resetAvatar">重置密码</div>
         </div>
       </div>
-      <div v-else class="gray-04">无记录</div>
     </div>
-    <div class="y-user__suggest">
-      <div class="y-user__suggest-title">
-        定制的主题
-        <span class="y-user__suggest-action" @click="changeTheme('custom')">定制</span>
-      </div>
-      <div class="y-user__suggest-content" v-if="state.themeList?.length">
+    <div class="y-user__content">
+      <div class="y-user__leaderboard">
+        <div class="y-user__leaderboard-title">打字记录</div>
         <div
-          v-for="item in state.themeList"
-          :key="item.id"
-          class="y-user__suggest-list-content"
-          :class="[item.isTheme ? 'flex-center--y' : '']"
+          class="y-user__leaderboard-info"
+          v-if="state.userTimeLeaderBoardInfo?.length || state.userCountdownLeaderBoardInfo?.length"
         >
-          <YTag v-if="item.accept" text="已采纳"></YTag>
-          <YTag v-if="item.done" text="已完成"></YTag>
-          <YTag :text="`主题色：${getCustomTheme(item.content)?.['THEME_INPUT']}`"></YTag>
-
-          <ThemeLabel
-            style="margin-left: 4px"
-            :custom-theme-obj="getCustomTheme(item.content)"
-          ></ThemeLabel>
-          <span
-            @click="setCustomTheme(item.content)"
-            class="gray-06 y-user__suggest-content-set flex-center--y"
-            style="margin-left: 4px; cursor: pointer"
+          <div class="y-user__leaderboard-info-item" v-if="state.userTimeLeaderBoardInfo?.length">
+            <div class="y-user__leaderboard-info-item-title">限时模式</div>
+            <div class="y-user__leaderboard-info-item-list">
+              <table class="y-user__leaderboard-info-item-table">
+                <thead>
+                  <tr>
+                    <td>{{ $t('speed') }}</td>
+                    <td>{{ $t('accuracy') }}</td>
+                    <td>时长</td>
+                    <td class="y-leader-board__header-finish-time">完成时间</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="y-leader-board-item"
+                    v-for="item in state.userTimeLeaderBoardInfo"
+                    :key="item.objectId"
+                  >
+                    <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
+                    <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
+                    <td class="y-leader-board-item__duration">{{ item.duration }}</td>
+                    <td class="y-leader-board-item__created-at">
+                      {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            class="y-user__leaderboard-info-item"
+            v-if="state.userCountdownLeaderBoardInfo?.length"
           >
-            点击设置该主题
-          </span>
+            <div class="y-user__leaderboard-info-item-title">计时模式</div>
+            <div class="y-user__leaderboard-info-item-list">
+              <table class="y-user__leaderboard-info-item-table">
+                <thead>
+                  <tr>
+                    <td>{{ $t('speed') }}</td>
+                    <td>{{ $t('accuracy') }}</td>
+                    <td>时长</td>
+                    <td class="y-leader-board__header-finish-time">完成时间</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    class="y-leader-board-item"
+                    v-for="item in state.userCountdownLeaderBoardInfo"
+                    :key="item.objectId"
+                  >
+                    <td class="y-leader-board-item__wpm">{{ item.wpm }}</td>
+                    <td class="y-leader-board-item__accuracy">{{ item.accuracy }}</td>
+                    <td class="y-leader-board-item__duration">{{ item.duration }}</td>
+                    <td class="y-leader-board-item__created-at">
+                      {{ dayjs(item.createdAt).format('YYYY-MM-DD HH:mm') }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
+        <div v-else class="gray-04">无记录</div>
       </div>
-      <div v-else class="gray-04">无记录</div>
+      <div class="y-user__suggest">
+        <div class="y-user__suggest-title">
+          反馈记录
+          <span class="y-user__suggest-action" @click="suggestClick">反馈</span>
+        </div>
+        <div class="y-user__suggest-content" v-if="state.suggestList?.length">
+          <div
+            v-for="item in state.suggestList"
+            :key="item.id"
+            class="y-user__suggest-list-content"
+            :class="[item.isTheme ? 'flex-center--y' : '']"
+          >
+            <YTag v-if="item.canShow" text="已展示"></YTag>
+            <YTag v-if="item.accept" text="已采纳"></YTag>
+            <YTag v-if="item.done" text="已完成"></YTag>
+            {{ item.content }}
+          </div>
+        </div>
+        <div v-else class="gray-04">无记录</div>
+      </div>
+      <div class="y-user__suggest">
+        <div class="y-user__suggest-title">
+          定制的主题
+          <span class="y-user__suggest-action" @click="changeTheme('custom')">定制</span>
+        </div>
+        <div class="y-user__suggest-content" v-if="state.themeList?.length">
+          <div
+            v-for="item in state.themeList"
+            :key="item.id"
+            class="y-user__suggest-list-content"
+            :class="[item.isTheme ? 'flex-center--y' : '']"
+          >
+            <YTag v-if="item.accept" text="已采纳"></YTag>
+            <YTag v-if="item.done" text="已完成"></YTag>
+            <YTag :text="`主题色：${getCustomTheme(item.content)?.['THEME_INPUT']}`"></YTag>
+
+            <ThemeLabel
+              style="margin-left: 4px"
+              :custom-theme-obj="getCustomTheme(item.content)"
+            ></ThemeLabel>
+            <span
+              @click="setCustomTheme(item.content)"
+              class="gray-06 y-user__suggest-content-set flex-center--y"
+              style="margin-left: 4px; cursor: pointer"
+            >
+              点击设置该主题
+            </span>
+          </div>
+        </div>
+        <div v-else class="gray-04">无记录</div>
+      </div>
     </div>
   </div>
   <YModal
@@ -418,68 +422,121 @@ const setResetAvatar = () => {
 </template>
 
 <style lang="scss">
-.y-user {
-  width: 600px;
+.y-user.y-main {
+  width: 100%;
+  margin: 12px 0;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.y-user__profile,
+.y-user__leaderboard,
+.y-user__suggest {
+  padding: 20px 24px;
+  background: $layout-background-gray;
+  border: 1px solid $border-hairline;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+.y-user__profile {
+  padding: 24px;
+  position: sticky;
+  top: 24px;
+}
+.y-user__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
 }
 .y-user__info {
   display: flex;
+  align-items: center;
+  min-width: 0;
 }
 .y-user__image {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border: 1px solid $border-hairline;
   border-radius: $radius-lg;
   overflow: hidden;
 }
 .y-user__name-info {
-  margin-left: 20px;
+  margin-left: 16px;
+  min-width: 0;
 }
 .y-user__user-name {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  word-break: break-all;
+}
+.y-user__user-email {
+  margin-top: 4px;
+  color: $gray-06;
+  font-size: 13px;
+  word-break: break-all;
 }
 .y-user__user-status {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: $gray-06;
   border-radius: $radius-full;
   padding: 2px 8px;
-  margin-left: 4px;
-  border: 1px solid $gray-04;
+  margin-left: 6px;
+  border: 1px solid $border-hairline;
   vertical-align: middle;
 }
 
-.y-user__setting,
-.y-user__leaderboard,
-.y-user__suggest {
-  margin-top: 40px;
+.y-user__setting {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid $border-hairline;
 }
-.y-user__setting-title,
 .y-user__setting-title,
 .y-user__leaderboard-title,
 .y-user__suggest-title {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+.y-user__setting-title {
+  font-size: 13px;
+  color: $gray-06;
   margin-bottom: 10px;
 }
 .y-user__suggest-action {
-  font-size: 18px;
-  color: $main-color;
+  font-size: 13px;
+  font-weight: 500;
+  color: $accent-text;
   margin-left: 8px;
   cursor: pointer;
 }
 .y-user__suggest-list-content {
   font-size: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   color: $gray-06;
+  line-height: 1.6;
 }
 .y-user__setting-set {
   display: flex;
-  font-size: 16px;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
 }
 .y-user__setting-set-item {
-  margin-right: 20px;
+  color: $gray-06;
   cursor: pointer;
+  transition: color 0.2s $ease-out;
+  &:hover {
+    color: $accent-text;
+  }
 }
 .y-user-pq__container {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 14px;
   .y-input {
     padding-bottom: 10px;
@@ -500,24 +557,29 @@ const setResetAvatar = () => {
 
 .y-user__leaderboard-info-item-title {
   color: $gray-06;
-  margin: 20px 0 10px;
-  font-weight: bold;
+  margin: 16px 0 8px;
+  font-size: 13px;
+  font-weight: 500;
 }
 .y-user__leaderboard-info-item-table {
   width: 100%;
-  max-width: 800px;
-  font-size: 14px;
+  max-width: 100%;
+  font-size: 13px;
   border-collapse: collapse;
   border-spacing: 0;
   td {
-    padding: 4px 6px;
+    padding: 8px;
     white-space: nowrap;
-    border-radius: 2px;
+    border-radius: $radius-sm;
+  }
+  thead td {
+    color: $gray-06;
+    font-weight: 500;
   }
   tbody {
     position: relative;
     tr:nth-child(2n + 1) {
-      background-color: $layout-background-gray;
+      background-color: $background-gray;
     }
   }
 }

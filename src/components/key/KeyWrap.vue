@@ -74,10 +74,10 @@ onBeforeUnmount(() => {
 }
 .y-key-wrap__title {
   text-align: center;
-  color: $gray-04;
+  color: $gray-06;
   font-size: 20px;
   transition: opacity 0.22s $ease-out, visibility 0.22s $ease-out;
-  font-weight: bold;
+  font-weight: 500;
   margin-top: 20px;
 }
 </style>

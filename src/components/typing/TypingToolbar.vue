@@ -57,8 +57,8 @@ export const TypingChipGroup = defineComponent({
     'Helvetica Neue',
     sans-serif;
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0;
   line-height: 1;
   -webkit-font-smoothing: antialiased;
 }
@@ -91,18 +91,18 @@ export const TypingChipGroup = defineComponent({
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0;
   line-height: 1;
   white-space: nowrap;
   user-select: none;
   transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
-    color: $main-color;
+    color: $accent-text;
   }
   &.is-active {
-    color: $label-white;
-    background: $main-color;
+    color: $accent-text;
+    background: $accent-soft;
   }
 }
 
@@ -123,11 +123,11 @@ export const TypingChipGroup = defineComponent({
     fill: currentColor;
   }
   &:hover {
-    color: $main-color;
+    color: $accent-text;
     background: $background-gray;
   }
   &.is-active {
-    color: $main-color;
+    color: $accent-text;
   }
 }
 </style>

@@ -133,6 +133,75 @@ export function removeAllCustomCssValue() {
   removeCustomCssValue(COLOR_ENUM['GRAY_04']);
   removeCustomCssValue(COLOR_ENUM['GRAY_02']);
   removeCustomCssValue(COLOR_ENUM['LABEL_WHITE']);
+  // 随主色派生的语义色，切换回预设主题时要一起清掉
+  removeCustomCssValue('--accent-text');
+  removeCustomCssValue('--accent-ink');
+  removeCustomCssValue('--accent-soft');
+  removeCustomCssValue('--text-passage-muted');
+}
+
+function normalizeHex(hex: string): string | null {
+  if (!hex || !isHexColor(hex)) return null;
+  const value = hex.replace('#', '');
+  const full =
+    value.length === 3
+      ? value
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : value;
+  return ('#' + full).toLowerCase();
+}
+
+function channelLuminance(channel: number) {
+  const c = channel / 255;
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+export function getColorLuminance(hex: string): number | null {
+  const normalized = normalizeHex(hex);
+  if (!normalized) return null;
+  const rgb = hexToRgb(normalized);
+  if (!rgb) return null;
+  return (
+    0.2126 * channelLuminance(rgb.r) +
+    0.7152 * channelLuminance(rgb.g) +
+    0.0722 * channelLuminance(rgb.b)
+  );
+}
+
+export function getContrastRatio(foreground: string, background: string): number | null {
+  const fg = getColorLuminance(foreground);
+  const bg = getColorLuminance(background);
+  if (fg === null || bg === null) return null;
+  const light = Math.max(fg, bg);
+  const dark = Math.min(fg, bg);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/** 把颜色朝可读方向推，直到对背景达到 4.5:1；自定义主题也沿用同一规则 */
+export function getReadableText(color: string, background?: string, minRatio = 4.5): string {
+  const normalized = normalizeHex(color);
+  const bg = background ? normalizeHex(background) : null;
+  if (!normalized || !bg) return color;
+  if ((getContrastRatio(normalized, bg) ?? 0) >= minRatio) return normalized;
+
+  const lightBackground = (getColorLuminance(bg) ?? 0) > 0.5;
+  let next = normalized;
+  for (let i = 0; i < 16; i++) {
+    if ((getContrastRatio(next, bg) ?? 0) >= minRatio) break;
+    next = lightBackground ? darkenHexColor(next, 0.1) : lightenHexColor(next, 0.1);
+  }
+  return next;
+}
+
+/** 实心主色上的文字：深墨或白，取对比度更高的那个 */
+export function getAccentInk(accent: string): string {
+  const normalized = normalizeHex(accent);
+  if (!normalized) return '#06282a';
+  const darkInk = getContrastRatio('#06282a', normalized) ?? 0;
+  const white = getContrastRatio('#ffffff', normalized) ?? 0;
+  return darkInk >= white ? '#06282a' : '#ffffff';
 }
 
 export function getRandomColor(): string {

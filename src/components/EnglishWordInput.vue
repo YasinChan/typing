@@ -451,7 +451,7 @@ defineExpose({
   letter-spacing: 0.2px;
   &:not(.is-focused):not(.is-typing) {
     .y-en-window {
-      opacity: 0.42;
+      opacity: 0.55;
       transition: opacity 0.25s $ease-out;
     }
   }
@@ -488,7 +488,7 @@ defineExpose({
   display: inline-block;
   height: 1.4em;
   line-height: 1.4;
-  color: $gray-04;
+  color: $text-passage-muted;
   transition: color 0.08s linear;
   &.is-correct {
     color: $gray-08;
@@ -501,7 +501,7 @@ defineExpose({
     opacity: 0.75;
   }
   &.is-missed {
-    color: $gray-04;
+    color: $text-passage-muted;
     text-decoration: underline;
     text-decoration-color: $main-red;
     text-underline-offset: 6px;
@@ -512,7 +512,7 @@ defineExpose({
   position: absolute;
   width: 2px;
   border-radius: 1px;
-  background: $main-color;
+  background: $accent-text;
   pointer-events: none;
   animation: en-caret 1s step-end infinite;
 }
@@ -524,9 +524,9 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $main-color;
+  color: $accent-text;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.18em;
   pointer-events: none;
 }

@@ -17,8 +17,8 @@ defineProps<{
   border-radius: $radius-full;
   line-height: 22px;
   font-size: 12px;
-  font-weight: 600;
-  color: #fff;
+  font-weight: 500;
+  color: $accent-ink;
   background-color: $main-color;
   margin-right: 4px;
 }

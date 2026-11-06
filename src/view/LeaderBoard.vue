@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 
 // components
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -54,16 +54,26 @@ const useConfig = useConfigStore();
 const { currentFont } = storeToRefs(useConfig);
 
 const state = reactive({
+  mode: 'time' as LeaderBoardMode,
   time: createBoard(),
   countdown: createBoard()
 });
 
-async function loadBoard(
-  board: BoardState,
-  type: LeaderBoardMode,
-  page: number,
-  append = false
-) {
+const activeBoard = computed(() => state[state.mode]);
+
+function switchMode(mode: LeaderBoardMode) {
+  state.mode = mode;
+}
+
+function loadMoreActive() {
+  loadMore(activeBoard.value, state.mode);
+}
+
+function toggleMineActive() {
+  toggleMine(activeBoard.value);
+}
+
+async function loadBoard(board: BoardState, type: LeaderBoardMode, page: number, append = false) {
   // 追加下一页时避免重复请求；首屏 loading 初始就是 true，不能同样拦截
   if (append && board.loading) return;
   if (append && page !== board.page + 1) return;
@@ -132,50 +142,64 @@ onMounted(() => {
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-leader-board">
-    <div class="y-leader-board__wrap-title flex-center">
-      <span>{{ $t('leaderboard') }}</span>
-      <Tooltip style="cursor: pointer">
-        <template #content>
-          <div class="y-leader-board__tip y-leader-board__tip--wide">
-            <p>{{ $t('sentence.leaderboard_rule1') }}</p>
-            <p>{{ $t('sentence.leaderboard_rule2') }}</p>
-          </div>
-        </template>
-        <IcoTips></IcoTips>
-      </Tooltip>
+    <div class="y-page-head">
+      <div>
+        <div class="y-page-title">
+          <span>{{ $t('leaderboard') }}</span>
+          <Tooltip style="cursor: pointer">
+            <template #content>
+              <div class="y-leader-board__tip y-leader-board__tip--wide">
+                <p>{{ $t('sentence.leaderboard_rule1') }}</p>
+                <p>{{ $t('sentence.leaderboard_rule2') }}</p>
+              </div>
+            </template>
+            <IcoTips></IcoTips>
+          </Tooltip>
+        </div>
+        <p class="y-page-desc">{{ $t('sentence.leaderboard_rule2') }}</p>
+      </div>
     </div>
-    <div class="y-leader-board__wrap">
-      <LeaderBoardPanel
-        :title="$t('limit_ranking')"
-        :list="state.time.list"
-        :page="state.time.page"
-        :pages="state.time.pages"
-        :loading="state.time.loading"
-        :total="state.time.total"
-        :mine="state.time.mine"
-        :mine-fetched="state.time.mineFetched"
-        :mine-resolved="state.time.mineResolved"
-        :mine-only="state.time.mineOnly"
-        :load-error="state.time.loadError"
-        @load-more="loadMore(state.time, 'time')"
-        @toggle-mine="toggleMine(state.time)"
-      ></LeaderBoardPanel>
-      <LeaderBoardPanel
-        :title="$t('time_ranking')"
-        :list="state.countdown.list"
-        :page="state.countdown.page"
-        :pages="state.countdown.pages"
-        :loading="state.countdown.loading"
-        :total="state.countdown.total"
-        :mine="state.countdown.mine"
-        :mine-fetched="state.countdown.mineFetched"
-        :mine-resolved="state.countdown.mineResolved"
-        :mine-only="state.countdown.mineOnly"
-        :load-error="state.countdown.loadError"
-        @load-more="loadMore(state.countdown, 'countdown')"
-        @toggle-mine="toggleMine(state.countdown)"
-      ></LeaderBoardPanel>
-    </div>
+    <LeaderBoardPanel
+      :key="state.mode"
+      :title="state.mode === 'time' ? $t('limit_ranking') : $t('time_ranking')"
+      :list="activeBoard.list"
+      :page="activeBoard.page"
+      :pages="activeBoard.pages"
+      :loading="activeBoard.loading"
+      :total="activeBoard.total"
+      :mine="activeBoard.mine"
+      :mine-fetched="activeBoard.mineFetched"
+      :mine-resolved="activeBoard.mineResolved"
+      :mine-only="activeBoard.mineOnly"
+      :load-error="activeBoard.loadError"
+      @load-more="loadMoreActive"
+      @toggle-mine="toggleMineActive"
+    >
+      <template #title>
+        <div class="y-leader-board__tabs" role="tablist" :aria-label="$t('leaderboard')">
+          <button
+            type="button"
+            role="tab"
+            class="y-leader-board__tab"
+            :class="{ 'is-active': state.mode === 'time' }"
+            :aria-selected="state.mode === 'time'"
+            @click="switchMode('time')"
+          >
+            {{ $t('limit_ranking') }}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="y-leader-board__tab"
+            :class="{ 'is-active': state.mode === 'countdown' }"
+            :aria-selected="state.mode === 'countdown'"
+            @click="switchMode('countdown')"
+          >
+            {{ $t('time_ranking') }}
+          </button>
+        </div>
+      </template>
+    </LeaderBoardPanel>
     <div class="y-leader-board__bottom">
       *{{ $t('note') }}
       <ol>
@@ -190,39 +214,55 @@ onMounted(() => {
 <style lang="scss">
 .y-leader-board {
   color: $gray-08;
-  margin: 8px 6px 40px;
+  margin: 12px 0 40px;
   font-weight: 500;
   letter-spacing: 0;
   svg {
     fill: $gray-08;
   }
 }
-.y-leader-board__wrap-title {
-  font-size: 22px;
-  margin-bottom: 24px;
-  svg {
-    width: 20px;
-    height: 20px;
-    margin-left: 4px;
-    fill: $gray-06;
-  }
-}
-.y-leader-board__wrap {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 40vh;
-}
 .y-leader-board__item {
-  flex: 1;
+  width: 100%;
   min-width: 0;
-  padding: 20px;
+  padding: 20px 20px 12px;
   background: $layout-background-gray;
+  border: 1px solid $border-hairline;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   display: flex;
   flex-direction: column;
-  max-height: min(72vh, 840px);
+  height: min(60vh, 680px);
+}
+.y-leader-board__tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 8px;
+  padding: 3px;
+  border-radius: $radius-full;
+  background: $background-gray;
+}
+.y-leader-board__tab {
+  height: 28px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: $radius-full;
+  background: transparent;
+  color: $gray-06;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out, box-shadow 0.2s $ease-out;
+  &:hover {
+    color: $gray-08;
+  }
+  &.is-active {
+    background: $layout-background-gray;
+    color: $gray-08;
+    box-shadow: $shadow-sm;
+  }
 }
 .y-leader-board__scroller {
   flex: 1;
@@ -262,7 +302,7 @@ onMounted(() => {
 }
 .y-leader-board__title {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 500;
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -286,7 +326,7 @@ onMounted(() => {
   margin-left: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: $gray-04;
+  color: $gray-06;
   white-space: nowrap;
   cursor: help;
 }
@@ -297,28 +337,28 @@ onMounted(() => {
   flex-shrink: 0;
   border: none;
   background: transparent;
-  color: $main-color;
+  color: $accent-text;
   cursor: pointer;
   padding: 4px 10px;
   border-radius: $radius-sm;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: inset 0 0 0 1px $main-color;
+  box-shadow: inset 0 0 0 1px $accent-text;
   transition: background-color 0.15s $ease-out, color 0.15s $ease-out;
   &:hover {
     background: $background-gray;
   }
   &.is-active {
-    background: $main-color;
-    color: $label-white;
+    background: $accent-soft;
+    color: $accent-text;
   }
 }
 .y-leader-board__mine-empty {
   flex-shrink: 0;
   font-size: 12px;
   font-weight: 500;
-  color: $gray-04;
+  color: $gray-06;
   white-space: nowrap;
 }
 .y-leader-board__status {
@@ -346,7 +386,7 @@ onMounted(() => {
 .y-leader-board__retry {
   border: none;
   background: transparent;
-  color: $main-color;
+  color: $accent-text;
   cursor: pointer;
   padding: 8px 12px;
   font-size: 13px;
@@ -356,25 +396,23 @@ onMounted(() => {
   height: 1px;
 }
 .y-leader-board__empty {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 13px;
   font-weight: 500;
 }
 
 .y-leader-board__bottom {
-  margin: 50px 0 20px;
-  font-size: 14px;
-  color: $gray-04;
+  margin: 24px 0 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: $gray-06;
   li {
     margin-left: 20px;
   }
 }
 @media only screen and (max-width: 1199px) {
-  .y-leader-board__wrap {
-    flex-direction: column;
-  }
   .y-leader-board__item {
-    max-height: min(64vh, 640px);
+    height: min(56vh, 600px);
   }
   .y-leader-board__header-finish-time {
     display: none;

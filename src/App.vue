@@ -59,16 +59,12 @@ const router = useRouter();
 const route = useRoute();
 const { locale, t } = useI18n();
 
-const gameVisited = ref(!!(YStorage.get('Y_STORAGE') || {}).gameVisited);
 watch(
   () => route.name,
-  (name) => {
-    if ((name === 'Game' || name === 'GameRoom') && !gameVisited.value) {
-      gameVisited.value = true;
-      YStorage.set('Y_STORAGE', { ...(YStorage.get('Y_STORAGE') || {}), gameVisited: true });
-    }
-  },
-  { immediate: true }
+  () => {
+    // 换页时退出专注态，避免上一页的打字状态把新页面的导航藏起来
+    useConfig.setOnlyShowMain(false);
+  }
 );
 
 const { config } = storeToRefs(userStore);
@@ -124,6 +120,7 @@ onMounted(() => {
   document.addEventListener('keyup', handleKeyUp);
   document.addEventListener('wheel', handleWheel);
   document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('focusout', handleFocusOut);
 });
 
 onBeforeUnmount(() => {
@@ -131,7 +128,26 @@ onBeforeUnmount(() => {
   document.removeEventListener('keyup', handleKeyUp);
   document.removeEventListener('wheel', handleWheel);
   document.removeEventListener('mousemove', handleMouseMove);
+  document.removeEventListener('focusout', handleFocusOut);
 });
+
+/** 只有焦点真正落在打字输入区时才进入专注态 */
+function isTypingAreaActive() {
+  const el = document.activeElement as HTMLElement | null;
+  return (
+    !!el &&
+    (el.classList.contains('y-word-input__input-area') || el.classList.contains('y-en-input'))
+  );
+}
+
+function handleFocusOut() {
+  // 等焦点落定后再判断，避免从输入区点到工具栏时误判
+  window.setTimeout(() => {
+    if (!isTypingAreaActive()) {
+      useConfig.setOnlyShowMain(false);
+    }
+  }, 0);
+}
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.code === KEY_CODE_ENUM['ESCAPE']) {
@@ -140,7 +156,10 @@ function handleKeyDown(e: KeyboardEvent) {
   if (e.code === KEY_CODE_ENUM['CAPS_LOCK']) {
     useConfig.setCapsLockOn(true);
   }
-  useConfig.setOnlyShowMain(true);
+  // 导航页、排行榜、键盘测试按任意键不应该把导航藏起来
+  if (isTypingAreaActive()) {
+    useConfig.setOnlyShowMain(true);
+  }
 }
 
 function handleKeyUp(e: KeyboardEvent) {
@@ -315,9 +334,7 @@ function changeLocale() {
             to="/game"
             class="y-menu__item"
             :class="{
-              'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom',
-              'y-menu__item--blink':
-                !gameVisited && $route.name !== 'Game' && $route.name !== 'GameRoom'
+              'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom'
             }"
             >{{ $t('game_mode') }}</router-link
           >
@@ -537,12 +554,12 @@ function changeLocale() {
   height: 32px;
   line-height: 32px;
   text-align: center;
-  color: $label-white;
-  font-weight: bold;
+  color: $accent-ink;
+  font-weight: 600;
   background: $main-color;
   cursor: pointer;
   svg {
-    fill: $label-white;
+    fill: $accent-ink;
     width: 16px;
     margin-left: 20px;
   }
@@ -584,7 +601,7 @@ function changeLocale() {
   }
   .y-mobile-show__hint {
     margin-top: 10px;
-    color: $main-color;
+    color: $accent-text;
     font-size: 14px;
     font-weight: 600;
   }
@@ -616,6 +633,7 @@ main,
 }
 footer {
   font-size: 13px;
+  font-weight: 400;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -625,11 +643,11 @@ footer {
   svg {
     width: 14px;
     height: 14px;
-    fill: $gray-04;
+    fill: $gray-06;
     margin-right: 4px;
   }
   span {
-    color: $gray-04;
+    color: $gray-06;
   }
 }
 .y-app__footer-group {
@@ -650,16 +668,16 @@ footer {
   top: 88px;
   left: 50%;
   transform: translateX(-50%);
-  color: $label-white;
+  color: $accent-ink;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   background: $main-color;
   border-radius: $radius-full;
   padding: 6px 12px;
   box-shadow: $shadow-md;
   svg {
     margin-right: 4px;
-    fill: $label-white;
+    fill: $accent-ink;
     width: 18px;
   }
 }
@@ -669,7 +687,9 @@ footer {
   transition: opacity 0.3s $ease-out;
 }
 .y-info__disabled {
-  opacity: 0.3;
+  // 专注打字时不要留一个 30% 的"幽灵 logo"
+  opacity: 0;
+  pointer-events: none;
 }
 .y-info__logo {
   width: 30px;
@@ -725,21 +745,21 @@ footer {
   align-items: center;
   justify-content: center;
   height: 32px;
-  padding: 0 12px;
+  padding: 0 11px;
   border-radius: $radius-full;
   cursor: pointer;
-  letter-spacing: 0.5px;
-  font-size: 13px;
-  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-size: 14px;
+  font-weight: 500;
   color: $gray-06;
   transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
-    color: $main-color;
+    color: $accent-text;
   }
   &.router-link-exact-active,
   &.y-menu__item--active {
-    color: $label-white;
-    background: $main-color;
+    color: $accent-text;
+    background: $accent-soft;
   }
 }
 .y-menu__icon {
@@ -758,7 +778,7 @@ footer {
     fill: currentColor;
   }
   &:hover {
-    color: $main-color;
+    color: $accent-text;
     background: $layout-background-gray;
   }
   &.y-menu__item-auth {
@@ -766,9 +786,6 @@ footer {
     min-width: 32px;
     padding: 0 2px;
   }
-}
-.y-menu__item--blink {
-  animation: title-blink 0.8s infinite alternate;
 }
 .y-menu__change {
   cursor: pointer;
@@ -778,21 +795,21 @@ footer {
   transition: background-color 0.2s $ease-out, color 0.2s $ease-out;
   color: inherit;
   &:hover {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
   &.y-menu__change--active {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
 }
 
 main {
-  margin: 12px 8px;
-  font-weight: 600;
+  margin: 12px 0;
+  font-weight: 400;
   color: $gray-08;
-  font-size: 20px;
-  letter-spacing: 0.4px;
+  font-size: 15px;
+  letter-spacing: 0;
 }
 .y-main {
   margin: 12px auto;
@@ -814,10 +831,10 @@ main {
   }
   &:hover {
     span {
-      color: $main-color;
+      color: $accent-text;
     }
     svg {
-      fill: $main-color;
+      fill: $accent-text;
     }
   }
 }
@@ -834,14 +851,5 @@ main {
 .menu-leave-to {
   opacity: 0;
   transform: translateY(-6px);
-}
-
-@keyframes title-blink {
-  0% {
-    text-shadow: none;
-  }
-  100% {
-    text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px #fff, 0 0 16px $main-color;
-  }
 }
 </style>

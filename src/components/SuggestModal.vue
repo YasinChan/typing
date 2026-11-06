@@ -87,10 +87,12 @@ async function getSuggestList(sort?: 'time' | 'hot' | 'theme') {
   const suggest = await getSuggest({ sort });
   state.currentSort = sort || 'time';
   const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
-  const done = suggestList.filter((item) => item.done);
+  // 未处理的问题优先展示，已采纳次之，已完成沉底。
+  // 避免用户一打开弹窗只看到「已完成」，误以为反馈列表没有在推进。
+  const pending = suggestList.filter((item) => !item.accept && !item.done);
   const accept = suggestList.filter((item) => !item.done).filter((item) => item.accept);
-  const left = suggestList.filter((item) => !item.accept && !item.done);
-  state.suggestList = [...done, ...accept, ...left];
+  const done = suggestList.filter((item) => item.done);
+  state.suggestList = [...pending, ...accept, ...done];
   state.isLoading = false;
 }
 
@@ -511,7 +513,7 @@ defineExpose({
   .y-submit-suggest__svg {
     width: 22px;
     height: 22px;
-    fill: $main-color;
+    fill: $accent-text;
     cursor: pointer;
     z-index: 999;
   }
@@ -531,7 +533,7 @@ defineExpose({
   }
 }
 .y-submit-suggest__tips {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 14px;
   padding-bottom: 10px;
   position: sticky;
@@ -554,10 +556,10 @@ defineExpose({
     margin-right: 4px;
   }
   &:hover {
-    background: $main-color;
-    color: $label-white;
+    background: $accent-soft;
+    color: $accent-text;
     svg {
-      fill: $label-white;
+      fill: $accent-text;
     }
   }
 }
@@ -588,7 +590,7 @@ defineExpose({
   svg {
     width: 14px;
     height: 14px;
-    fill: $main-color;
+    fill: $accent-text;
   }
 }
 .y-submit-suggest__list {
@@ -619,7 +621,7 @@ defineExpose({
 .list-content__set {
   transition: color 0.2s;
   &:hover {
-    color: $main-color;
+    color: $accent-text;
   }
 }
 .y-submit-suggest__list-info {
@@ -654,9 +656,9 @@ defineExpose({
   }
 }
 .y-submit-suggest__list-data--active {
-  color: $main-color;
+  color: $accent-text;
   svg {
-    fill: $main-color;
+    fill: $accent-text;
   }
 }
 
@@ -671,14 +673,14 @@ defineExpose({
   span {
     margin-right: 10px;
     cursor: pointer;
-    color: $gray-04;
+    color: $gray-06;
     &.active {
-      color: $main-color;
+      color: $accent-text;
     }
   }
 }
 .y-submit-suggest__reply-tips {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 12px;
   margin-left: 10px;
 }

@@ -296,7 +296,7 @@ onUnmounted(() => {
   }
 }
 .time-limit__container {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 14px;
 }
 </style>

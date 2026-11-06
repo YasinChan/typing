@@ -497,7 +497,7 @@ defineExpose({
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px $main-color;
+  box-shadow: 0 0 0 2px $accent-text;
   overflow: hidden;
   .y-auth__login-img {
     width: 100%;
@@ -518,7 +518,7 @@ defineExpose({
   white-space: nowrap;
   font-size: 14px;
   .router-link-active {
-    color: $main-color;
+    color: $accent-text;
   }
 }
 .y-auth__menu-item {
@@ -527,7 +527,7 @@ defineExpose({
   display: block;
   transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
-    color: $main-color;
+    color: $accent-text;
     background: $background-gray;
   }
 }
@@ -541,7 +541,7 @@ defineExpose({
   }
 }
 .y-change-login__remind {
-  color: $gray-04;
+  color: $gray-06;
   font-size: 12px;
   padding-bottom: 8px;
 }
@@ -554,7 +554,7 @@ defineExpose({
 
 .y-forget-modal__remind {
   font-size: 14px;
-  color: $gray-04;
+  color: $gray-06;
   margin-bottom: 20px;
 }
 

@@ -72,8 +72,12 @@ watch(
     }
     &:focus {
       outline: none;
-      border-color: $main-color;
-      box-shadow: 0 0 0 3px rgba(21, 197, 206, 0.16);
+      border-color: $accent-text;
+      box-shadow: 0 0 0 3px $accent-soft;
+    }
+    &::placeholder {
+      color: $gray-06;
+      opacity: 0.9;
     }
   }
 }
@@ -81,7 +85,7 @@ watch(
   position: absolute;
   right: 6px;
   bottom: 6px;
-  color: $gray-04;
+  color: $gray-06;
   font-size: 14px;
 }
 </style>

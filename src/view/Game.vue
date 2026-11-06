@@ -170,39 +170,34 @@ watch(
 
 <template>
   <main class="y-game">
-    <!--    <Chart1></Chart1>-->
-    <!--    <h1 style="margin-bottom: 20px">-->
-    <!--      开发中，敬请期待！页面会随时更新，创建的房间可能随时被删除哦~-->
-    <!--    </h1>-->
-    <div class="y-game__rule y-game__rule-title">{{ $t('game_rules') }}</div>
-    <ul class="y-game__rule">
-      <li>{{ $t('sentence.game_rule1') }}</li>
-      <li v-if="!isLogin">
-        由于目前服务器资源有限，为限制人数，暂时需要<span
-          class="main-color cursor-pointer"
-          @click="triggerShowLogin"
-          >登录</span
-        >后才能创建比一比。不过加入已创建的房间则<strong>不需要登录</strong>，设置一个昵称就可以了哦。
-      </li>
-      <li>
-        创建的房间如果<strong>五分钟</strong>内没有任何操作，则会自动关闭。不过当还剩五秒会关闭时，会有弹框提示，任何操作都可以避免关闭。
-      </li>
-      <li>{{ $t('sentence.game_rule2') }}</li>
-    </ul>
-    <YButton @click="clickCreate">{{ isLogin ? $t('create_game') : '点击登录/注册' }}</YButton>
-    <div class="y-game__current flex-center--y">
+    <div class="y-page-head">
       <div>
-        当前比一比人数：<span class="y-game__current-count">{{ currentPlayerLen }} 人</span>
+        <div class="y-page-title">{{ $t('game_mode') }}</div>
+        <p class="y-page-desc">{{ $t('sentence.game_rule1') }}</p>
       </div>
-      <IcoChange class="y-game__current-refresh" @click="refreshList"></IcoChange>
+    </div>
+    <div class="y-game__create">
+      <div class="y-game__create-copy">
+        <div class="y-game__create-title">{{ $t('create_room_title') }}</div>
+        <p class="y-game__create-desc">
+          {{ isLogin ? $t('create_game_desc') : $t('join_game_hint') }}
+        </p>
+      </div>
+      <YButton @click="clickCreate">{{ isLogin ? $t('create_game') : '登录后创建' }}</YButton>
+    </div>
+    <div class="y-game__list-head">
+      <div class="y-game__list-title">{{ $t('rooms_available') }}</div>
+      <div class="y-game__current flex-center--y">
+        <span class="y-game__current-count">{{ currentPlayerLen }} 人在线</span>
+        <button type="button" class="y-game__refresh" @click="refreshList">
+          <IcoChange></IcoChange>
+          刷新
+        </button>
+      </div>
     </div>
     <div class="y-game__list">
       <YLoading v-if="state.isLoading"></YLoading>
-      <div
-        class="y-game__list-item--empty y-game__list-item"
-        v-for="item in state.lists"
-        :key="item.op"
-      >
+      <div class="y-game__list-item" v-for="item in state.lists" :key="item.op">
         <div class="y-game__list-item-title">{{ base64ToString(item.op) }}的房间</div>
         <div class="gray-06">人数限制：{{ item.count }} 人</div>
         <div class="gray-06">
@@ -215,10 +210,27 @@ watch(
           >
         </div>
       </div>
-      <div class="y-game__list-item--empty"></div>
-      <div class="y-game__list-item--empty"></div>
-      <div class="y-game__list-item--empty"></div>
+      <div v-if="!state.isLoading && !state.lists.length" class="y-game__empty">
+        {{ $t('rooms_empty') }}
+      </div>
     </div>
+    <details class="y-game__rules">
+      <summary>{{ $t('game_rules_title') }}</summary>
+      <ul class="y-game__rule">
+        <li>{{ $t('sentence.game_rule1') }}</li>
+        <li v-if="!isLogin">
+          由于目前服务器资源有限，为限制人数，暂时需要<span
+            class="main-color cursor-pointer"
+            @click="triggerShowLogin"
+            >登录</span
+          >后才能创建比一比。不过加入已创建的房间则<strong>不需要登录</strong>，设置一个昵称就可以了哦。
+        </li>
+        <li>
+          创建的房间如果<strong>五分钟</strong>内没有任何操作，则会自动关闭。不过当还剩五秒会关闭时，会有弹框提示，任何操作都可以避免关闭。
+        </li>
+        <li>{{ $t('sentence.game_rule2') }}</li>
+      </ul>
+    </details>
   </main>
   <YModal :show="state.showSetting" @close="state.showSetting = false" @confirm="confirmCreate">
     <template #header>
@@ -311,16 +323,121 @@ watch(
 .y-game__setting-item {
   margin-bottom: 10px;
 }
+.y-game__create {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  background: $layout-background-gray;
+  border: 1px solid $border-hairline;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+.y-game__create-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+.y-game__create-desc {
+  margin-top: 4px;
+  color: $gray-06;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+.y-game__list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.y-game__list-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+.y-game__refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $gray-06;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+  &:hover {
+    color: $accent-text;
+    background: $accent-soft;
+  }
+}
+.y-game__rules {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid $border-hairline;
+  color: $gray-06;
+  font-size: 14px;
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $gray-06;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+    &:hover {
+      color: $gray-08;
+    }
+    &::-webkit-details-marker {
+      display: none;
+    }
+    &::before {
+      content: '+';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: $accent-soft;
+      color: $accent-text;
+      font-size: 12px;
+      line-height: 1;
+    }
+  }
+  &[open] summary::before {
+    content: '−';
+  }
+  .y-game__rule {
+    margin: 12px 0 0;
+  }
+}
+.y-game__empty {
+  grid-column: 1 / -1;
+  padding: 32px 16px;
+  border: 1px dashed $border-hairline;
+  border-radius: $radius-md;
+  color: $gray-06;
+  font-size: 14px;
+  text-align: center;
+}
 .y-game__rule {
   margin-bottom: 20px;
   line-height: 28px;
   font-size: 14px;
   font-weight: 400;
-}
-.y-game__rule-title {
-  margin-bottom: 10px;
-  font-size: 18px;
-  font-weight: bold;
 }
 
 .y-game__modal-title {
@@ -339,10 +456,10 @@ watch(
     margin-right: 4px;
   }
   &:hover {
-    background: $main-color;
-    color: $label-white;
+    background: $accent-soft;
+    color: $accent-text;
     svg {
-      fill: $label-white;
+      fill: $accent-text;
     }
   }
 }
@@ -360,56 +477,44 @@ watch(
   transition: all 0.2s;
   color: inherit;
   &:hover {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
   &.y-game__modal-content-item--active {
-    background-color: $main-color;
-    color: $label-white;
+    background-color: $accent-soft;
+    color: $accent-text;
   }
 }
 .y-game__current {
-  margin-top: 20px;
+  gap: 12px;
+  color: $gray-06;
+  font-size: 13px;
+  font-weight: 400;
 }
 .y-game__current-count {
-  display: inline-block;
-  position: relative;
-  &:after {
-    position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  &::before {
     content: '';
     width: 6px;
     height: 6px;
+    border-radius: 50%;
     background: $main-color;
-    border-radius: 6px;
-    right: -12px;
-    top: 50%;
-    transform: translateY(-50%);
   }
-}
-.y-game__current-refresh {
-  margin-left: 20px;
-  cursor: pointer;
-  width: 40px;
-  height: 20px;
-  fill: $gray-08;
 }
 .y-game__list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   font-size: 14px;
-  margin-top: 20px;
+  margin-top: 0;
   position: relative;
   font-weight: 400;
   .y-loading {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-  }
-}
-.y-game__list-item--empty {
-  &:not(.y-game__list-item) {
-    display: none;
   }
 }
 .y-game__list-item {

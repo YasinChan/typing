@@ -31,9 +31,9 @@ defineProps({
   transform: translate(-50%, 0);
   padding: 10px 18px;
   border-radius: $radius-full;
-  color: #fff;
+  color: $accent-ink;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   box-shadow: $shadow-md;
   z-index: 9999;
   max-width: min(90vw, 520px);
@@ -44,7 +44,8 @@ defineProps({
 }
 
 .y-message--error {
-  background: $main-red;
+  color: $label-white;
+  background: $error-fill;
 }
 .y-message--warn {
   background: $main-orange;

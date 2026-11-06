@@ -57,9 +57,9 @@ const handlerClick = () => {
   touch-action: manipulation;
   padding: 8px 16px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   border-radius: $radius-md;
-  color: $label-white;
+  color: $accent-ink;
   background: $main-color;
   box-shadow: $shadow-sm;
   transition: transform 0.2s $ease-out, box-shadow 0.2s $ease-out, background-color 0.2s $ease-out,
@@ -95,12 +95,12 @@ const handlerClick = () => {
 }
 .y-button--secondary {
   background: transparent;
-  color: $main-color;
-  box-shadow: inset 0 0 0 1px $main-color;
+  color: $accent-text;
+  box-shadow: inset 0 0 0 1px $accent-text;
   &:hover {
-    background: $main-color;
-    color: $label-white;
-    box-shadow: $shadow-sm;
+    background: $accent-soft;
+    color: $accent-text;
+    box-shadow: inset 0 0 0 1px $accent-text;
   }
 }
 </style>

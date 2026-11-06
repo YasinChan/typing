@@ -1,0 +1,125 @@
+/* 声明、日志等阅读型页面 */
+.y-doc-page {
+  width: min(900px, 100%);
+  margin: 12px auto 40px;
+}
+.y-doc {
+  padding: 32px 36px;
+  background: $layout-background-gray;
+  border: 1px solid $border-hairline;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+.y-doc__loading {
+  display: block;
+  margin: 64px auto;
+}
+.y-doc__markdown {
+  color: $gray-06;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.85;
+  letter-spacing: 0;
+  word-break: break-word;
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: $gray-08;
+    letter-spacing: 0;
+  }
+  h1 {
+    margin: 0 0 20px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  h2 {
+    margin: 36px 0 14px;
+    font-size: 18px;
+    font-weight: 600;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+  /* 日志的日期标签：一条一眼能扫到的时间线 */
+  h3 {
+    width: fit-content;
+    margin: 28px 0 10px;
+    padding: 3px 8px;
+    border-radius: $radius-full;
+    background: $accent-soft;
+    color: $accent-text;
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+  h2 + h3 {
+    margin-top: 16px;
+  }
+  p {
+    margin: 0 0 14px;
+  }
+  ul,
+  ol {
+    margin: 0 0 18px;
+    padding-left: 22px;
+  }
+  li {
+    margin-bottom: 8px;
+    padding-left: 2px;
+    &::marker {
+      color: $gray-06;
+    }
+    > ul,
+    > ol {
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+  }
+  strong {
+    color: $gray-08;
+    font-weight: 600;
+  }
+  a {
+    color: $accent-text;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    &:hover {
+      color: $gray-08;
+    }
+  }
+  code {
+    padding: 1px 5px;
+    border: 1px solid $border-hairline;
+    border-radius: 4px;
+    background: $background-gray;
+    color: $gray-08;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  hr {
+    margin: 28px 0;
+    border: 0;
+    border-top: 1px solid $border-hairline;
+  }
+  blockquote {
+    margin: 0 0 18px;
+    padding: 4px 0 4px 16px;
+    border-left: 2px solid $accent-text;
+    color: $gray-06;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .y-doc {
+    padding: 20px 18px;
+  }
+  .y-doc__markdown {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+}

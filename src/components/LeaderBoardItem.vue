@@ -50,10 +50,10 @@ const props = defineProps<{
   font-size: 13px;
 }
 .y-leader-board-item--me td:first-child {
-  box-shadow: inset 3px 0 0 $main-color;
+  box-shadow: inset 3px 0 0 $accent-text;
 }
 .y-leader-board-item--me td {
-  color: $main-color;
+  color: $accent-text;
 }
 .y-leader-board-item__rank {
   svg {

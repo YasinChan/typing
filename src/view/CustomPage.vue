@@ -346,7 +346,7 @@ function changePunctuation() {
   svg {
     width: 16px;
     height: 16px;
-    fill: $label-white;
+    fill: $accent-ink;
   }
 }
 </style>

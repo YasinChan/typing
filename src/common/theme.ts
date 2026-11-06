@@ -1,6 +1,13 @@
 import YStorage from '@/common/YStorage';
 import { DARK_THEME, DEFAULT_THEME, LIGHT_THEME, type ThemeType } from '@/config/theme';
-import { removeAllCustomCssValue, setCustomCssValue } from '@/common/color';
+import {
+  addOpacityToHex,
+  getAccentInk,
+  getReadableText,
+  isHexColor,
+  removeAllCustomCssValue,
+  setCustomCssValue
+} from '@/common/color';
 import { COLOR_ENUM, type COLOR_TYPE } from '@/types';
 
 const theme: any = {
@@ -95,6 +102,23 @@ export function setCustomTheme(info?: string, obj?: COLOR_TYPE) {
   setCustomCssValue(COLOR_ENUM['GRAY_06'], customObj['GRAY_06']);
   setCustomCssValue(COLOR_ENUM['GRAY_04'], customObj['GRAY_04']);
   setCustomCssValue(COLOR_ENUM['GRAY_02'], customObj['GRAY_02']);
+
+  // 自定义主题也要有可读的主色文字与配套的墨色/浅底
+  const mainColor = customObj['MAIN_COLOR'];
+  const backgroundColor = customObj['BACKGROUND_COLOR'];
+  if (mainColor) {
+    setCustomCssValue('--accent-text', getReadableText(mainColor, backgroundColor, 5));
+    setCustomCssValue('--accent-ink', getAccentInk(mainColor));
+    if (isHexColor(mainColor)) {
+      setCustomCssValue('--accent-soft', addOpacityToHex(mainColor, 0.14));
+    }
+  }
+  if (customObj['GRAY_06']) {
+    setCustomCssValue(
+      '--text-passage-muted',
+      getReadableText(customObj['GRAY_06'], backgroundColor)
+    );
+  }
 }
 
 export function getCustomTheme(ct: string) {

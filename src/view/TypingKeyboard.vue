@@ -202,7 +202,7 @@ const changeKeyboard = (keyboard: KeyBoardType) => {
   text-align: right;
   transition: all 0.3s cubic-bezier(0.55, 0, 0.1, 1);
   &:hover {
-    color: $main-color;
+    color: $accent-text;
   }
 }
 .y-main__screen {

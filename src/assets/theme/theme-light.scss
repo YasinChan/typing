@@ -14,9 +14,19 @@
 
   /* 基础色 */
   --label-white: #fff;
-  --main-red: #f64c4c;
+  --main-red: #c92626;
   --main-color: #15c5ce;
   --main-orange: #ff8156;
+
+  /* 主色的三种用法：填充、压在填充上的墨色、作为文字的主色 */
+  --accent-ink: #06282a;
+  --accent-text: #0b6f75;
+  --accent-soft: rgba(15, 124, 130, 0.1);
+  --error-fill: #b32626;
+
+  /* 正文里"尚未输入"的文字，不能低于 4.5:1 */
+  --text-passage-muted: #5c626a;
+  --border-hairline: rgba(29, 33, 39, 0.1);
 
   /* 形状与层级，自定义主题不覆盖颜色时沿用 */
   --radius-sm: 6px;

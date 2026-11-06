@@ -16,7 +16,7 @@ const emit = defineEmits(['click']);
   border-radius: $radius-sm;
   transition: color 0.2s $ease-out, background-color 0.2s $ease-out;
   &:hover {
-    color: $main-color;
+    color: $accent-text;
     background: $background-gray;
   }
 }

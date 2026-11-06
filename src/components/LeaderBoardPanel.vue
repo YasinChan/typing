@@ -28,9 +28,7 @@ const scroller = ref<HTMLElement | null>(null);
 const sentinel = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
-const hasMore = computed(
-  () => !props.mineOnly && props.pages > 0 && props.page < props.pages
-);
+const hasMore = computed(() => !props.mineOnly && props.pages > 0 && props.page < props.pages);
 
 function rankOf(index: number) {
   // 滚动加载是累加列表，名次直接用当前下标
@@ -108,7 +106,9 @@ watch(
   <div class="y-leader-board__item">
     <div class="y-leader-board__title">
       <div class="y-leader-board__title-main flex-center--y">
-        <span>{{ title }}</span>
+        <slot name="title">
+          <span>{{ title }}</span>
+        </slot>
         <Tooltip v-if="mineFetched">
           <template #content>
             <div class="y-leader-board__tip">{{ $t('sentence.leaderboard_rule3') }}</div>
@@ -118,11 +118,7 @@ watch(
           </span>
         </Tooltip>
       </div>
-      <Tooltip
-        v-if="mineFetched && mine"
-        class="y-leader-board__mine-tip"
-        :content="$t('my_rank')"
-      >
+      <Tooltip v-if="mineFetched && mine" class="y-leader-board__mine-tip" :content="$t('my_rank')">
         <button
           type="button"
           class="y-leader-board__mine-btn"

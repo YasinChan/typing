@@ -642,7 +642,7 @@ defineExpose({
   &:not(.is-focused):not(.is-typing) {
     .y-word-input__quote,
     .y-word-input__input-area {
-      opacity: 0.42;
+      opacity: 0.55;
       transition: opacity 0.25s $ease-out;
     }
   }
@@ -688,7 +688,7 @@ defineExpose({
 .y-word-input__quote {
   line-height: 70px;
   user-select: none;
-  color: $gray-04;
+  color: $text-passage-muted;
   word-break: break-all;
   white-space: normal;
   .letter {
@@ -712,7 +712,7 @@ defineExpose({
   display: inline-block;
   width: 100%;
   color: $gray-08;
-  caret-color: $main-color;
+  caret-color: $accent-text;
   transition: opacity 0.25s $ease-out;
   outline: 0;
   &:after {
@@ -730,7 +730,7 @@ defineExpose({
   &:hover,
   &:focus {
     &:after {
-      background: $main-color;
+      background: $accent-text;
       opacity: 1;
     }
   }
@@ -743,9 +743,9 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $main-color;
+  color: $accent-text;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.18em;
   pointer-events: none;
 }

@@ -69,8 +69,12 @@ const blurHandler = (event: any): any => {
       border-color: $gray-06;
     }
     &:focus {
-      border-color: $main-color;
-      box-shadow: 0 0 0 3px rgba(21, 197, 206, 0.16);
+      border-color: $accent-text;
+      box-shadow: 0 0 0 3px $accent-soft;
+    }
+    &::placeholder {
+      color: $gray-06;
+      opacity: 0.9;
     }
   }
 }

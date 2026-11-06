@@ -55,8 +55,8 @@ const props = defineProps({
 });
 
 onMounted(() => {
-  const mainColor = getCustomCssValue('--main-color');
-  const gray04 = getCustomCssValue('--gray-04');
+  // 用可读的主色文字色，浅色主题下不会出现亮青线压白底
+  const mainColor = getCustomCssValue('--accent-text');
   const gray06 = getCustomCssValue('--gray-06');
   const gray08 = getCustomCssValue('--gray-08');
   const mainColor2 = addOpacityToHex(mainColor, 0.2);
@@ -104,7 +104,10 @@ onMounted(() => {
     // },
     legend: {
       data: ['这次', '上次'],
-      top: 0
+      top: 0,
+      textStyle: {
+        color: gray06
+      }
     },
     xAxis: {
       name: t('sec'),
@@ -120,7 +123,7 @@ onMounted(() => {
       },
       axisLine: {
         lineStyle: {
-          color: gray04
+          color: gray06
         }
       },
       data: xAxisData

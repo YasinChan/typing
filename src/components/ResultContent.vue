@@ -28,7 +28,8 @@ import { storeToRefs } from 'pinia';
 const { t } = useI18n();
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
-const { currentFont } = storeToRefs(useConfigStore());
+const configStore = useConfigStore();
+const { currentFont } = storeToRefs(configStore);
 
 const confirm: any = inject('confirm');
 const message: any = inject('message');
@@ -78,6 +79,8 @@ const isShort = computed(() => {
 });
 
 onMounted(() => {
+  // 结算页没有输入区，退出专注态，保留导航
+  configStore.setOnlyShowMain(false);
   if (props.typingRecordArr && props.typingRecordArr.length > 0) {
     // 短句模式下特别处理
     for (let i = 0; i < props.typingRecordArr.length; i++) {
@@ -401,7 +404,12 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
     <YButton class="result-content__svg" size="large" @click="restart"
       ><IcoChange></IcoChange> {{ $t('restart') }}</YButton
     >
-    <YButton class="result-content__svg" v-if="!isShort" size="large" @click="replay"
+    <YButton
+      class="result-content__svg"
+      v-if="!isShort"
+      size="large"
+      theme="secondary"
+      @click="replay"
       ><IcoReplay></IcoReplay> {{ $t('review_playback') }}</YButton
     >
     <Tooltip
@@ -410,7 +418,12 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
       :class="[state.hadRecord ? 'result-content__svg--disabled' : '']"
       :content="state.hadRecord ? '记录已保存' : '保存本次记录，将会在排行榜中展示。'"
     >
-      <YButton class="flex-center--y" :disable="state.hadRecord" size="large" @click="record"
+      <YButton
+        class="flex-center--y"
+        :disable="state.hadRecord"
+        size="large"
+        theme="secondary"
+        @click="record"
         ><IcoRecord></IcoRecord> {{ $t('save_records') }}</YButton
       >
     </Tooltip>
@@ -480,14 +493,14 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
 }
 .y-result-stat__label {
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: $gray-06;
 }
 .y-result-stat__value {
-  color: $main-color;
+  color: $accent-text;
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   line-height: 1.1;
@@ -496,7 +509,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   margin-left: 6px;
   font-size: 14px;
   color: $gray-06;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 .y-result-stat__tips {
@@ -506,7 +519,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   svg {
     width: 16px;
     height: 16px;
-    fill: $gray-04;
+    fill: $gray-06;
   }
 }
 .result-content__svg {
@@ -530,6 +543,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   gap: 8px;
 }
 .result-content__replay {
+  font-size: 20px;
   line-height: 28px;
   margin-top: 60px;
   position: relative;
@@ -552,7 +566,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   position: absolute;
   top: 16px;
   left: 20px;
-  color: $main-color;
+  color: $accent-text;
   font-size: 22px;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
@@ -562,9 +576,9 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
   position: absolute;
   top: 18px;
   left: 84px;
-  color: $gray-04;
+  color: $gray-06;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 500;
   svg {
     width: 22px;
     height: 22px;
@@ -572,7 +586,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
     cursor: pointer;
     &:hover,
     &:active {
-      fill: $main-color;
+      fill: $accent-text;
     }
   }
   .result-content__speed-up-ratio {
@@ -595,7 +609,7 @@ const speedTooltipFormatter = buildTooltipFormatter(` ${t('wpm')}`);
 .y-result-content__bottom {
   margin: 50px 0 20px;
   font-size: 14px;
-  color: $gray-04;
+  color: $gray-06;
   font-weight: 400;
   letter-spacing: 0;
   li {

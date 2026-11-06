@@ -23,11 +23,19 @@ body {
 
 ::selection {
   background: $main-color;
-  color: $label-white;
+  color: $accent-ink;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 :focus-visible:not([contenteditable='true']) {
-  outline: 2px solid $main-color;
+  outline: 2px solid $accent-text;
   outline-offset: 2px;
 }
 
@@ -64,7 +72,7 @@ a {
 }
 
 .router-link-active {
-  color: $main-color;
+  color: $accent-text;
 }
 
 @font-face {
@@ -146,6 +154,38 @@ a {
   font-weight: bold;
 }
 
+/* 二级页统一页头：标题到顶部的距离、行高、说明间距都从这里来 */
+.y-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.y-page-title {
+  display: flex;
+  align-items: center;
+  color: $gray-08;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    fill: $gray-06;
+  }
+}
+.y-page-desc {
+  margin-top: 6px;
+  color: $gray-06;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
 .flex-center {
   display: flex;
   align-items: center;
@@ -170,7 +210,7 @@ a {
   justify-content: center;
 }
 .main-color {
-  color: $main-color;
+  color: $accent-text;
 }
 .gray-08 {
   color: $gray-08;
@@ -179,7 +219,7 @@ a {
   color: $gray-06;
 }
 .gray-04 {
-  color: $gray-04;
+  color: $gray-06;
 }
 
 .cursor-pointer {
@@ -191,3 +231,4 @@ a {
 }
 
 @import './typing.scss';
+@import './document.scss';
