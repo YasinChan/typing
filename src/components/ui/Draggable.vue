@@ -128,6 +128,7 @@ defineExpose({
 .draggable {
   position: fixed;
   width: 410px;
+  font-size: 14px;
   color: $gray-08;
   background-color: $layout-background-gray;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);

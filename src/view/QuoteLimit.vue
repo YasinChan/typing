@@ -10,9 +10,9 @@ import TypingToolbar, {
   TypingChipGroup,
   TypingToolbarDivider
 } from '@/components/typing/TypingToolbar.vue';
-import TypingToolbarIcon from '@/components/typing/TypingToolbarIcon.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import ResultContent from '@/components/ResultContent.vue';
+import CustomTextModal from '@/components/typing/CustomTextModal.vue';
 
 // stores
 import { storeToRefs } from 'pinia';
@@ -23,13 +23,16 @@ import Sentence from '@/files/Quote.json';
 
 // svg
 import IcoChange from '@/assets/svg/change.svg';
+import IcoUpload from '@/assets/svg/upload.svg';
 
 // config
 import { KEY_CODE_ENUM } from '@/config/key';
-import type { TypingRecordType } from '@/types';
+import type { PresetQuote, TypingRecordType } from '@/types';
 
 // common
 import { handleChart } from '@/common/chart';
+import { getCustomTextKey } from '@/common/custom-text';
+import { listCustomTexts, type CustomTextRecord } from '@/common/custom-text-db';
 
 const { t } = useI18n();
 const wordInputRef = ref<any>(null);
@@ -38,6 +41,9 @@ const detailModalRef = ref<any>(null);
 const useConfig = useConfigStore();
 const { currentFont, isEscape } = storeToRefs(useConfig);
 const quoteLength = [5, 10];
+
+const showSourceModal = ref(false);
+const sourceTab = ref<'preset' | 'local'>('preset');
 const typeList = computed(() => [
   {
     type: 'short',
@@ -70,10 +76,29 @@ const state = reactive({
   showResult: false,
   typingRecord: {} as TypingRecordType,
   typingRecordArr: [] as TypingRecordType[],
-  currentIndex: 0 // 当前显示的句子的索引
+  currentIndex: 0, // 当前显示的句子的索引
+  source: 'preset' as 'preset' | 'local',
+  localRecord: null as CustomTextRecord | null,
+  lastLocalRecord: null as CustomTextRecord | null
+});
+
+const usingLocal = computed(() => state.source === 'local' && !!state.localRecord);
+const localText = computed(() => state.localRecord?.content || '');
+const sourcePickerLabel = computed(() => {
+  if (usingLocal.value) return state.localRecord?.name || t('local_text');
+  const quote = Array.isArray(state.quotes)
+    ? state.quotes[state.currentIndex] || state.quotes[0]
+    : state.quotes;
+  return quote?.title || t('preset_text');
 });
 
 state.quotes = getRandom();
+
+const isShort = computed(() => state.type === 'short' && !usingLocal.value);
+const activeContent = computed(() => (usingLocal.value ? localText.value : state.quotes?.content));
+const activeChartKey = computed(() =>
+  usingLocal.value ? getCustomTextKey(localText.value) : state.quotes?.title
+);
 
 onMounted(async () => {
   await nextTick();
@@ -95,6 +120,15 @@ watch(
     }
   }
 );
+
+watch(showSourceModal, (show) => {
+  if (!show) {
+    nextTick(() => {
+      wordInputRef.value?.focusInput();
+      wordInputShortRef.value?.focusInput();
+    });
+  }
+});
 
 watch(
   () => state.isTyping,
@@ -124,6 +158,7 @@ const timeFormat = computed(() => {
 });
 
 async function refresh() {
+  if (usingLocal.value) return;
   state.isTyping = false;
   state.time = 0;
   state.quotes = null;
@@ -200,14 +235,14 @@ function finished() {
     state.intervalId = null;
   }
   state.showResult = true;
-  if (state.type === 'short') {
+  if (isShort.value) {
     state.typingRecordArr.push(wordInputShortRef.value?.getTypingRecord());
   } else {
     state.typingRecord = wordInputRef.value?.getTypingRecord();
 
     // 处理图表数据
     const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
-    const currentTitle = state.quotes.title;
+    const currentTitle = activeChartKey.value;
     const { typingChartSpeed, lastTypingChartSpeed, typingChartAccuracy, lastTypingChartAccuracy } =
       handleChart(typingChartRecord, currentTitle);
 
@@ -236,7 +271,95 @@ function restart() {
   state.currentIndex = 0;
 }
 
+function openSource(tab: 'preset' | 'local') {
+  sourceTab.value = tab;
+  showSourceModal.value = true;
+}
+
+function resetSource() {
+  state.isTyping = false;
+  state.time = 0;
+  state.showResult = false;
+  state.currentIndex = 0;
+  state.typingRecordArr = [];
+  nextTick(() => {
+    wordInputRef.value?.focusInput();
+    wordInputShortRef.value?.focusInput();
+  });
+}
+
+async function switchSource(tab: 'preset' | 'local') {
+  if (tab === 'preset') {
+    if (!usingLocal.value) return;
+    state.localRecord = null;
+    state.source = 'preset';
+    resetSource();
+    return;
+  }
+  if (usingLocal.value) return;
+  if (state.lastLocalRecord) {
+    state.localRecord = state.lastLocalRecord;
+    state.source = 'local';
+    resetSource();
+    return;
+  }
+  try {
+    const records = await listCustomTexts();
+    if (records.length) {
+      state.lastLocalRecord = records[0];
+      state.localRecord = records[0];
+      state.source = 'local';
+      resetSource();
+      return;
+    }
+  } catch (error) {
+    console.error('load local texts failed', error);
+  }
+  openSource('local');
+}
+
+function applyPreset(quote: PresetQuote) {
+  state.source = 'preset';
+  state.localRecord = null;
+  if (quote.length === 'short') {
+    state.type = 'short';
+    state.len = 1;
+    state.quotes = [quote];
+    state.currentIndex = 0;
+  } else {
+    state.type = quote.length;
+    state.quotes = quote;
+  }
+  resetSource();
+}
+
+function applyLocal(record: CustomTextRecord) {
+  state.source = 'local';
+  state.localRecord = record;
+  state.lastLocalRecord = record;
+  resetSource();
+}
+
+function onLocalUpdated(record: CustomTextRecord) {
+  if (state.lastLocalRecord?.id === record.id) state.lastLocalRecord = record;
+  if (state.localRecord?.id !== record.id) return;
+  state.localRecord = record;
+  if (state.source === 'local') {
+    state.isTyping = false;
+    state.showResult = false;
+  }
+}
+
+function onLocalDeleted(id: string) {
+  if (state.lastLocalRecord?.id === id) state.lastLocalRecord = null;
+  if (state.localRecord?.id !== id) return;
+  state.localRecord = null;
+  state.source = 'preset';
+  resetSource();
+}
+
 function changePunctuation() {
+  if (usingLocal.value) return;
   // 与英文标点开关一致：同一篇就地切换，不换文、不重开计时
   state.isSpaceType = !state.isSpaceType;
   if (state.isTyping) state.isTyping = false;
@@ -247,25 +370,41 @@ function changePunctuation() {
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
     <div v-if="!state.showResult" class="y-typing-stage">
       <div class="y-quote-limit__setting-wrap">
-        <div
-          v-if="state.showTime"
-          class="y-typing-timer"
-          :class="{ 'is-active': !!timeFormat }"
-        >
+        <div v-if="state.showTime" class="y-typing-timer" :class="{ 'is-active': !!timeFormat }">
           {{ timeFormat || 0 }}
         </div>
-        <div
-          class="y-quote-limit__setting y-typing-setting"
-        >
+        <div class="y-quote-limit__setting y-typing-setting">
           <TypingToolbar>
-              <TypingChip
-                v-if="state.type !== 'short'"
-                :active="!state.isSpaceType"
-                @click="changePunctuation"
-              >
+            <TypingChipGroup class="y-source-switch">
+              <TypingChip :active="!usingLocal" @click="switchSource('preset')">
+                {{ $t('preset_source') }}
+              </TypingChip>
+              <TypingChip :active="usingLocal" @click="switchSource('local')">
+                {{ $t('local_source') }}
+              </TypingChip>
+            </TypingChipGroup>
+            <TypingChip
+              class="y-source-picker"
+              aria-haspopup="dialog"
+              :title="sourcePickerLabel"
+              @click="openSource(usingLocal ? 'local' : 'preset')"
+            >
+              <span class="y-source-picker__text">{{ sourcePickerLabel }}</span>
+            </TypingChip>
+            <TypingChip v-if="!usingLocal" class="y-source-refresh" @click="refresh">
+              <IcoChange></IcoChange>
+              {{ $t('change_passage') }}
+            </TypingChip>
+            <TypingChip class="y-source-import" @click="openSource('local')">
+              <IcoUpload></IcoUpload>
+              {{ usingLocal ? $t('manage_local_text') : $t('import_local_text') }}
+            </TypingChip>
+            <TypingToolbarDivider />
+            <template v-if="!usingLocal">
+              <TypingChip v-if="!isShort" :active="!state.isSpaceType" @click="changePunctuation">
                 @ {{ $t('punctuation') }}
               </TypingChip>
-              <TypingToolbarDivider v-if="state.type !== 'short'" />
+              <TypingToolbarDivider v-if="!isShort" />
               <Tooltip content="选择句子类型">
                 <TypingChipGroup>
                   <TypingChip
@@ -278,7 +417,7 @@ function changePunctuation() {
                   </TypingChip>
                 </TypingChipGroup>
               </Tooltip>
-              <template v-if="state.type === 'short'">
+              <template v-if="isShort">
                 <TypingToolbarDivider />
                 <Tooltip content="选择数量">
                   <TypingChipGroup>
@@ -294,18 +433,14 @@ function changePunctuation() {
                 </Tooltip>
               </template>
               <TypingToolbarDivider />
-              <TypingToolbarIcon @click="refresh">
-                <Tooltip :content="$t('refresh')">
-                  <IcoChange></IcoChange>
-                </Tooltip>
-              </TypingToolbarIcon>
-              <TypingChip :active="state.showTime" @click="state.showTime = !state.showTime">
-                {{ $t('display_timer') }}
-              </TypingChip>
+            </template>
+            <TypingChip :active="state.showTime" @click="state.showTime = !state.showTime">
+              {{ $t('display_timer') }}
+            </TypingChip>
           </TypingToolbar>
         </div>
       </div>
-      <template v-if="state.type === 'short'">
+      <template v-if="isShort">
         <WordInput
           v-if="state.quotes && state.quotes[state.currentIndex]"
           :quote="state.quotes[state.currentIndex]?.content"
@@ -330,14 +465,15 @@ function changePunctuation() {
         <WordInput
           ref="wordInputRef"
           v-if="state.quotes"
-          :is-space-type="state.isSpaceType"
-          :quote="state.quotes?.content"
+          :is-space-type="usingLocal ? false : state.isSpaceType"
+          :can-space="usingLocal"
+          :quote="activeContent"
           @is-typing="isTypingFunc"
           @is-finished="finished"
           @refresh="refresh"
           class-name="y-quote-limit__word-input"
         ></WordInput>
-        <div class="y-quote-limit__info y-quote-meta">
+        <div v-if="!usingLocal" class="y-quote-limit__info y-quote-meta">
           ——
           <span class="y-quote-limit__info-title">
             {{ state.quotes?.title }}
@@ -347,27 +483,26 @@ function changePunctuation() {
             {{ state.quotes?.author }}
           </span>
         </div>
-        <Transition name="menu">
-          <div
-            class="y-quote-limit__detail y-quote-more"
-            @click="detailModalRef?.setShowDetail()"
-          >
+        <Transition v-if="!usingLocal" name="menu">
+          <div class="y-quote-limit__detail y-quote-more" @click="detailModalRef?.setShowDetail()">
             {{ $t('view_full') }}
           </div>
         </Transition>
-        <DetailModal ref="detailModalRef" :quote="state.quotes"></DetailModal>
+        <DetailModal v-if="!usingLocal" ref="detailModalRef" :quote="state.quotes"></DetailModal>
       </template>
       <Transition name="menu">
         <div class="y-quote-limit__tips y-typing-tips">
-          <p>*{{ $t('sentence.word_tip') }}</p>
-          <p v-if="state.type === 'short'">*{{ $t('sentence.short_enter_tip') }}</p>
+          <p v-if="!usingLocal">*{{ $t('sentence.word_tip') }}</p>
+          <p v-if="isShort">*{{ $t('sentence.short_enter_tip') }}</p>
+          <p v-if="usingLocal">*{{ $t('local_tip') }}</p>
         </div>
       </Transition>
     </div>
     <template v-else>
+      <div v-if="usingLocal" class="y-local-result-note">{{ $t('local_result_note') }}</div>
       <ResultContent
         type="countdown"
-        :show-save-record="true"
+        :show-save-record="!usingLocal"
         :typing-record="state.typingRecord"
         :typing-record-arr="state.typingRecordArr"
         @restart="restart"
@@ -380,6 +515,19 @@ function changePunctuation() {
       ></ResultContent>
     </template>
   </main>
+  <CustomTextModal
+    v-model:show="showSourceModal"
+    :initial-tab="sourceTab"
+    :active-local-id="state.localRecord?.id || ''"
+    :active-preset-title="
+      !usingLocal && !Array.isArray(state.quotes) ? state.quotes?.title || '' : ''
+    "
+    :allowed-preset-lengths="['medium', 'long']"
+    @select-preset="applyPreset"
+    @select-local="applyLocal"
+    @local-updated="onLocalUpdated"
+    @local-deleted="onLocalDeleted"
+  />
 </template>
 <style lang="scss">
 .y-quote-limit {

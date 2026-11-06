@@ -1,9 +1,10 @@
 /* 打字页共用控件：计时、胶囊工具条、文案信息、提示 */
 
-/* 在页头页脚之间把打字区垂直居中；内容超出时 auto 边距收成 0，避免顶部被裁切 */
+/* 固定打字区顶部基线，避免切换文稿/模式时因内容高度变化而整体上下移动 */
 .y-typing-stage {
   width: 100%;
-  margin-block: auto;
+  // 视口越高留白越多，但同一视口下始终固定，不随内部内容变化
+  margin: clamp(24px, calc(100vh - 920px), 80px) 0 0;
   // 打字区自己的字号/字重，不再继承 main 的界面字
   font-size: 20px;
   font-weight: 500;
@@ -80,6 +81,15 @@
   letter-spacing: 0;
 }
 
+.y-local-result-note {
+  margin: 0 0 16px;
+  color: $gray-06;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-align: center;
+}
+
 @keyframes typing-urgent {
   0%,
   100% {
@@ -97,6 +107,13 @@
 }
 
 /* 1366×768 这类短屏：收短舞台，避免页脚被挤出视口 */
+@media (max-width: 800px) {
+  // 窄屏工具条可能折成两行；预留固定高度，避免切来源时工具条收成一行导致输入区上移
+  .y-typing-setting {
+    min-height: 74px;
+  }
+}
+
 @media (max-height: 820px) {
   .y-typing-stage {
     .y-word-input__wrap,

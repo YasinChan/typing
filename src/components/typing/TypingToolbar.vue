@@ -43,19 +43,8 @@ export const TypingChipGroup = defineComponent({
   border-radius: $radius-full;
   box-shadow: $shadow-sm;
   // 用界面字体，不跟 main 上的打字字体走
-  font-family:
-    Quotes,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: Quotes, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0;
@@ -104,6 +93,47 @@ export const TypingChipGroup = defineComponent({
     color: $accent-text;
     background: $accent-soft;
   }
+}
+
+.y-typing-chip.y-source-import,
+.y-typing-chip.y-source-refresh {
+  gap: 4px;
+  padding: 0 10px;
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+}
+
+.y-typing-chip.y-source-import {
+  color: $accent-text;
+  &:hover {
+    background: $accent-soft;
+  }
+}
+
+.y-typing-chip.y-source-picker {
+  max-width: 170px;
+  padding-right: 10px;
+  &::after {
+    flex-shrink: 0;
+    content: '';
+    width: 0;
+    height: 0;
+    margin-left: 5px;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 4px solid currentColor;
+    opacity: 0.7;
+  }
+}
+
+.y-source-picker__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .y-typing-icon {

@@ -315,8 +315,7 @@ function startWs(
     }
     // 3001 房间不存在 / 3000 房主关闭 / 3002 满员 / 3005 被踢，统一跳回创建页
     const redirectCodes = [3001, 3002, 3005];
-    const shouldRedirect =
-      redirectCodes.includes(e.code) || (e.code === 3000 && !state.isOwner);
+    const shouldRedirect = redirectCodes.includes(e.code) || (e.code === 3000 && !state.isOwner);
     if (shouldRedirect) {
       const goGame = () => {
         router.replace({ name: 'Game' });
@@ -758,29 +757,31 @@ watch(
     </div>
   </YDraggable>
   <main class="y-game-room">
-    <!--    <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px">-->
-    <!--      功能还差一点哦，再等等~-->
-    <!--    </div>-->
-    <div class="y-game-room__setting">
-      <div
-        v-if="state.countDown || state.selectTime"
-        class="y-game-room__count-down"
-        :class="[state.countDown ? 'y-game-room__count-down--active' : '']"
-      >
-        {{ state.countDown || state.selectTime }}
+    <div class="y-typing-stage">
+      <!--    <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px">-->
+      <!--      功能还差一点哦，再等等~-->
+      <!--    </div>-->
+      <div class="y-game-room__setting">
+        <div
+          v-if="state.countDown || state.selectTime"
+          class="y-game-room__count-down"
+          :class="[state.countDown ? 'y-game-room__count-down--active' : '']"
+        >
+          {{ state.countDown || state.selectTime }}
+        </div>
       </div>
+      <WordInput
+        ref="wordInputRef"
+        v-if="state.quote"
+        :is-show-progress="true"
+        :progress-info="state.websocketTypingInfo"
+        :is-space-type="state.isSpaceType"
+        :quote="state.quote?.content"
+        @typing-info="getTypingInfo"
+        @is-typing="isTypingFunc"
+      ></WordInput>
+      <YLoading class="y-game-room__loading" v-else></YLoading>
     </div>
-    <WordInput
-      ref="wordInputRef"
-      v-if="state.quote"
-      :is-show-progress="true"
-      :progress-info="state.websocketTypingInfo"
-      :is-space-type="state.isSpaceType"
-      :quote="state.quote?.content"
-      @typing-info="getTypingInfo"
-      @is-typing="isTypingFunc"
-    ></WordInput>
-    <YLoading class="y-game-room__loading" v-else></YLoading>
   </main>
   <YModal
     :show="state.showRemindStart"
@@ -843,14 +844,6 @@ watch(
 </template>
 
 <style lang="scss">
-.y-game-room {
-  .y-word-input__wrap,
-  .y-word-input,
-  .y-en-wrap,
-  .y-en-window {
-    height: 420px;
-  }
-}
 .y-game-room__remind {
   color: $gray-06;
 }

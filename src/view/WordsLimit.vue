@@ -9,9 +9,7 @@ import TypingToolbar, {
   TypingChipGroup,
   TypingToolbarDivider
 } from '@/components/typing/TypingToolbar.vue';
-import TypingToolbarIcon from '@/components/typing/TypingToolbarIcon.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
-import YDropDown from '@/components/ui/DropDown.vue';
 import YInput from '@/components/ui/Input.vue';
 import YModal from '@/components/ui/Modal.vue';
 
@@ -20,9 +18,6 @@ import { useConfigStore } from '@/store/config';
 import type { TypingRecordType } from '@/types';
 
 import IcoChange from '@/assets/svg/change.svg';
-import IcoSelect from '@/assets/svg/select.svg';
-import IcoSetting from '@/assets/svg/setting.svg';
-import IcoUnSelect from '@/assets/svg/un-select.svg';
 
 const wordInputRef = ref<any>(null);
 const { currentFont } = storeToRefs(useConfigStore());
@@ -61,12 +56,8 @@ function finishTyping() {
   wordInputRef.value?.typingEnd();
   state.typingRecord = wordInputRef.value?.getTypingRecord() || {};
   const typingChartRecord = wordInputRef.value?.getTypingChartRecord();
-  const {
-    typingChartSpeed,
-    lastTypingChartSpeed,
-    typingChartAccuracy,
-    lastTypingChartAccuracy
-  } = handleChart(typingChartRecord, chartKey());
+  const { typingChartSpeed, lastTypingChartSpeed, typingChartAccuracy, lastTypingChartAccuracy } =
+    handleChart(typingChartRecord, chartKey());
   state.typingChartSpeed = typingChartSpeed;
   state.lastTypingChartSpeed = lastTypingChartSpeed;
   state.typingChartAccuracy = typingChartAccuracy;
@@ -91,7 +82,19 @@ function refresh() {
 
 function selectTime(time: number) {
   state.selectTime = time;
-  refresh();
+  state.isTyping = false;
+  state.countDown = null;
+  if (state.intervalId !== null) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
+  }
+  nextTick(() => wordInputRef.value?.focusInput());
+}
+
+function openCustomTime() {
+  state.setCountDown = String(state.selectTime);
+  state.errorText = '';
+  state.showSetTime = true;
 }
 
 function togglePunctuation() {
@@ -115,7 +118,8 @@ function setTime() {
   }
   state.selectTime = Number(state.setCountDown);
   state.showSetTime = false;
-  refresh();
+  state.isTyping = false;
+  nextTick(() => wordInputRef.value?.focusInput());
 }
 
 function restart() {
@@ -181,51 +185,43 @@ onUnmounted(() => {
           {{ state.countDown || state.selectTime }}
         </div>
         <TypingToolbar>
-            <TypingChip :active="state.punctuation" @click="togglePunctuation">
-              @ {{ $t('punctuation') }}
-            </TypingChip>
-            <TypingToolbarDivider />
-            <Tooltip :content="$t('select_countdown')">
-              <TypingChipGroup>
-                <TypingChip
-                  v-for="item in customTime"
-                  :key="item"
-                  :active="state.selectTime === item"
-                  @click="selectTime(item)"
-                >
-                  {{ item }}
-                </TypingChip>
-              </TypingChipGroup>
-            </Tooltip>
-            <TypingToolbarDivider />
-            <TypingToolbarIcon @click="refresh">
-              <Tooltip :content="$t('refresh')">
-                <IcoChange></IcoChange>
-              </Tooltip>
-            </TypingToolbarIcon>
-            <YDropDown>
-              <template #title>
-                <Tooltip :content="$t('settings')">
-                  <TypingToolbarIcon :active="!customTime.includes(state.selectTime)">
-                    <IcoSetting></IcoSetting>
-                  </TypingToolbarIcon>
-                </Tooltip>
-              </template>
-              <template #menu>
-                <div class="y-time-limit__settings-menu">
-                  <div
-                    class="y-time-limit__settings-item"
-                    @click="state.showCountDown = !state.showCountDown"
-                  >
-                    <component :is="state.showCountDown ? IcoSelect : IcoUnSelect" />
-                    <span>{{ $t('display_countdown') }}</span>
-                  </div>
-                  <div class="y-time-limit__settings-item" @click="state.showSetTime = true">
-                    <span>{{ $t('custom_countdown') }}</span>
-                  </div>
-                </div>
-              </template>
-            </YDropDown>
+          <TypingChip :active="state.punctuation" @click="togglePunctuation">
+            @ {{ $t('punctuation') }}
+          </TypingChip>
+          <TypingChip class="y-source-refresh" @click="refresh">
+            <IcoChange></IcoChange>
+            {{ $t('change_passage') }}
+          </TypingChip>
+          <TypingToolbarDivider />
+          <Tooltip :content="$t('select_countdown')">
+            <TypingChipGroup>
+              <TypingChip
+                v-for="item in customTime"
+                :key="item"
+                :active="state.selectTime === item"
+                @click="selectTime(item)"
+              >
+                {{ item }}
+              </TypingChip>
+              <TypingChip
+                :active="!customTime.includes(state.selectTime)"
+                :title="$t('custom_countdown')"
+                @click="openCustomTime"
+              >
+                {{
+                  customTime.includes(state.selectTime) ? $t('custom_time') : `${state.selectTime}s`
+                }}
+              </TypingChip>
+            </TypingChipGroup>
+          </Tooltip>
+          <TypingToolbarDivider />
+          <TypingChip
+            :active="state.showCountDown"
+            :title="$t('display_countdown')"
+            @click="state.showCountDown = !state.showCountDown"
+          >
+            {{ $t('display_countdown') }}
+          </TypingChip>
         </TypingToolbar>
       </div>
       <EnglishWordInput
@@ -271,30 +267,6 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss">
-.y-time-limit__settings-menu {
-  min-width: 180px;
-  padding: 4px 0;
-  font-size: 14px;
-}
-.y-time-limit__settings-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: $radius-sm;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s $ease-out, color 0.15s $ease-out;
-  svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-  &:hover {
-    background: $background-gray;
-    color: $gray-08;
-  }
-}
 .time-limit__container {
   color: $gray-06;
   font-size: 14px;

@@ -214,8 +214,8 @@ watch(
         {{ $t('rooms_empty') }}
       </div>
     </div>
-    <details class="y-game__rules">
-      <summary>{{ $t('game_rules_title') }}</summary>
+    <section class="y-game__rules">
+      <h3 class="y-game__rules-title">{{ $t('game_rules_title') }}</h3>
       <ul class="y-game__rule">
         <li>{{ $t('sentence.game_rule1') }}</li>
         <li v-if="!isLogin">
@@ -230,7 +230,7 @@ watch(
         </li>
         <li>{{ $t('sentence.game_rule2') }}</li>
       </ul>
-    </details>
+    </section>
   </main>
   <YModal :show="state.showSetting" @close="state.showSetting = false" @confirm="confirmCreate">
     <template #header>
@@ -388,37 +388,11 @@ watch(
   border-top: 1px solid $border-hairline;
   color: $gray-06;
   font-size: 14px;
-  summary {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  .y-game__rules-title {
+    margin: 0;
     color: $gray-06;
     font-size: 14px;
     font-weight: 500;
-    cursor: pointer;
-    list-style: none;
-    &:hover {
-      color: $gray-08;
-    }
-    &::-webkit-details-marker {
-      display: none;
-    }
-    &::before {
-      content: '+';
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      background: $accent-soft;
-      color: $accent-text;
-      font-size: 12px;
-      line-height: 1;
-    }
-  }
-  &[open] summary::before {
-    content: '−';
   }
   .y-game__rule {
     margin: 12px 0 0;

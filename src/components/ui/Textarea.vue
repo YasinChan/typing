@@ -16,8 +16,8 @@ const props = withDefaults(
 );
 
 const state = reactive({
-  leftLength: props.maxLength | 80,
-  value: ''
+  leftLength: props.maxLength,
+  value: (props.modelValue as string) ?? ''
 });
 
 const emitter = defineEmits(['update:modelValue']);
@@ -35,7 +35,10 @@ watch(
 watch(
   () => props.modelValue,
   (val) => {
-    state.value = val as string;
+    state.value = (val as string) ?? '';
+  },
+  {
+    immediate: true
   }
 );
 </script>

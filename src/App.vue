@@ -339,9 +339,8 @@ function changeLocale() {
             >{{ $t('game_mode') }}</router-link
           >
           <router-link to="/" class="y-menu__item">{{ $t('limit_mode') }}</router-link>
-          <router-link to="/words" class="y-menu__item">{{ $t('english_mode') }}</router-link>
           <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
-          <router-link to="/custom" class="y-menu__item">{{ $t('custom_mode') }}</router-link>
+          <router-link to="/words" class="y-menu__item">{{ $t('english_mode') }}</router-link>
           <a
             href="/keyboard"
             class="y-menu__item y-menu__keyboard-test"

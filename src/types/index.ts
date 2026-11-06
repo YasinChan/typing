@@ -124,3 +124,12 @@ export type WsItem = {
   time: number;
   count: number;
 };
+
+export interface PresetQuote {
+  key: string;
+  title: string;
+  author: string;
+  type: string;
+  length: 'short' | 'medium' | 'long';
+  content: string;
+}

@@ -41,13 +41,7 @@ export default [
   },
   {
     path: '/custom',
-    name: 'Custom',
-    component: () => import('@/view/CustomPage.vue'),
-    meta: {
-      title: '自定义文本打字 - Typing',
-      description:
-        '粘贴或上传任意文本进行打字练习，可切换标点转空格模式，记录准确率与速度。'
-    }
+    redirect: '/quote'
   },
   {
     path: '/user/:id',
