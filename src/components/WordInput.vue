@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, unref, watch } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
-import { useScroll } from '@vueuse/core';
 import {
   type IWebsocketTypingInfo,
   type SentenceArrItem,
@@ -19,7 +18,8 @@ import { useProgressInfo } from '@/composables/use-progress-info';
 
 const LINE_HEIGHT = 70;
 const el = ref<HTMLElement | null>(null);
-const { y } = useScroll(el, { behavior: 'smooth' });
+const scrollTop = ref(0);
+const isAtBottom = ref(false);
 const whiteList = ['”', '》', '}', '）', '】', '’']; // 白名单，这些字符不会被标记为错误
 const compositionList = ['“”', '《》', '{}', '（）', '【】', '‘’']; // composition 状态下的字符
 const inputAreaRef = ref<HTMLElement | null>(null);
@@ -55,7 +55,6 @@ interface ITypingFinalWordsRecord {
 }
 
 const state = reactive({
-  currentAreaHeight: LINE_HEIGHT,
   isComposing: false,
   inputText: '',
   content: '',
@@ -78,6 +77,7 @@ const chartSampler = useTypingChartSampler({
 
 onMounted(async () => {
   await nextTick();
+  syncScrollState();
   window.addEventListener('keydown', onWindowKeyDown, true);
   // 等页面自动聚焦完成后再决定是否展示提示，避免首屏闪一下
   hintTimer = window.setTimeout(() => {
@@ -348,6 +348,10 @@ function reset() {
   state.isTyping = false;
   state.typingRecord = {};
   state.typingRecordRealTime = [];
+  if (el.value) {
+    el.value.scrollTop = 0;
+  }
+  syncScrollState();
 }
 
 function beforeInputEvent(e: any) {
@@ -464,13 +468,21 @@ function moveCaretToEnd(element: HTMLElement) {
 
 function handlerInput(text: string) {
   state.inputText = text;
-  const currentHeight = inputAreaRef.value?.offsetHeight;
-  if (currentHeight && currentHeight > Math.max(state.currentAreaHeight, LINE_HEIGHT * 2)) {
-    y.value += LINE_HEIGHT;
-  } else if (currentHeight && currentHeight < state.currentAreaHeight) {
-    y.value -= LINE_HEIGHT;
+  const currentHeight = inputAreaRef.value?.offsetHeight || LINE_HEIGHT;
+  const lineCount = Math.max(1, Math.round(currentHeight / LINE_HEIGHT));
+  // 直接按当前行数计算目标位置；删除时立即回滚，避免平滑动画造成滞后
+  const target = Math.max(0, (lineCount - 2) * LINE_HEIGHT);
+  if (el.value) {
+    el.value.scrollTop = target;
   }
-  state.currentAreaHeight = currentHeight || LINE_HEIGHT;
+  syncScrollState();
+}
+
+function syncScrollState() {
+  const box = el.value;
+  if (!box) return;
+  scrollTop.value = box.scrollTop;
+  isAtBottom.value = box.scrollTop + box.clientHeight >= box.scrollHeight - 1;
 }
 
 function pasteEvent(e: ClipboardEvent) {
@@ -575,9 +587,9 @@ defineExpose({
     @mousedown="onWrapMouseDown"
   >
     <Transition name="mask">
-      <div v-if="y > 0" class="y-word-input__mask"></div>
+      <div v-if="scrollTop > 0 && !isAtBottom" class="y-word-input__mask"></div>
     </Transition>
-    <div class="y-word-input__mask-bottom" v-if="showMask"></div>
+    <div class="y-word-input__mask-bottom" v-if="showMask && !isAtBottom"></div>
     <Transition name="mask">
       <div
         v-if="showStartHint && !isFocused && !state.isTyping && !hasOpenModal"
@@ -586,15 +598,11 @@ defineExpose({
         {{ t('click_to_start') }}
       </div>
     </Transition>
-    <div class="y-word-input" ref="el">
+    <div class="y-word-input" ref="el" @scroll="syncScrollState">
       <div class="y-word-input__quote">
         <span
           v-for="(item, index) in state.quoteArr"
-          :class="[
-            'letter',
-            item.isWrong ? 'is-wrong' : '',
-            item.isInput ? 'is-input' : '',
-          ]"
+          :class="['letter', item.isWrong ? 'is-wrong' : '', item.isInput ? 'is-input' : '']"
           :key="item.id"
           >{{ item.word
           }}<template v-if="progressInfoKeys.includes(index)"
@@ -712,6 +720,8 @@ defineExpose({
   display: inline-block;
   width: 100%;
   color: $gray-08;
+  word-break: break-all;
+  white-space: normal;
   caret-color: $accent-text;
   transition: opacity 0.25s $ease-out;
   outline: 0;
