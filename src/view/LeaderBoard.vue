@@ -284,11 +284,23 @@ onMounted(() => {
     position: sticky;
     top: 0;
     z-index: 1;
+    height: 34px;
+    line-height: 18px;
     background: $layout-background-gray;
     box-shadow: 0 1px 0 $background-gray;
   }
   tbody {
     position: relative;
+    .y-leader-board-item {
+      height: 34px;
+      td {
+        height: 34px;
+        line-height: 18px;
+      }
+      svg {
+        vertical-align: middle;
+      }
+    }
     tr:nth-child(2n + 1) {
       background-color: $background-gray;
     }
