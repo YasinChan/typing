@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, reactive, onMounted, watch, inject } from 'vue';
-import { useRouter } from 'vue-router';
 import { ColorPicker } from 'vue3-colorpicker';
 import 'vue3-colorpicker/style.css';
 
@@ -11,6 +10,7 @@ import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
 import ThemeLabel from '@/components/ThemeLabel.vue';
 import YInput from '@/components/ui/Input.vue';
+import ThemeGallery from '@/components/ThemeGallery.vue';
 
 // config
 import type { ThemeType } from '@/config/theme';
@@ -46,12 +46,10 @@ import { createSuggest } from '@/request';
 
 const useConfig = useConfigStore();
 const userStore = useUserStore();
-const router = useRouter();
 const { profile, getProvinceUser } = storeToRefs(userStore);
 
 const confirm: any = inject('confirm');
 const message: any = inject('message');
-const suggestClick: any = inject('suggestClick');
 const state = reactive({
   themeInput: '',
   show: false,
@@ -72,7 +70,7 @@ onMounted(() => {});
 watch(
   () => state.selectThemeType,
   (val) => {
-    if (val !== '预设') {
+    if (val === '自定义') {
       let target = 'root';
       const mainColor = getCustomCssValue('--main-color', 'body');
       if (mainColor) {
@@ -123,7 +121,7 @@ const replyName = computed(() => {
 
 function showModal(type: string = 'normal') {
   state.show = true;
-  state.selectThemeType = type === 'normal' ? '预设' : '自定义';
+  state.selectThemeType = type === 'normal' ? '预设' : type === 'gallery' ? '社区' : '自定义';
 }
 
 function themeSet(type: ThemeType) {
@@ -155,8 +153,7 @@ function toLight() {
 function saveCustomTheme() {
   confirm({
     title: '确认保存',
-    content:
-      '保存后将在「建议与反馈」（入口为页面右下角图标）中展示，随后将根据投票情况保存到预设主题中。',
+    content: '保存后将在「主题 → 社区」中展示，随后会根据投票情况进入预设主题。',
     confirmClose: () => {
       return true;
     },
@@ -188,39 +185,16 @@ function saveCustomTheme() {
             userId: profile.value?.userId,
             userName: profile.value?.userName
           };
-          suggestClick({
-            isTheme: true,
-            down: 0,
-            content: info,
-            up: 0,
-            canShow: true,
-            userId: profile.value?.userId,
-            userName: profile.value?.userName,
-            createdAt: new Date().getTime()
-          });
         } else if (replyName.value) {
           params = {
             content: info,
             userName: replyName.value
           };
-          suggestClick({
-            isTheme: true,
-            down: 0,
-            content: info,
-            up: 0,
-            canShow: true,
-            userName: replyName.value,
-            createdAt: new Date().getTime()
-          });
         }
         params['isTheme'] = true;
         params['canShow'] = true;
-        const res = await createSuggest(params);
-        if (res.data?.message) {
-          message({ message: res.data?.message });
-        } else {
-          message({ message: '发布成功' });
-        }
+        await createSuggest(params);
+        message({ message: '主题已保存并应用，可在「社区主题」查看' });
       } catch (error: any) {
         const msg = error.response?.data?.message;
         message({ message: msg, type: 'error' });
@@ -232,11 +206,7 @@ function saveCustomTheme() {
 }
 
 function toThemeList() {
-  router.replace({ query: { suggest_filter: 'theme' } });
-  setTimeout(() => {
-    state.show = false;
-    suggestClick();
-  }, 200);
+  state.selectThemeType = '社区';
 }
 
 defineExpose({
@@ -248,162 +218,185 @@ defineExpose({
     :show="state.show"
     @close="state.show = false"
     @confirm="state.show = false"
-    :class-name="state.selectThemeType === '自定义' ? 'y-modal__theme' : ''"
+    :class-name="
+      state.selectThemeType === '自定义'
+        ? 'y-modal__theme'
+        : state.selectThemeType === '社区'
+        ? 'y-modal__theme-gallery'
+        : ''
+    "
   >
     <template #header>
       <h3>
         {{
-          state.selectThemeType === '自定义' ? $t('customize_theme') : $t('select_pre_set_theme')
+          state.selectThemeType === '自定义'
+            ? $t('customize_theme')
+            : state.selectThemeType === '社区'
+            ? '社区主题'
+            : $t('select_pre_set_theme')
         }}
       </h3>
     </template>
     <template #body>
       <div class="y-modal__theme-setting" v-if="state.selectThemeType === '自定义'">
-        <div class="gray-08" style="max-width: 200px">
-          <div class="flex-center--y">
-            <div class="theme-setting__title">
-              <span class="">背景色</span>
-              <Tooltip content="页面背景色">
-                <IcoTips></IcoTips>
-              </Tooltip>
+        <div class="y-theme-editor">
+          <div class="y-theme-editor__intro">
+            <strong>配色</strong>
+            <p>左侧调整，右侧实时预览</p>
+          </div>
+
+          <section class="y-theme-editor__group">
+            <div class="y-theme-editor__group-title">基础颜色</div>
+            <div class="y-theme-editor__grid">
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">
+                  背景色
+                  <Tooltip content="页面背景色"><IcoTips></IcoTips></Tooltip>
+                </span>
+                <color-picker
+                  v-model:pureColor="state.backgroundGrayColor"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">
+                  布局色
+                  <Tooltip content="弹框、下拉框、卡片等布局背景色">
+                    <IcoTips></IcoTips>
+                  </Tooltip>
+                </span>
+                <color-picker
+                  v-model:pureColor="state.layoutBackgroundGrayColor"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">主题色</span>
+                <color-picker
+                  v-model:pureColor="state.mainColor"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">错误色</span>
+                <color-picker
+                  v-model:pureColor="state.mainRedColor"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
             </div>
-            <color-picker
-              v-model:pureColor="state.backgroundGrayColor"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="flex-center--y">
-            <div class="theme-setting__title">
-              <span>布局色</span>
-              <Tooltip content="布局背景色，如弹框、下拉框背景色，排行榜列表区分色">
-                <IcoTips></IcoTips>
-              </Tooltip>
-            </div>
-            <color-picker
-              v-model:pureColor="state.layoutBackgroundGrayColor"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="flex-center--y">
-            <span class="theme-setting__title">主题色</span>
-            <color-picker
-              v-model:pureColor="state.mainColor"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="flex-center--y">
-            <span class="theme-setting__title">错误颜色</span>
-            <color-picker
-              v-model:pureColor="state.mainRedColor"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="flex-center--y">
-            <div class="theme-setting__title">
-              <span>主字体颜色</span>
+          </section>
+
+          <section class="y-theme-editor__group">
+            <div class="y-theme-editor__group-title">
+              文字颜色
               <Tooltip
-                html="字体颜色一共有四种，对应右侧预览界面中的<br>输入中、已输入、未输入和底部提示四种<br>逐渐变亮或变暗的字体颜色。<br>一般来说，整体是亮色主题可以选择深色的字体颜色，<br>反之选择浅色的主字体颜色。"
+                html="字体颜色一共有四种，对应右侧预览中的<br>输入中、已输入、未输入和底部提示四种<br>逐渐变亮或变暗的字体颜色。<br>浅色主题选深色文字，深色主题选浅色文字。"
               >
                 <IcoTips></IcoTips>
               </Tooltip>
             </div>
-            <color-picker
-              v-model:pureColor="state.gray08Color"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="theme-setting__second">
-            <div class="theme-setting__title main-color">
-              <span>自动生成</span>
-              <Tooltip
-                :html="`<p>这里其他三种颜色可以自动生成或者手动设置，<br>根据主题色是深还是浅，选择变暗或者变深。<br>一般来说，深色主题选择变暗，浅色主题选择变亮。</p>`"
-              >
-                <IcoTips></IcoTips>
-              </Tooltip>
+            <div class="y-theme-editor__grid">
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">主文字</span>
+                <color-picker
+                  v-model:pureColor="state.gray08Color"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">次文字</span>
+                <color-picker
+                  v-model:pureColor="state.gray06Color"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">辅助文字</span>
+                <color-picker
+                  v-model:pureColor="state.gray04Color"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field">
+                <span class="y-theme-editor__label">弱化文字</span>
+                <color-picker
+                  v-model:pureColor="state.gray02Color"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
+              <div class="y-theme-editor__field y-theme-editor__field--full">
+                <span class="y-theme-editor__label">
+                  标签文字
+                  <Tooltip content="按钮、标签等控件上的文字颜色。">
+                    <IcoTips></IcoTips>
+                  </Tooltip>
+                </span>
+                <color-picker
+                  v-model:pureColor="state.labelWhiteColor"
+                  shape="circle"
+                  format="hex"
+                  :disable-history="true"
+                  :disable-alpha="true"
+                  :debounce="100"
+                />
+              </div>
             </div>
-            <div>
-              <YButton size="small" @click="toDark">变暗</YButton>
-              <YButton size="small" @click="toLight">变亮</YButton>
+            <div class="y-theme-editor__auto">
+              <span>自动生成文字层级</span>
+              <div>
+                <YButton size="small" @click="toDark">变暗</YButton>
+                <YButton size="small" @click="toLight">变亮</YButton>
+              </div>
             </div>
-          </div>
-          <div class="theme-setting__second flex-center--y">
-            <span class="theme-setting__title">字体颜色1</span>
-            <color-picker
-              v-model:pureColor="state.gray06Color"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="theme-setting__second flex-center--y">
-            <span class="theme-setting__title">字体颜色2</span>
-            <color-picker
-              v-model:pureColor="state.gray04Color"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="theme-setting__second flex-center--y">
-            <span class="theme-setting__title">字体颜色3</span>
-            <color-picker
-              v-model:pureColor="state.gray02Color"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="flex-center--y">
-            <div class="theme-setting__title">
-              <span>标签字体颜色</span>
-              <Tooltip content="按钮、标签等字体颜色。">
-                <IcoTips></IcoTips>
-              </Tooltip>
-            </div>
-            <color-picker
-              v-model:pureColor="state.labelWhiteColor"
-              shape="circle"
-              format="hex"
-              :disable-history="true"
-              :disable-alpha="true"
-              :debounce="100"
-            />
-          </div>
-          <div class="main-color" style="margin-bottom: 10px">
-            <div class="theme-setting__title">
-              <span>为主题定个名称吧</span>
-            </div>
-            <YInput v-model="state.themeInput" placeholder="主题名称" :max-length="6"></YInput>
-          </div>
-          <YButton @click="saveCustomTheme" :disable="!state.themeInput">保存自定义设置</YButton>
-          <div @click="toThemeList" class="theme-setting__title-click font-bold">
-            点击此处查看用户已定义的主题，并为你喜欢的主题投票吧~
+          </section>
+
+          <section class="y-theme-editor__group">
+            <div class="y-theme-editor__group-title">主题名称</div>
+            <YInput
+              v-model="state.themeInput"
+              placeholder="给主题起个名字"
+              :max-length="6"
+            ></YInput>
+          </section>
+
+          <div class="y-theme-editor__actions">
+            <YButton @click="saveCustomTheme" :disable="!state.themeInput">保存并使用</YButton>
+            <button type="button" class="y-theme-editor__link" @click="toThemeList">
+              去主题广场
+            </button>
           </div>
         </div>
         <div class="y-modal__theme-custom">
@@ -440,17 +433,9 @@ defineExpose({
                 <div class="y-menu">
                   <div class="y-menu__item">限时模式</div>
                   <div class="y-menu__item y-menu__item--active router-link-active">计时模式</div>
-                  <div class="y-menu__item">自定义模式</div>
+                  <div class="y-menu__item">英文打字</div>
                   <div class="y-menu__item flex-center--y">
                     <IcoSetting></IcoSetting>
-                    <div class="y-drop-down__menu">
-                      <div class="y-auth__menu">
-                        <div class="y-menu__change y-menu__change-font">切换字体</div>
-                        <div class="y-menu__change">切换主题</div>
-                        <div class="y-menu__change">声明</div>
-                        <div class="y-menu__change">更新日志</div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -474,6 +459,11 @@ defineExpose({
           </div>
         </div>
       </div>
+      <ThemeGallery
+        v-else-if="state.selectThemeType === '社区'"
+        @customize="state.selectThemeType = '自定义'"
+        @applied="state.show = false"
+      />
       <div v-else class="y-theme__container gray-08">
         <ListItem @click="themeSet('dark')" class="flex-center--y-between">
           <span>深色模式</span>
@@ -498,15 +488,17 @@ defineExpose({
       </div>
     </template>
     <template #footer>
-      <div class="flex-center--y-between">
-        <YButton
-          @click="
-            state.selectThemeType === '自定义'
-              ? (state.selectThemeType = '预设')
-              : (state.selectThemeType = '自定义')
-          "
-          >{{ state.selectThemeType === '自定义' ? '预设' : '自定义' }}</YButton
-        >
+      <div class="y-theme__footer flex-center--y-between">
+        <div class="y-theme__tabs">
+          <YButton
+            v-for="tab in ['预设', '自定义', '社区']"
+            :key="tab"
+            size="small"
+            :theme="state.selectThemeType === tab ? 'default' : 'secondary'"
+            @click="state.selectThemeType = tab"
+            >{{ tab }}</YButton
+          >
+        </div>
         <YButton @click="state.show = false">{{ $t('confirm') }}</YButton>
       </div>
     </template>
@@ -515,6 +507,14 @@ defineExpose({
 <style lang="scss">
 .y-modal__theme.y-modal__container {
   width: 996px;
+}
+.y-modal__theme-gallery.y-modal__container {
+  width: 780px;
+}
+.y-theme__tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .y-theme__color {
   border: 1px solid rgba(0, 0, 0, 0.4);
@@ -557,47 +557,111 @@ defineExpose({
 
 .y-modal__theme-setting {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 16px;
   color: #fff;
 }
-.theme-setting__title {
-  width: 120px;
-  font-size: 14px;
-  line-height: 30px;
+.y-theme-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 260px;
+  max-height: 460px;
+  overflow: auto;
+  padding-right: 4px;
+}
+.y-theme-editor__intro {
+  strong {
+    display: block;
+    color: $gray-08;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  p {
+    margin-top: 2px;
+    color: $gray-06;
+    font-size: 12px;
+  }
+}
+.y-theme-editor__group-title {
   display: flex;
   align-items: center;
-  svg {
-    fill: $gray-06;
-    cursor: pointer;
-    width: 14px;
-    margin-top: 2px;
-    height: 14px;
-    margin-left: 4px;
-  }
-}
-.theme-setting__title-click {
-  font-size: 14px;
-  font-weight: bold;
-  margin-top: 10px;
-  color: $accent-text;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-}
-.theme-setting__tips {
+  gap: 3px;
+  margin-bottom: 6px;
+  color: $gray-06;
   font-size: 12px;
-  color: $gray-02;
+  font-weight: 500;
   svg {
     width: 12px;
     height: 12px;
-    fill: $accent-text;
+    fill: $gray-06;
+    cursor: pointer;
   }
 }
-.theme-setting__second {
-  margin-left: 20px;
-  button {
-    margin-right: 10px;
+.y-theme-editor__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 8px;
+}
+.y-theme-editor__field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 6px;
+  border: 1px solid $border-hairline;
+  border-radius: $radius-sm;
+  background: $background-gray;
+}
+.y-theme-editor__field--full {
+  grid-column: 1 / -1;
+}
+.y-theme-editor__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: $gray-08;
+  font-size: 12px;
+  white-space: nowrap;
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: $gray-06;
+    cursor: pointer;
+  }
+}
+.y-theme-editor__auto {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  color: $gray-06;
+  font-size: 12px;
+  > div {
+    display: inline-flex;
+    gap: 6px;
+  }
+}
+.y-theme-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.y-theme-editor__link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: $accent-text;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
   }
 }
 

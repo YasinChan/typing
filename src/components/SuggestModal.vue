@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { computed, inject, reactive, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
 // components
@@ -9,7 +8,6 @@ import YModal from '@/components/ui/Modal.vue';
 import YButton from '@/components/ui/Button.vue';
 import YTag from '@/components/ui/Tag.vue';
 import YLoading from '@/components/ui/Loading.vue';
-import ThemeLabel from '@/components/ThemeLabel.vue';
 import YDropDown from '@/components/ui/DropDown.vue';
 
 // stores
@@ -25,10 +23,7 @@ import IcoFilter from '@/assets/svg/filter.svg';
 import IcoStar from '@/assets/svg/star.svg';
 
 // types
-import type { COLOR_TYPE, SuggestItem } from '@/types';
-
-// common
-import { setCustomTheme, getCustomTheme } from '@/common/theme';
+import type { SuggestItem } from '@/types';
 
 const userStore = useUserStore();
 const { profile, getProvinceUser } = storeToRefs(userStore);
@@ -36,36 +31,28 @@ const { profile, getProvinceUser } = storeToRefs(userStore);
 const message: any = inject('message');
 
 const suggestFilterRef = ref();
-const router = useRouter();
+const votingIds = ref<string[]>([]);
 
 const state = reactive({
   show: false,
   isAnonymity: false,
   suggestList: [] as SuggestItem[],
-  activeSuggest: {} as SuggestItem,
-  customObj: {} as COLOR_TYPE,
-  currentSort: 'time' as 'time' | 'hot' | 'theme',
+  currentSort: 'time' as 'time' | 'hot',
   suggestContent: '',
-  isLoading: true
+  isLoading: true,
+  loadError: false,
+  isSubmitting: false
 });
-
-const emit = defineEmits(['openThemeModal']);
 
 watch(
   () => state.show,
   (show) => {
     if (!show) {
-      // @ts-ignore
-      state.activeSuggest = {};
-      router.replace({ query: { suggest_filter: undefined } });
-    } else {
-      const query = router.currentRoute.value?.query;
-      if (query.suggest_filter === 'theme') {
-        getSuggestList('theme');
-        return;
-      }
-      getSuggestList();
+      state.loadError = false;
+      return;
     }
+    state.currentSort = 'time';
+    getSuggestList('time', true);
   }
 );
 
@@ -78,22 +65,30 @@ const replyName = computed(() => {
   return '';
 });
 
-async function getSuggestList(sort?: 'time' | 'hot' | 'theme') {
-  if (state.currentSort === sort) {
+async function getSuggestList(sort?: 'time' | 'hot', force = false) {
+  if (!force && state.currentSort === sort) {
     return;
   }
   suggestFilterRef.value?.closeMenu();
   state.isLoading = true;
-  const suggest = await getSuggest({ sort });
-  state.currentSort = sort || 'time';
-  const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
-  // 未处理的问题优先展示，已采纳次之，已完成沉底。
-  // 避免用户一打开弹窗只看到「已完成」，误以为反馈列表没有在推进。
-  const pending = suggestList.filter((item) => !item.accept && !item.done);
-  const accept = suggestList.filter((item) => !item.done).filter((item) => item.accept);
-  const done = suggestList.filter((item) => item.done);
-  state.suggestList = [...pending, ...accept, ...done];
-  state.isLoading = false;
+  state.loadError = false;
+  try {
+    const suggest = await getSuggest({ sort });
+    state.currentSort = sort || 'time';
+    const suggestList: SuggestItem[] = suggest.data?.result?.suggest || [];
+    // 主题有独立入口，反馈列表只展示建议和 BUG。
+    const visible = suggestList.filter((item) => item.canShow && !item.isTheme);
+    const pending = visible.filter((item) => !item.accept && !item.done);
+    const accept = visible.filter((item) => item.accept && !item.done);
+    const done = visible.filter((item) => item.done);
+    state.suggestList = [...pending, ...accept, ...done];
+  } catch (error) {
+    console.error('get suggest failed', error);
+    state.suggestList = [];
+    state.loadError = true;
+  } finally {
+    state.isLoading = false;
+  }
 }
 
 function showSuggest() {
@@ -101,42 +96,44 @@ function showSuggest() {
 }
 
 async function confirmSuggest() {
-  try {
-    let params: any = {
-      content: state.suggestContent
-    };
-    if (!state.isAnonymity) {
-      if (profile.value?.userName && profile.value?.userId) {
-        params = {
-          content: state.suggestContent,
-          userId: profile.value?.userId,
-          userName: profile.value?.userName
-        };
-      } else if (replyName.value) {
-        params = {
-          content: state.suggestContent,
-          userName: replyName.value
-        };
-      }
+  const content = state.suggestContent.trim();
+  if (!content || state.isSubmitting) return;
+
+  let params: any = { content };
+  if (!state.isAnonymity) {
+    if (profile.value?.userName && profile.value?.userId) {
+      params = {
+        content,
+        userId: profile.value?.userId,
+        userName: profile.value?.userName
+      };
+    } else if (replyName.value) {
+      params = {
+        content,
+        userName: replyName.value
+      };
     }
+  }
+
+  state.isSubmitting = true;
+  try {
     const res = await createSuggest(params);
     state.suggestContent = '';
-    if (res.data?.message) {
-      message({ message: res.data?.message });
-    } else {
-      message({ message: '发布成功' });
-    }
+    message({ message: res.data?.message || '发布成功' });
+    await getSuggestList(state.currentSort, true);
   } catch (error: any) {
-    const msg = error.response?.data?.message;
+    const msg = error.response?.data?.message || '发布失败，请稍后重试';
     message({ message: msg, type: 'error' });
+  } finally {
+    state.isSubmitting = false;
   }
 }
 
 function getVoteInfo(id: string) {
   return localStorage.getItem('typing:vote:' + id);
 }
+
 function setVoteInfo(id: string, value: string) {
-  // 这里的 value 只能是 '1' '-1' '0'
   if (value === '0') {
     localStorage.removeItem('typing:vote:' + id);
     return;
@@ -144,126 +141,65 @@ function setVoteInfo(id: string, value: string) {
   localStorage.setItem('typing:vote:' + id, value);
 }
 
-function upClick(id: string) {
-  // value '3' 表示 up - 1 down 不动
-  // value '2' 表示 up + 1 down - 1
-  // value '1' 表示 up + 1 down 不动
-  // value '-1' 表示 up 不动 down + 1
-  // value '-2' 表示 up - 1 down + 1
-  // value '-3' 表示 up 不动 down - 1
-  const voteInfo = getVoteInfo(id);
-  if (voteInfo === '1') {
-    voteSuggest({
-      id,
-      value: '3'
-    }).then((res) => {
-      message({ message: '取消投票' });
-      setVoteInfo(id, '0');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.up = item.up - 1;
-        }
-        return item;
-      });
-    });
-  } else if (voteInfo === '-1') {
-    voteSuggest({
-      id,
-      value: '2'
-    }).then((res) => {
-      message({ message: '已投票' });
-      setVoteInfo(id, '1');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.up = item.up + 1;
-          item.down = item.down - 1;
-        }
-        return item;
-      });
-    });
-  } else {
-    voteSuggest({
-      id,
-      value: '1'
-    }).then((res) => {
-      message({ message: '已投票' });
-      setVoteInfo(id, '1');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.up = item.up + 1;
-        }
-        return item;
-      });
-    });
-  }
+function isVoting(id: string) {
+  return votingIds.value.includes(id);
 }
-function downClick(id: string) {
-  const voteInfo = getVoteInfo(id);
-  if (voteInfo === '1') {
-    voteSuggest({
-      id,
-      value: '-2'
-    }).then((res) => {
-      message({ message: '已投票' });
-      setVoteInfo(id, '-1');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.up = item.up - 1;
-          item.down = item.down + 1;
-        }
-        return item;
-      });
-    });
-  } else if (voteInfo === '-1') {
-    voteSuggest({
-      id,
-      value: '-3'
-    }).then((res) => {
-      message({ message: '取消投票' });
-      setVoteInfo(id, '0');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.down = item.down - 1;
-        }
-        return item;
-      });
-    });
+
+async function castVote(item: SuggestItem, direction: 'up' | 'down') {
+  if (isVoting(item.id)) return;
+  const current = getVoteInfo(item.id);
+  let value = '';
+  let next = '';
+  let upDelta = 0;
+  let downDelta = 0;
+
+  if (direction === 'up') {
+    if (current === '1') {
+      value = '3';
+      next = '0';
+      upDelta = -1;
+    } else if (current === '-1') {
+      value = '2';
+      next = '1';
+      upDelta = 1;
+      downDelta = -1;
+    } else {
+      value = '1';
+      next = '1';
+      upDelta = 1;
+    }
+  } else if (current === '1') {
+    value = '-2';
+    next = '-1';
+    upDelta = -1;
+    downDelta = 1;
+  } else if (current === '-1') {
+    value = '-3';
+    next = '0';
+    downDelta = -1;
   } else {
-    voteSuggest({
-      id,
-      value: '-1'
-    }).then((res) => {
-      message({ message: '已投票' });
-      setVoteInfo(id, '-1');
-      state.suggestList = state.suggestList.map((item) => {
-        if (item.id === id) {
-          item.down = item.down + 1;
-        }
-        return item;
-      });
-    });
+    value = '-1';
+    next = '-1';
+    downDelta = 1;
+  }
+
+  votingIds.value = [...votingIds.value, item.id];
+  try {
+    await voteSuggest({ id: item.id, value });
+    setVoteInfo(item.id, next);
+    item.up = Math.max(0, (item.up || 0) + upDelta);
+    item.down = Math.max(0, (item.down || 0) + downDelta);
+    message({ message: next === '0' ? '取消投票' : '已投票' });
+  } catch (error) {
+    console.error('vote suggest failed', error);
+    message({ message: '投票失败，请稍后重试', type: 'error' });
+  } finally {
+    votingIds.value = votingIds.value.filter((id) => id !== item.id);
   }
 }
 
-function setTheme() {
-  state.show = false;
-  emit('openThemeModal');
-}
-
-function getCustomThemeFunc(ct: string) {
-  if (!ct) return '';
-  state.customObj = getCustomTheme(ct);
-  if (state.customObj) {
-    return state.customObj?.['THEME_INPUT'];
-  }
-  return ct;
-}
-function activeSetFirstSuggest(info: SuggestItem) {
-  state.activeSuggest = info;
-}
 defineExpose({
-  showSuggest,
-  activeSetFirstSuggest
+  showSuggest
 });
 </script>
 <template>
@@ -287,13 +223,7 @@ defineExpose({
           <template #title>
             <div class="y-submit-suggest__filter flex-center--y">
               <IcoFilter></IcoFilter>
-              {{
-                state.currentSort === 'time'
-                  ? '最新'
-                  : state.currentSort === 'hot'
-                  ? '最热'
-                  : '主题'
-              }}
+              {{ state.currentSort === 'time' ? '最新' : '最热' }}
             </div>
           </template>
           <template #menu>
@@ -312,145 +242,57 @@ defineExpose({
               >
                 最热
               </div>
-              <div
-                class="y-menu__change"
-                :class="[state.currentSort === 'theme' ? 'y-menu__change--active' : '']"
-                @click="getSuggestList('theme')"
-              >
-                主题
-              </div>
             </div>
           </template>
         </YDropDown>
       </div>
+
       <YLoading class="y-submit-suggest__loading" v-if="state.isLoading"></YLoading>
+      <div v-else-if="state.loadError" class="y-submit-suggest__status">
+        反馈加载失败
+        <button type="button" @click="getSuggestList(state.currentSort, true)">重试</button>
+      </div>
+      <div v-else-if="!state.suggestList.length" class="y-submit-suggest__status">
+        还没有反馈，欢迎提出第一条建议。
+      </div>
       <template v-else>
-        <div v-if="state.currentSort === 'theme'" class="y-submit-suggest__custom gray-06">
-          以下为用户自定义设置生成的主题，若支持该主题可以点击对应主题下方的「<IcoStar
-          ></IcoStar>」为其投票，投票多的将设置为预设主题。如果你也想设置独特的主题，欢迎<span
-            class="main-color"
-            @click="setTheme"
-            >点击此处设置或自定义主题</span
-          >，然后你做的主题也可以生成至此展示使用。
-        </div>
-        <div
-          v-if="state.activeSuggest.createdAt"
-          class="y-submit-suggest__list y-submit-suggest__list--active gray-08"
-        >
-          <div class="y-submit-suggest__list-content flex-center--y">
-            <YTag v-if="state.activeSuggest.done" text="已完成"></YTag>
-            <YTag v-if="state.activeSuggest.accept" text="已采纳"></YTag>
-            <YTag
-              v-if="state.activeSuggest.isTheme"
-              :text="`主题色：${getCustomThemeFunc(state.activeSuggest.content)}`"
-            ></YTag>
-            <ThemeLabel
-              v-if="state.activeSuggest.isTheme"
-              style="margin-left: 4px"
-              :label-background-color="state.customObj['LAYOUT_BACKGROUND_COLOR']"
-              :background-color="state.customObj['BACKGROUND_COLOR']"
-              :red-color="state.customObj['MAIN_RED']"
-              :gray-color="state.customObj['GRAY_08']"
-              :main-color="state.customObj['MAIN_COLOR']"
-            ></ThemeLabel>
-            <template v-else>
-              {{ state.activeSuggest.content }}
-            </template>
-            <span
-              @click="setCustomTheme(undefined, state.customObj)"
-              class="gray-06 list-content__set flex-center--y"
-              style="margin-left: 4px; cursor: pointer"
-            >
-              点击设置该主题
-            </span>
-          </div>
-          <div class="y-submit-suggest__list-info">
-            <div class="y-submit-suggest__list-data">
-              <span class="y-submit-suggest__list-data-up">
-                <IcoStar></IcoStar>
-              </span>
-              <span class="y-submit-suggest__list-data-down">
-                <IcoUp></IcoUp>
-              </span>
-            </div>
-            <div>
-              <span class="main-color cursor-pointer" @click="setTheme">点击定制你的主题</span>
-              <span> · </span>
-              <router-link
-                :to="{ name: 'User', params: { id: state.activeSuggest.userId } }"
-                v-if="state.activeSuggest.userName && state.activeSuggest.userId"
-                target="_blank"
-                class="gray-08"
-                >{{ state.activeSuggest.userName }}</router-link
-              >
-              <span v-else-if="state.activeSuggest.userName" class="gray-08">{{
-                state.activeSuggest.userName
-              }}</span>
-              <span v-if="state.activeSuggest.userName"> · </span>
-              <span class="gray-06">{{
-                dayjs(state.activeSuggest.createdAt).format('YY/MM/DD HH:mm')
-              }}</span>
-            </div>
-          </div>
-        </div>
         <div
           class="y-submit-suggest__list gray-08"
           :class="{ 'y-submit-suggest__list-even': index % 2 === 0 }"
-          v-for="(item, index) in state.suggestList.filter((suggest) => suggest.canShow)"
+          v-for="(item, index) in state.suggestList"
           :key="item.id"
         >
-          <div
-            class="y-submit-suggest__list-content"
-            :class="[item.isTheme ? 'flex-center--y' : '']"
-          >
+          <div class="y-submit-suggest__list-content">
             <YTag v-if="item.done" text="已完成"></YTag>
             <YTag v-if="item.accept" text="已采纳"></YTag>
-            <YTag
-              v-if="item.isTheme"
-              :text="`主题色：${getCustomTheme(item.content)?.['THEME_INPUT']}`"
-            ></YTag>
-
-            <ThemeLabel
-              v-if="item.isTheme"
-              style="margin-left: 4px"
-              :custom-theme-obj="getCustomTheme(item.content)"
-            ></ThemeLabel>
-            <template v-else>
-              {{ item.content }}
-            </template>
-            <span
-              v-if="item.isTheme"
-              @click="setCustomTheme(item.content, state.customObj)"
-              class="gray-06 list-content__set flex-center--y"
-              style="margin-left: 4px; cursor: pointer"
-            >
-              点击设置该主题
-            </span>
+            {{ item.content }}
           </div>
           <div class="y-submit-suggest__list-info">
             <div class="y-submit-suggest__list-data">
               <span
-                v-throttle-click:2000="upClick.bind(null, item.id)"
                 class="y-submit-suggest__list-data-up"
-                :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1' }"
+                :class="{
+                  'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '1',
+                  'is-voting': isVoting(item.id)
+                }"
+                @click="castVote(item, 'up')"
               >
                 <IcoStar></IcoStar>
-                {{ item.up ? item.up : '' }}
+                {{ item.up || '' }}
               </span>
               <span
-                v-throttle-click:2000="downClick.bind(null, item.id)"
                 class="y-submit-suggest__list-data-down"
-                :class="{ 'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '-1' }"
+                :class="{
+                  'y-submit-suggest__list-data--active': getVoteInfo(item.id) === '-1',
+                  'is-voting': isVoting(item.id)
+                }"
+                @click="castVote(item, 'down')"
               >
                 <IcoUp></IcoUp>
-                {{ item.down ? item.down : '' }}
+                {{ item.down || '' }}
               </span>
             </div>
             <div>
-              <span v-if="item.isTheme" class="main-color cursor-pointer" @click="setTheme"
-                >点击定制你的主题</span
-              >
-              <span v-if="item.isTheme"> · </span>
               <router-link
                 :to="{ name: 'User', params: { id: item.userId } }"
                 v-if="item.userName && item.userId"
@@ -466,6 +308,7 @@ defineExpose({
         </div>
       </template>
     </template>
+
     <template #footer>
       <div class="y-submit-suggest__reply gray-08">
         <p class="y-submit-suggest__reply-title">回复</p>
@@ -479,16 +322,21 @@ defineExpose({
             >匿名发布</span
           >
         </div>
-        <YTextarea placeholder="提出您的建议或反馈~" v-model="state.suggestContent"></YTextarea>
+        <YTextarea
+          placeholder="提出您的建议或反馈~"
+          v-model="state.suggestContent"
+          :max-length="300"
+        ></YTextarea>
         <YButton
-          :disable="!state.suggestContent"
+          :disable="!state.suggestContent.trim() || state.isSubmitting"
           style="margin-top: 10px"
           size="small"
           @click="confirmSuggest"
-          >{{ $t('confirm') }}</YButton
+          >{{ state.isSubmitting ? '发布中…' : $t('confirm') }}</YButton
         >
         <span class="y-submit-suggest__reply-tips">
-          *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~ 也可以加入QQ群 <b>1028763853</b> 反馈～
+          *为避免展示无意义的内容，各位提出的建议与反馈将会在开发者整理后展示出来~ 也可以加入QQ群
+          <b>1028763853</b> 反馈～
         </span>
       </div>
     </template>
@@ -576,40 +424,29 @@ defineExpose({
   left: 50%;
   transform: translateX(-50%);
 }
-.y-submit-suggest__custom {
+.y-submit-suggest__status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  color: $gray-06;
   font-size: 14px;
-  margin-bottom: 16px;
-  font-weight: bold;
-  span {
+  button {
+    border: 0;
+    background: transparent;
+    color: $accent-text;
+    font-family: inherit;
+    font-size: 14px;
     cursor: pointer;
-    font-weight: bold;
     &:hover {
       text-decoration: underline;
     }
-  }
-  svg {
-    width: 14px;
-    height: 14px;
-    fill: $accent-text;
   }
 }
 .y-submit-suggest__list {
   padding: 16px 8px;
   font-size: 14px;
-}
-.y-submit-suggest__list--active {
-  border: 1px solid $main-color;
-  box-shadow: 0 0 3px 0 $main-color;
-  animation: glow 0.4s ease-in-out infinite alternate;
-  margin: 5px;
-}
-@keyframes glow {
-  from {
-    box-shadow: 0 0 3px 0 $main-color;
-  }
-  to {
-    box-shadow: 0 0 3px 2px $main-color;
-  }
 }
 .y-submit-suggest__list-even {
   background: $background-gray;
@@ -617,12 +454,6 @@ defineExpose({
 .y-submit-suggest__list-content {
   margin-bottom: 4px;
   line-height: 20px;
-}
-.list-content__set {
-  transition: color 0.2s;
-  &:hover {
-    color: $accent-text;
-  }
 }
 .y-submit-suggest__list-info {
   display: flex;
@@ -660,6 +491,10 @@ defineExpose({
   svg {
     fill: $accent-text;
   }
+}
+.y-submit-suggest__list-data.is-voting {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .y-submit-suggest__reply-title {

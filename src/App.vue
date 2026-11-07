@@ -42,7 +42,6 @@ import IcoLog from '@/assets/svg/log.svg';
 import IcoDocument from '@/assets/svg/document.svg';
 
 // types
-import type { SuggestItem } from '@/types';
 import YButton from '@/components/ui/Button.vue';
 
 // common
@@ -103,8 +102,8 @@ provide('confirm', (obj: any) => {
   showConfirmModal(obj);
 });
 
-provide('suggestClick', (obj: any) => {
-  suggestClick(obj);
+provide('suggestClick', () => {
+  suggestClick();
 });
 
 provide('changeTheme', (obj: any) => {
@@ -274,15 +273,10 @@ function showConfirmModal({
   };
 }
 
-async function suggestClick(info?: SuggestItem | MouseEvent) {
+async function suggestClick() {
   obj.showSuggest = true;
   await nextTick();
-  if (suggestModalRef.value) {
-    suggestModalRef.value.showSuggest();
-    if (info) {
-      suggestModalRef.value.activeSetFirstSuggest(info as SuggestItem);
-    }
-  }
+  suggestModalRef.value?.showSuggest();
 }
 
 function changeLocale() {
@@ -317,8 +311,14 @@ function changeLocale() {
     </p>
     <p class="y-mobile-show__hint">建议使用电脑端打开，获得完整打字体验。</p>
     <div class="y-mobile-show__shots">
-      <img src="https://file.yasinchan.com/MCOD5rboejy8aB14T97iybJsYbPt2oAV/2272970956.png" alt="Typing 界面预览" />
-      <img src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png" alt="打字结果预览" />
+      <img
+        src="https://file.yasinchan.com/MCOD5rboejy8aB14T97iybJsYbPt2oAV/2272970956.png"
+        alt="Typing 界面预览"
+      />
+      <img
+        src="https://file.yasinchan.com/OuP7VwJmVyGF8SVYI1GBAf64w0vkR9VF/741427767.png"
+        alt="打字结果预览"
+      />
     </div>
   </div>
   <div class="y-app" :class="{ 'is-focus': onlyShowMain }">
@@ -330,54 +330,58 @@ function changeLocale() {
       <Transition name="menu">
         <div class="y-menu">
           <nav class="y-menu__nav">
-          <router-link
-            to="/game"
-            class="y-menu__item"
-            :class="{
-              'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom'
-            }"
-            >{{ $t('game_mode') }}</router-link
-          >
-          <router-link to="/" class="y-menu__item">{{ $t('limit_mode') }}</router-link>
-          <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
-          <router-link to="/words" class="y-menu__item">{{ $t('english_mode') }}</router-link>
-          <a
-            href="/keyboard"
-            class="y-menu__item y-menu__keyboard-test"
-            :class="{ 'y-menu__item--active': $route.name === 'TypingKeyboard' }"
-            >{{ $t('keyboard') }}</a
-          >
-          <router-link to="/leaderboard" class="y-menu__item">{{ $t('leaderboard') }}</router-link>
+            <router-link
+              to="/game"
+              class="y-menu__item"
+              :class="{
+                'y-menu__item--active': $route.name === 'Game' || $route.name === 'GameRoom'
+              }"
+              >{{ $t('game_mode') }}</router-link
+            >
+            <router-link to="/" class="y-menu__item">{{ $t('limit_mode') }}</router-link>
+            <router-link to="/quote" class="y-menu__item">{{ $t('time_mode') }}</router-link>
+            <router-link to="/words" class="y-menu__item">{{ $t('english_mode') }}</router-link>
+            <a
+              href="/keyboard"
+              class="y-menu__item y-menu__keyboard-test"
+              :class="{ 'y-menu__item--active': $route.name === 'TypingKeyboard' }"
+              >{{ $t('keyboard') }}</a
+            >
+            <router-link to="/leaderboard" class="y-menu__item">{{
+              $t('leaderboard')
+            }}</router-link>
           </nav>
           <div class="y-menu__tools">
-          <YDropDown>
-            <template #title>
-              <div class="y-menu__icon flex-center--y">
-                <IcoSetting></IcoSetting>
+            <Tooltip :content="$t('theme')">
+              <div class="y-menu__icon" @click="changeTheme('normal')">
+                <IcoTheme></IcoTheme>
               </div>
-            </template>
-            <template #menu>
-              <div class="y-auth__menu">
-                <div class="y-menu__change y-menu__change-font" @click="changeFont">
-                  {{ $t('change_font') }}
+            </Tooltip>
+            <YDropDown>
+              <template #title>
+                <div class="y-menu__icon flex-center--y">
+                  <IcoSetting></IcoSetting>
                 </div>
-                <div class="y-menu__change" @click="changeTheme('normal')">
-                  {{ $t('change_theme') }}
+              </template>
+              <template #menu>
+                <div class="y-auth__menu">
+                  <div class="y-menu__change y-menu__change-font" @click="changeFont">
+                    {{ $t('change_font') }}
+                  </div>
+                  <div class="y-menu__change" @click="suggestClick">
+                    {{ $t('suggestions_and_feedback') }}
+                  </div>
                 </div>
-                <div class="y-menu__change" @click="suggestClick">
-                  {{ $t('suggestions_and_feedback') }}
-                </div>
+              </template>
+            </YDropDown>
+            <Tooltip :content="locale === 'zh' ? 'English' : '中文'">
+              <div class="y-menu__icon" @click="changeLocale">
+                <IcoTranslate></IcoTranslate>
               </div>
-            </template>
-          </YDropDown>
-          <Tooltip :content="locale === 'zh' ? 'English' : '中文'">
-            <div class="y-menu__icon" @click="changeLocale">
-              <IcoTranslate></IcoTranslate>
+            </Tooltip>
+            <div class="y-menu__icon y-menu__item-auth">
+              <auth ref="authRef"></auth>
             </div>
-          </Tooltip>
-          <div class="y-menu__icon y-menu__item-auth">
-            <auth ref="authRef"></auth>
-          </div>
           </div>
         </div>
       </Transition>
@@ -460,11 +464,7 @@ function changeLocale() {
       <IcoMessage @click="suggestClick" class="y-submit-suggest__svg"></IcoMessage>
     </Tooltip>
   </Transition>
-  <SuggestModal
-    ref="suggestModalRef"
-    v-if="obj.showSuggest"
-    @open-theme-modal="changeTheme('custom')"
-  ></SuggestModal>
+  <SuggestModal ref="suggestModalRef" v-if="obj.showSuggest"></SuggestModal>
   <ThemeModal ref="themeModalRef" v-if="obj.showThemeSelect"></ThemeModal>
 
   <YModal :show="obj.showDonate" @close="obj.showDonate = false">
@@ -485,9 +485,15 @@ function changeLocale() {
     </template>
     <template #footer>
       <YButton @click="obj.showDonate = false">{{ $t('pay') }}</YButton>
-      <YButton theme="secondary" style="margin-left: 20px" @click="obj.showDonate = false; suggestClick()">{{
-        $t('not_good')
-      }}</YButton>
+      <YButton
+        theme="secondary"
+        style="margin-left: 20px"
+        @click="
+          obj.showDonate = false;
+          suggestClick();
+        "
+        >{{ $t('not_good') }}</YButton
+      >
     </template>
   </YModal>
   <YModal
