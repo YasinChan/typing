@@ -37,6 +37,9 @@ const isFocused = ref(false);
 const showStartHint = ref(false);
 const scrollY = ref(0);
 const hasOpenModal = ref(false);
+const composing = ref(false);
+let lastCompositionEndAt = 0;
+const COMPOSITION_ESCAPE_GRACE_MS = 80;
 const caretStyle = ref({ left: '0px', top: '0px', height: '22px', opacity: '0' });
 let hintTimer: number | null = null;
 let modalObserver: MutationObserver | null = null;
@@ -234,14 +237,27 @@ function goBackToPrevError() {
   afterRender();
 }
 
+function onCompositionStart() {
+  composing.value = true;
+}
+
+function onCompositionEnd() {
+  composing.value = false;
+  lastCompositionEndAt = Date.now();
+}
+
 function onKeydown(e: KeyboardEvent) {
   if (hasOpenModal.value) return;
+  // 输入法组合中的 Esc 只应该取消候选，不能结束本局
+  if (e.isComposing || e.keyCode === 229 || composing.value) return;
   if (e.key === 'Tab') {
     e.preventDefault();
     emit('refresh');
     return;
   }
   if (e.key === 'Escape') {
+    // 部分输入法先触发 compositionend，再派发 Esc
+    if (Date.now() - lastCompositionEndAt < COMPOSITION_ESCAPE_GRACE_MS) return;
     e.preventDefault();
     if (state.isTyping) emit('is-finished');
     return;
@@ -338,7 +354,12 @@ watch(
 );
 
 watch(
-  () => [state.currentIndex, state.words[state.currentIndex]?.typed, isFocused.value, scrollY.value],
+  () => [
+    state.currentIndex,
+    state.words[state.currentIndex]?.typed,
+    isFocused.value,
+    scrollY.value
+  ],
   () => afterRender()
 );
 
@@ -388,19 +409,12 @@ defineExpose({
     @mousedown="onWrapMouseDown"
   >
     <Transition name="mask">
-      <div
-        v-if="showStartHint && !isFocused && !state.isTyping && !hasOpenModal"
-        class="y-en-hint"
-      >
+      <div v-if="showStartHint && !isFocused && !state.isTyping && !hasOpenModal" class="y-en-hint">
         {{ t('click_to_start') }}
       </div>
     </Transition>
     <div ref="wrapRef" class="y-en-window">
-      <div
-        ref="trackRef"
-        class="y-en-track"
-        :style="{ transform: `translateY(-${scrollY}px)` }"
-      >
+      <div ref="trackRef" class="y-en-track" :style="{ transform: `translateY(-${scrollY}px)` }">
         <span
           v-for="(word, index) in state.words"
           :key="`${word.text}-${index}`"
@@ -433,6 +447,8 @@ defineExpose({
       inputmode="text"
       @keydown="onKeydown"
       @input="onInput"
+      @compositionstart="onCompositionStart"
+      @compositionend="onCompositionEnd"
       @focus="isFocused = true"
       @blur="isFocused = false"
     />

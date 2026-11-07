@@ -120,6 +120,8 @@ onMounted(() => {
   document.addEventListener('wheel', handleWheel);
   document.addEventListener('mousemove', handleMouseMove);
   document.addEventListener('focusout', handleFocusOut);
+  document.addEventListener('compositionstart', handleCompositionStart, true);
+  document.addEventListener('compositionend', handleCompositionEnd, true);
 });
 
 onBeforeUnmount(() => {
@@ -128,6 +130,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('wheel', handleWheel);
   document.removeEventListener('mousemove', handleMouseMove);
   document.removeEventListener('focusout', handleFocusOut);
+  document.removeEventListener('compositionstart', handleCompositionStart, true);
+  document.removeEventListener('compositionend', handleCompositionEnd, true);
 });
 
 /** 只有焦点真正落在打字输入区时才进入专注态 */
@@ -148,12 +152,31 @@ function handleFocusOut() {
   }, 0);
 }
 
+let isComposing = false;
+let lastCompositionEndAt = 0;
+const COMPOSITION_ESCAPE_GRACE_MS = 80;
+
+function handleCompositionStart() {
+  isComposing = true;
+}
+
+function handleCompositionEnd() {
+  isComposing = false;
+  lastCompositionEndAt = Date.now();
+}
+
 function handleKeyDown(e: KeyboardEvent) {
-  if (e.code === KEY_CODE_ENUM['ESCAPE']) {
-    useConfig.setIsEscape(true);
-  }
-  if (e.code === KEY_CODE_ENUM['CAPS_LOCK']) {
-    useConfig.setCapsLockOn(true);
+  // 输入法组合中的 Esc 是用来取消候选的，不能当成结束打字
+  const composing = e.isComposing || e.keyCode === 229 || isComposing;
+  if (!composing) {
+    if (e.code === KEY_CODE_ENUM['ESCAPE']) {
+      // 部分输入法会先 compositionend 再派发 Esc keydown，留一个很短的宽限窗口
+      if (Date.now() - lastCompositionEndAt < COMPOSITION_ESCAPE_GRACE_MS) return;
+      useConfig.setIsEscape(true);
+    }
+    if (e.code === KEY_CODE_ENUM['CAPS_LOCK']) {
+      useConfig.setCapsLockOn(true);
+    }
   }
   // 导航页、排行榜、键盘测试按任意键不应该把导航藏起来
   if (isTypingAreaActive()) {
