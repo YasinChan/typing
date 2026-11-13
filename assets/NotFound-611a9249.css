@@ -1,0 +1,1 @@
+@charset "UTF-8";.y-not-found{color:var(--gray-06);font-size:15px;line-height:1.8}.y-not-found__links{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px}.y-not-found__links a{color:var(--accent-text, var(--main-color));text-decoration:underline;text-underline-offset:3px}.y-not-found__links a:hover{color:var(--gray-08)}

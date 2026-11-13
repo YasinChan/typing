@@ -1,0 +1,1 @@
+import{L as t}from"./vue-041744b1.js";import{h as s}from"./index-aec827dd.js";const e=t("game",{state:()=>({setting:{},isFromGame:!1}),actions:{setSetting(t,s){this.setting[t]=s},setMySetting(t){const{myUserName:e}=s();e&&(this.setting[e]=t)},getSettingCount(t){return this.setting[t]},setIsFromGame(t){this.isFromGame=t}}});export{e as u};
