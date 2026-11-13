@@ -54,7 +54,7 @@ onMounted(async () => {
   <div class="y-main y-doc-page">
     <div class="y-page-head">
       <div>
-        <div class="y-page-title">声明</div>
+        <h1 class="y-page-title">声明</h1>
         <p class="y-page-desc">使用条款、素材来源与备案信息</p>
       </div>
     </div>

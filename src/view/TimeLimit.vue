@@ -308,6 +308,7 @@ function reset() {
 </script>
 <template>
   <main class="y-time-limit" :class="'y-font--' + currentFont">
+    <h1 class="y-sr-only">在线打字练习 - 限时模式</h1>
     <div v-if="!state.showResult" class="y-typing-stage">
       <div class="y-time-limit__setting y-typing-setting">
         <div

@@ -42,6 +42,7 @@ import IcoFont from '@/assets/svg/font.svg';
 import IcoStatement from '@/assets/svg/statement.svg';
 import IcoLog from '@/assets/svg/log.svg';
 import IcoDocument from '@/assets/svg/document.svg';
+import IcoTips from '@/assets/svg/tips.svg';
 
 // types
 import YButton from '@/components/ui/Button.vue';
@@ -451,6 +452,10 @@ function changeLocale() {
             <IcoIntroduce></IcoIntroduce>
             <span>{{ $t('introduction') }}</span>
           </a>
+          <router-link to="/guide" class="flex-center--y cursor-pointer y-app__footer">
+            <IcoTips></IcoTips>
+            <span>{{ $t('guide') }}</span>
+          </router-link>
           <router-link to="/statement" class="flex-center--y cursor-pointer y-app__footer">
             <IcoStatement></IcoStatement>
             <span>{{ $t('statement') }}</span>

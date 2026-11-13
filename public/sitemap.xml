@@ -6,9 +6,19 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://typing.yasinchan.com/guide</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://typing.yasinchan.com/quote</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://typing.yasinchan.com/words</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://typing.yasinchan.com/keyboard</loc>

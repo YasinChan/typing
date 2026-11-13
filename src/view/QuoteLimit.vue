@@ -368,6 +368,7 @@ function changePunctuation() {
 </script>
 <template>
   <main :class="'y-font--' + currentFont" class="y-quote-limit">
+    <h1 class="y-sr-only">在线打字练习 - 计时模式</h1>
     <div v-if="!state.showResult" class="y-typing-stage">
       <div class="y-quote-limit__setting-wrap">
         <div v-if="state.showTime" class="y-typing-timer" :class="{ 'is-active': !!timeFormat }">

@@ -144,7 +144,7 @@ onMounted(() => {
   <main :class="'y-font--' + currentFont" class="y-leader-board">
     <div class="y-page-head">
       <div>
-        <div class="y-page-title">
+        <h1 class="y-page-title">
           <span>{{ $t('leaderboard') }}</span>
           <Tooltip style="cursor: pointer">
             <template #content>
@@ -155,7 +155,7 @@ onMounted(() => {
             </template>
             <IcoTips></IcoTips>
           </Tooltip>
-        </div>
+        </h1>
         <p class="y-page-desc">{{ $t('sentence.leaderboard_rule2') }}</p>
       </div>
     </div>

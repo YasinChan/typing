@@ -35,7 +35,7 @@ onMounted(async () => {
   <div class="y-main y-doc-page">
     <div class="y-page-head">
       <div>
-        <div class="y-page-title">更新日志</div>
+        <h1 class="y-page-title">更新日志</h1>
         <p class="y-page-desc">功能更新与版本记录</p>
       </div>
     </div>

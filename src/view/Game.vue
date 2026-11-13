@@ -172,7 +172,7 @@ watch(
   <main class="y-game">
     <div class="y-page-head">
       <div>
-        <div class="y-page-title">{{ $t('game_mode') }}</div>
+        <h1 class="y-page-title">{{ $t('game_mode') }}</h1>
         <p class="y-page-desc">{{ $t('sentence.game_rule1') }}</p>
       </div>
     </div>

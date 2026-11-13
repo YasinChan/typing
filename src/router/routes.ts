@@ -50,6 +50,16 @@ export default [
     meta: { title: '个人主页 - Typing', noindex: true }
   },
   {
+    path: '/guide',
+    name: 'Guide',
+    component: () => import('@/view/Guide.vue'),
+    meta: {
+      title: '在线打字练习与打字速度测试指南 - Typing',
+      description:
+        '在线打字练习指南：限时、计时、英文和键盘测试模式怎么选，WPM 如何计算，中文打字速度参考，以及本机文稿和排行榜说明。'
+    }
+  },
+  {
     path: '/log',
     name: 'Log',
     component: () => import('@/view/Log.vue'),
@@ -73,8 +83,7 @@ export default [
     component: () => import('@/view/LeaderBoard.vue'),
     meta: {
       title: '打字速度排行榜 - Typing',
-      description:
-        '查看 Typing 用户的打字速度（WPM）排行榜，按限时模式与计时模式分类排名。'
+      description: '查看 Typing 用户的打字速度（WPM）排行榜，按限时模式与计时模式分类排名。'
     }
   },
   {
@@ -83,8 +92,7 @@ export default [
     component: () => import('@/view/Game.vue'),
     meta: {
       title: '比一比 - 多人在线打字 PK - Typing',
-      description:
-        '创建房间或加入好友房间，进行实时多人打字 PK，比拼速度与准确率。'
+      description: '创建房间或加入好友房间，进行实时多人打字 PK，比拼速度与准确率。'
     }
   },
   {
@@ -95,6 +103,12 @@ export default [
   },
   {
     path: '/:catchAll(.*)',
-    redirect: '/'
+    name: 'NotFound',
+    component: () => import('@/view/NotFound.vue'),
+    meta: {
+      title: '页面不存在 - Typing',
+      description: '这个页面不存在或已经失效。',
+      noindex: true
+    }
   }
 ];

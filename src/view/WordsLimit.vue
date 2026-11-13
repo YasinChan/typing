@@ -172,6 +172,7 @@ onUnmounted(() => {
 
 <template>
   <main class="y-words-limit" :class="'y-font--' + currentFont">
+    <h1 class="y-sr-only">英文打字练习</h1>
     <div v-if="!state.showResult" class="y-typing-stage">
       <div class="y-words-limit__setting y-typing-setting">
         <div
