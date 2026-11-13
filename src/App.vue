@@ -2,12 +2,14 @@
 import { reactive, provide, onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import { KEY_CODE_ENUM } from '@/config/key';
 import { useRouter, useRoute } from 'vue-router';
+import { routeLoading } from '@/router';
 import { useI18n } from 'vue-i18n';
 // @ts-ignore
 import FontFaceObserver from 'fontfaceobserver';
 
 // components
 import Message from '@/components/ui/Message.vue';
+import YLoading from '@/components/ui/Loading.vue';
 import Auth from '@/components/Auth.vue';
 import YModal from '@/components/ui/Modal.vue';
 import ListItem from '@/components/ui/ListItem.vue';
@@ -410,7 +412,17 @@ function changeLocale() {
       </Transition>
     </header>
 
-    <router-view></router-view>
+    <router-view v-if="!routeLoading"></router-view>
+    <main
+      v-else
+      class="y-main y-route-loading"
+      role="status"
+      aria-live="polite"
+      aria-label="页面加载中"
+    >
+      <YLoading></YLoading>
+      <span>页面加载中…</span>
+    </main>
 
     <Transition name="menu">
       <footer class="flex-center">
@@ -591,6 +603,18 @@ function changeLocale() {
     width: 16px;
     margin-left: 20px;
   }
+}
+.y-route-loading {
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 220px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: $gray-06;
+  font-size: 14px;
 }
 .y-app {
   display: flex;

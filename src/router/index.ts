@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import routes from '@/router/routes';
 
@@ -6,8 +7,39 @@ const router = createRouter({
   routes: routes
 });
 
-const DEFAULT_TITLE =
-  '在线打字练习与打字速度测试（WPM）| 键盘测试 / 多人 PK - Typing';
+// 路由组件是异步加载的。加载期间先占住 main 的高度，避免页脚先被顶上来。
+export const routeLoading = ref(true);
+const ROUTE_LOADING_MIN_MS = 180;
+let routeLoadingStartedAt = Date.now();
+let routeLoadingTimer: number | null = null;
+
+function startRouteLoading() {
+  if (routeLoadingTimer !== null) {
+    window.clearTimeout(routeLoadingTimer);
+    routeLoadingTimer = null;
+  }
+  routeLoadingStartedAt = Date.now();
+  routeLoading.value = true;
+}
+
+function finishRouteLoading() {
+  if (routeLoadingTimer !== null) {
+    window.clearTimeout(routeLoadingTimer);
+  }
+  const elapsed = Date.now() - routeLoadingStartedAt;
+  routeLoadingTimer = window.setTimeout(() => {
+    routeLoading.value = false;
+    routeLoadingTimer = null;
+  }, Math.max(0, ROUTE_LOADING_MIN_MS - elapsed));
+}
+
+router.beforeEach((to, from) => {
+  // query/hash 变化不换页面，不闪 loading
+  if (from.name === to.name && from.path === to.path) return;
+  startRouteLoading();
+});
+
+const DEFAULT_TITLE = '在线打字练习与打字速度测试（WPM）| 键盘测试 / 多人 PK - Typing';
 const DEFAULT_DESCRIPTION =
   '免费的在线中英文打字练习与打字速度测试（WPM）网站。提供限时、计时、自定义文本、键盘测试与多人 PK 五种模式，实时统计准确率与速度，支持回放、排行榜、自定义主题与字体。';
 
@@ -39,6 +71,11 @@ router.afterEach((to) => {
   document.title = (to.meta?.title as string | undefined) || DEFAULT_TITLE;
   setMetaDescription((to.meta?.description as string | undefined) || DEFAULT_DESCRIPTION);
   setMetaRobots(Boolean(to.meta?.noindex));
+  finishRouteLoading();
+});
+
+router.onError(() => {
+  finishRouteLoading();
 });
 
 export default router;
